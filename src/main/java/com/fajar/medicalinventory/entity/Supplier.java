@@ -12,6 +12,10 @@ import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
+import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.constants.FieldType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +26,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@Component
+@Dto
 @Entity
 @Table(name="supplier")
 @Data
@@ -37,12 +41,16 @@ public class Supplier extends BaseEntity{
 	private static final long serialVersionUID = -6919147802315112851L;
 	 
 	@Column(unique = true)
+	@FormField
     private String code;
 	@Column 
+	@FormField
     private String name;
 	@Column
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
     private String address;
 	@Column 
+	@FormField
     private String contact;
 
   

@@ -1,10 +1,10 @@
 package com.fajar.medicalinventory.repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.fajar.medicalinventory.entity.Configuration;
 
-public interface ConfigurationRepository extends CrudRepository<Configuration, Long>{
+public interface ConfigurationRepository extends JpaRepository<Configuration, Long>{
 	
 	 
 

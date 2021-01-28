@@ -5,6 +5,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.constants.AuthorityType;
 
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
+@Dto
 public class Authority extends BaseEntity {
 	/**
 	 * 

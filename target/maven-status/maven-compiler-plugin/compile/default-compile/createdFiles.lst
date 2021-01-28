@@ -44,6 +44,7 @@ com\fajar\medicalinventory\dto\Filter.class
 com\fajar\medicalinventory\querybuilder\CriteriaBuilder.class
 com\fajar\medicalinventory\statistics\Tabelkolmogorov.class
 com\fajar\medicalinventory\querybuilder\QueryFilterItem.class
+com\fajar\medicalinventory\constants\Gender.class
 com\fajar\medicalinventory\entity\setting\EntityElement$1.class
 com\fajar\medicalinventory\annotation\StoreValueTo.class
 com\fajar\medicalinventory\dto\PageCommonData$PageCommonDataBuilder.class

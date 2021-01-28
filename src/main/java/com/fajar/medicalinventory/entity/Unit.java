@@ -9,7 +9,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.springframework.stereotype.Component;
+import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.constants.FieldType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,23 +22,24 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@Component
+@Dto
 @Entity
 @Table(name = "unit")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Unit extends BaseEntity{
+public class Unit extends BaseEntity {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8298314953785695479L;
-	 
+
 	@Column(unique = true)
+	@FormField
 	private String name;
 	@Column
-	private String description;	
- 
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	private String description;
 
 }

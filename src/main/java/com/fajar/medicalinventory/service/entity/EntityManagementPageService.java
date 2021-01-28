@@ -16,6 +16,11 @@ import org.springframework.ui.Model;
 
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.Customer;
+import com.fajar.medicalinventory.entity.HealthCenter;
+import com.fajar.medicalinventory.entity.Product;
+import com.fajar.medicalinventory.entity.Supplier;
+import com.fajar.medicalinventory.entity.Unit;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.repository.EntityRepository;
@@ -79,17 +84,16 @@ public class EntityManagementPageService {
 		
 		List<Object> result = new ArrayList<>(); 
 		
-		result.add(entityRepository.getConfig("lesson").setIconClassName("fas fa-book"));
-		result.add(entityRepository.getConfig("lessoncategory").setIconClassName("fas fa-tags"));  
-		result.add(entityRepository.getConfig("images").setIconClassName("fas fa-book"));
-		result.add(entityRepository.getConfig("imagecategory").setIconClassName("fas fa-tags")); 
-		result.add(entityRepository.getConfig("videos").setIconClassName("fas fa-book"));
-		result.add(entityRepository.getConfig("videocategory").setIconClassName("fas fa-tags")); 
-		result.add(entityRepository.getConfig("documents").setIconClassName("fas fa-book")); 
-		result.add(entityRepository.getConfig("documentcategory").setIconClassName("fas fa-tags")); 
-		result.add(entityRepository.getConfig("quiz").setIconClassName("fas fa-book")); 
+		addConfig(result, Customer.class, "fas fa-user");
+		addConfig(result, HealthCenter.class, "fas fa-landmark");
+		addConfig(result, Product.class, "fas fa-box");
+		addConfig(result, Supplier.class, "fas fa-truck");
+		addConfig(result, Unit.class, "fas fa-tags");
 		
 		return WebResponse.builder().generalList(result).build();
+	}
+	  void addConfig(List<Object> result, Class<?> _class, String iconClassName) {
+		  result.add(entityRepository.getConfig(_class.getSimpleName().toLowerCase()).setIconClassName(iconClassName));
 	}
 
 }

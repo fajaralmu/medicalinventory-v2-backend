@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.constants.TransactionType;
 
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@Component
+@Dto
 @Entity
 @Table(name = "transaction")  
 @Data

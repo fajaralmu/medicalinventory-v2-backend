@@ -30,6 +30,11 @@ public class BindedValues {
 	@Value("${app.footer.label}")
 	protected String applicationFooterLabel; 
 
+	@Value("${app.config.masterHealthCenter.code}")
+	private String masterHealthCenterCode;
+	@Value("${app.config.masterHealthCenter.name}")
+	private String masterHealthCenterName;
+	
 	@Autowired
 	ApplicationContext applicationContext;
 

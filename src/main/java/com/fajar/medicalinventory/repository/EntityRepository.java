@@ -25,7 +25,6 @@ import com.fajar.medicalinventory.service.config.WebConfigService;
 import com.fajar.medicalinventory.service.entity.BaseEntityUpdateService;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
-import com.fajar.medicalinventory.util.StringUtil;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -39,7 +38,6 @@ public class EntityRepository {
 
 	@Autowired
 	private WebConfigService webConfigService;
-
 	@Autowired
 	private CustomRepositoryImpl customRepository;
 	@Autowired

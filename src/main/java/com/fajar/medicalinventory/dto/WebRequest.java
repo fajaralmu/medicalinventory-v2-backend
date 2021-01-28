@@ -6,6 +6,11 @@ import java.util.List;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.entity.ApplicationProfile;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.Customer;
+import com.fajar.medicalinventory.entity.HealthCenter;
+import com.fajar.medicalinventory.entity.Product;
+import com.fajar.medicalinventory.entity.Supplier;
+import com.fajar.medicalinventory.entity.Unit;
 import com.fajar.medicalinventory.entity.User;
 
 import lombok.AllArgsConstructor;
@@ -32,9 +37,12 @@ public class WebRequest implements Serializable {
 	 */
 
 	private String entity;
-	private User user; 
-	private ApplicationProfile profile;  
 	
+	private Customer customer;
+	private HealthCenter healthcenter;
+	private Product product;
+	private Supplier supplier;
+	private Unit unit;
 
 	/**
 	 * ==========end entity============
@@ -42,6 +50,8 @@ public class WebRequest implements Serializable {
 
 	private Filter filter; 
 	
+	private User user; 
+	private ApplicationProfile profile;  
 	private BaseEntity entityObject;
 	private AttachmentInfo attachmentInfo; 
 	private List<BaseEntity> orderedEntities; 

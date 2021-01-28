@@ -73,7 +73,7 @@ public class ImageUploadService {
 	 * @return
 	 */
 	public String writeNewImages(MultipleImageModel multipleImageModel, HttpServletRequest httpServletRequest) {
-		String[] rawImageList = multipleImageModel.getImageNames();
+		String[] rawImageList = multipleImageModel.getImageNamesArray();
 		if (rawImageList == null || rawImageList.length == 0) {
 			return null;
 		}
@@ -100,7 +100,7 @@ public class ImageUploadService {
 		CollectionUtil.printArray(arrayOfString);
 
 		String imageUrlArray = String.join("~", arrayOfString);
-		multipleImageModel.setImageNames(arrayOfString);
+		multipleImageModel.setImageNamesArray(arrayOfString);
 
 		return imageUrlArray;
 	}
@@ -115,12 +115,12 @@ public class ImageUploadService {
 	 */
 	public String updateImages(MultipleImageModel multipleImageModel, MultipleImageModel exixstingMultipleImageModel,
 			HttpServletRequest httpServletRequest) {
-		final String[] rawImageList = multipleImageModel.getImageNames();
+		final String[] rawImageList = multipleImageModel.getImageNamesArray();
 		if (rawImageList == null || rawImageList.length == 0 || exixstingMultipleImageModel == null) {
 			return null;
 		}
-		final boolean oldValueExist = exixstingMultipleImageModel.getImageNames().length > 0;
-		final String[] oldValueStringArr = oldValueExist ? multipleImageModel.getImageNames() : new String[] {};
+		final boolean oldValueExist = exixstingMultipleImageModel.getImageNamesArray().length > 0;
+		final String[] oldValueStringArr = oldValueExist ? multipleImageModel.getImageNamesArray() : new String[] {};
 		final List<String> imageUrls = new ArrayList<>();
 		// loop
 		log.info("rawImageList length: {}", rawImageList.length);
@@ -155,7 +155,7 @@ public class ImageUploadService {
 		CollectionUtil.printArray(arrayOfString);
 
 		String imageUrlArray = String.join("~", arrayOfString);
-		multipleImageModel.setImageNames(arrayOfString);
+		multipleImageModel.setImageNamesArray(arrayOfString);
 
 		return imageUrlArray;
 	}

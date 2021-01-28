@@ -62,7 +62,7 @@ public class HibernateSessionConfig {
 
 		List<Type> entities = webConfigService.getEntityClassess();
 		for (Type type : entities) {
-//			log.info("addAnnotatedClass: {}", type);
+			log.info("@@@@ addAnnotatedClass: {}", type);
 			configuration.addAnnotatedClass((Class) type);
 		}
 

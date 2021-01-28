@@ -10,9 +10,16 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.Gender;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,12 +31,14 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
+@Dto
 @Entity
 @Table(name = "customer")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class Customer extends BaseEntity implements Serializable{
 	/**
 	 * 
@@ -37,16 +46,22 @@ public class Customer extends BaseEntity implements Serializable{
 	private static final long serialVersionUID = -2953923202077469683L;
 	 
 	@Column
+	@FormField
 	private String name;
 	@Column
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String address;
 	@Column
-	private String gender;
+	@Enumerated(EnumType.STRING)
+	@FormField
+	private Gender gender;
 	@Column
+	@FormField
 	private Date birthDate;
 	 
 	@ManyToOne
 	@JoinColumn(name = "health_center_id")
+	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	private HealthCenter healthCenter;
 	   
  

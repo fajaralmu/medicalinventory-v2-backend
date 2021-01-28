@@ -2,11 +2,15 @@ package com.fajar.medicalinventory.service.entity;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
+import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
+import com.fajar.medicalinventory.entity.setting.SingleImageModel;
+import com.fajar.medicalinventory.service.resources.ImageUploadService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,12 +18,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
 
+	@Autowired
+	private ImageUploadService imageUploadService;
 	@Override
-	public WebResponse saveEntity(BaseEntity entity, boolean newRecord, HttpServletRequest httoHttpServletRequest) {
+	public WebResponse saveEntity(BaseEntity entity, boolean newRecord, HttpServletRequest httpServletRequest) {
 		log.info("saving entity: {}", entity.getClass());
 		entity = copyNewElement(entity, newRecord);
 
 		validateEntityFields(entity, newRecord);
+		
+		if (entity instanceof SingleImageModel) {
+			imageUploadService.uploadImage((SingleImageModel) entity);
+		}
+		if (entity instanceof MultipleImageModel) {
+			if (newRecord) {
+				imageUploadService.writeNewImages((MultipleImageModel) entity, httpServletRequest);
+			}else {
+				MultipleImageModel existing = (MultipleImageModel) entityRepository.findById(entity.getClass(), entity.getId());
+				imageUploadService.updateImages((MultipleImageModel) entity, existing , httpServletRequest);
+			}
+		}
+		
 		interceptPreUpdate(entity);
 		BaseEntity newEntity = entityRepository.save(entity);
 

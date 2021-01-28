@@ -16,6 +16,8 @@ import javax.persistence.Transient;
 
 import org.springframework.stereotype.Component;
 
+import com.fajar.medicalinventory.annotation.Dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -26,6 +28,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
+@Dto
 @Component
 @Entity
 @Table(name = "product_flow")
@@ -41,26 +44,28 @@ public class ProductFlow extends BaseEntity {
 	private static final long serialVersionUID = 8839593046741372229L;
 
 	@ManyToOne
-	@JoinColumn(name = "kodetransaksi")
-	private Transaction transaksi;
+	@JoinColumn(name = "transaction_id")
+	private Transaction transaction;
 
 	@ManyToOne
-	@JoinColumn(name = "kodeobat")
-	private Product drug;
+	@JoinColumn(name = "product_id")
+	private Product product;
+
+	@Column(name="expired_date")
+	private Date expiredDate;
+	@Column
+	private int count;
+	@ManyToOne
+	@JoinColumn(name = "reference_flow_id")
+	private ProductFlow referenceProductFlow;
 
 	@Column
-	private Date kadaluarsa;
-	@Column
-	private int jumlah;
-	@Column
-	private Integer kodestokobat;
-	@Column
 	@Default
-	private boolean sesuai = true;
+	private boolean suitable = true;
 	@Column
-	private long harga;
+	private long price;
 	@Column
-	private boolean generik;
+	private boolean generic;
 
 	@Transient
 	Integer hargaPerItem;
