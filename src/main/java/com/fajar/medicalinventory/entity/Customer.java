@@ -53,10 +53,10 @@ public class Customer extends BaseEntity implements Serializable{
 	private String address;
 	@Column
 	@Enumerated(EnumType.STRING)
-	@FormField
+	@FormField(type=FieldType.FIELD_TYPE_PLAIN_LIST)
 	private Gender gender;
 	@Column
-	@FormField
+	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date birthDate;
 	 
 	@ManyToOne
