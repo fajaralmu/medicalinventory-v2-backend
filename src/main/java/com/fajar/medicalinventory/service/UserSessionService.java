@@ -12,6 +12,7 @@ import com.fajar.medicalinventory.config.security.JWTUtils;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.service.config.DefaultApplicationProfileService;
+import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.util.StringUtil;
 
 @Service
@@ -23,6 +24,8 @@ public class UserSessionService {
 	private SessionValidationService sessionValidationService;
 	@Autowired
 	private DefaultApplicationProfileService defaultApplicationProfileService;
+	@Autowired
+	private DefaultHealthCenterMasterService defaultHealthCenterMasterService;
 	
 	public String generateJwt() {
 		try {
@@ -44,6 +47,7 @@ public class UserSessionService {
 		}
 		response.setApplicationProfile(defaultApplicationProfileService.getApplicationProfile());
 		response.setRequestId(randomRequestId());
+		response.setMasterHealthCenter(defaultHealthCenterMasterService.getMasterHealthCenter());
 		return response;
 	}
 

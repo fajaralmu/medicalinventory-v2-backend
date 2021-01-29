@@ -8,6 +8,8 @@ import java.util.List;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.entity.ApplicationProfile;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.HealthCenter;
+import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.util.CollectionUtil;
@@ -55,12 +57,13 @@ public class WebResponse implements Serializable {
 	private Long maxValue;
 	private Integer quantity;
 	private ApplicationProfile applicationProfile;
+	private HealthCenter masterHealthCenter;
+	private Transaction transaction;
 
 	private Double percentage;
 	private Integer[] transactionYears;
 	 
-	private String requestId; 
-	private String token;
+	private String requestId;  
  
 	private Boolean loggedIn;
  

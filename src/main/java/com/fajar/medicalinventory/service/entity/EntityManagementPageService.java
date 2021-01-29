@@ -20,6 +20,7 @@ import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.Supplier;
+import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.entity.Unit;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
@@ -89,6 +90,7 @@ public class EntityManagementPageService {
 		addConfig(result, Product.class, "fas fa-box");
 		addConfig(result, Supplier.class, "fas fa-truck");
 		addConfig(result, Unit.class, "fas fa-tags");
+		addConfig(result, Transaction.class, "fas fa-book");
 		
 		return WebResponse.builder().generalList(result).build();
 	}

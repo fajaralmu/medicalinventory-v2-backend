@@ -24,19 +24,19 @@ public class DefaultHealthCenterMasterService {
 	 */
 	@PostConstruct
 	public void init() {
-		checkMasterHealthCenter();
+		getMasterHealthCenter();
 	}
 
-	private void checkMasterHealthCenter() {
+	public HealthCenter getMasterHealthCenter() {
 		HealthCenter healthCenter = healthCenterRepository.findTop1ByCode(bindedValues.getMasterHealthCenterCode());
 		if (null !=  healthCenter) {
-			return;
+			return healthCenter;
 		}
 		healthCenter = new HealthCenter();
 		healthCenter.setCode(bindedValues.getMasterHealthCenterCode());
 		healthCenter.setName(bindedValues.getMasterHealthCenterName());
 		healthCenter.setAddress("Address");
-		entityRepository.save(healthCenter);
+		return entityRepository.save(healthCenter);
 	}
 
 }

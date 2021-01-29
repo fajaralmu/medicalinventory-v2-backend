@@ -10,6 +10,7 @@ import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.Supplier;
+import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.entity.Unit;
 import com.fajar.medicalinventory.entity.User;
 
@@ -52,8 +53,8 @@ public class WebRequest implements Serializable {
 	
 	private User user; 
 	private ApplicationProfile profile;  
-	private BaseEntity entityObject;
-	private AttachmentInfo attachmentInfo; 
+	private BaseEntity entityObject; 
+	private Transaction transaction;
 	private List<BaseEntity> orderedEntities; 
 	
 	private boolean regularTransaction;
