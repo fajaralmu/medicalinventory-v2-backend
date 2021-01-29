@@ -18,6 +18,7 @@ import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
 import com.fajar.medicalinventory.service.ProgressService;
+import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 
 @Service
@@ -28,6 +29,8 @@ public class TransactionService {
 	@Autowired
 	private SessionFactory sessionFactory;
 	@Autowired
+	private SessionValidationService sessionValidationService;
+	@Autowired
 	private DefaultHealthCenterMasterService defaultHealthCenterMasterService;
 
 	public WebResponse performTransactionIN(WebRequest webRequest, HttpServletRequest httpServletRequest) {
@@ -35,7 +38,7 @@ public class TransactionService {
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buildTransactionObject(webRequest);
+			Transaction transaction = buildTransactionObject(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getSupplier()) {
@@ -67,9 +70,10 @@ public class TransactionService {
 		}
 	}
 
-	private Transaction buildTransactionObject(WebRequest webRequest) {
+	private Transaction buildTransactionObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		HealthCenter masterHealthCenter = defaultHealthCenterMasterService.getMasterHealthCenter();
 		Transaction transaction = webRequest.getTransaction();
+		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
 		transaction.generateUniqueCode();
 		transaction.setType(TransactionType.TRANS_IN);
 		transaction.setHealthCenter(masterHealthCenter);
