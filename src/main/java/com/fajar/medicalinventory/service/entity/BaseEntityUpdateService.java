@@ -17,10 +17,13 @@ import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
+import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
+import com.fajar.medicalinventory.entity.setting.SingleImageModel;
 import com.fajar.medicalinventory.repository.EntityRepository;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.resources.FileService;
+import com.fajar.medicalinventory.service.resources.ImageUploadService;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
@@ -35,7 +38,9 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 	@Autowired
 	protected EntityRepository entityRepository;
 	@Autowired
-	private SessionValidationService sessionValidationService;
+	private SessionValidationService sessionValidationService; 
+	@Autowired
+	private ImageUploadService imageUploadService;
 	
 	@PostConstruct
 	public void init() {
@@ -82,8 +87,9 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 	 * @param object
 	 * @param newRecord
 	 */
-	protected void validateEntityFields(BaseEntity object, boolean newRecord) {
+	protected void validateEntityFields(BaseEntity object, boolean newRecord, HttpServletRequest httpServletRequest) {
 		log.info("validating entity: {} newRecord: {}", object.getClass(), newRecord);
+		object.validateNullValues();
 		try {
 
 			BaseEntity existingEntity = null;
@@ -115,17 +121,32 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 					case FIELD_TYPE_IMAGE:
 						
 						boolean isUpdateRecord =  newRecord == false;
-						
-						if (isUpdateRecord &&  fieldValue.equals(field.get(existingEntity))) {
-							Object existingImage = field.get(existingEntity);
-							log.info("existingImage : {}", existingImage);
-							if ( existingImage.equals(fieldValue)) {
-								field.set(object, existingImage);
-							}
-						} else {
-							String imageName = updateImage(field, object, formfield.iconImage());
-							field.set(object, imageName);
+						if (isUpdateRecord &&  fieldValue.equals(field.get(existingEntity))) { 
+							field.set(object, field.get(existingEntity));
+							break; 
+						} 
+						if (object instanceof SingleImageModel) {
+							imageUploadService.uploadImage((SingleImageModel) object);
 						}
+						if (object instanceof MultipleImageModel) {
+							log.info("{} is multiple image model", object.getClass());
+							if (newRecord) {
+								imageUploadService.writeNewImages((MultipleImageModel) object, httpServletRequest);
+							}else {
+								MultipleImageModel existing = (MultipleImageModel) existingEntity;
+								imageUploadService.updateImages((MultipleImageModel) object, existing , httpServletRequest);
+							}
+						}
+//						if (isUpdateRecord &&  fieldValue.equals(field.get(existingEntity))) {
+//							Object existingImage = field.get(existingEntity);
+//							log.info("existingImage : {}", existingImage);
+//							if ( existingImage.equals(fieldValue)) {
+//								field.set(object, existingImage);
+//							}
+//						} else {
+//							String imageName = updateImage(field, object, formfield.iconImage());
+//							field.set(object, imageName);
+//						}
 						break;
 					case FIELD_TYPE_FIXED_LIST:
 						
@@ -160,41 +181,7 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 		}
 	}
 
-	/**
-	 * update image field, writing to disc
-	 * 
-	 * @param field
-	 * @param object
-	 * @return
-	 */
-	private String updateImage(Field field, BaseEntity object, boolean isIcon) {
-		log.info("updating image {}", field.getName());
-		try {
-			Object base64Value = field.get(object);
-			return writeImage(object, base64Value, isIcon);
+	
 
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private String writeImage(BaseEntity object, Object base64Value, boolean isIcon) {
-		String fileName = null;
-		if (null != base64Value && base64Value.toString().trim().isEmpty() == false) {
-			try {
-				if(isIcon) {
-					fileName = fileService.writeIcon(object.getClass().getSimpleName(), base64Value.toString(), null);
-				}else {
-					fileName = fileService.writeImage(object.getClass().getSimpleName(), base64Value.toString());
-				}
-				
-			} catch (Exception e) {
-				log.error("Error writing image for {}", object.getClass().getSimpleName());
-				e.printStackTrace();
-			}
-		}
-		return fileName;
-	}
+	
 }

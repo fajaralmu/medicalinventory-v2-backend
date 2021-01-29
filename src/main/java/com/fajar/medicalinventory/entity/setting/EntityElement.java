@@ -180,6 +180,14 @@ public class EntityElement implements Serializable {
 		setEntityProperty(null);
 		return result;
 	}
+	
+	public void setRequiredProp(FormField formField) {
+		if (formField.type().equals(FieldType.FIELD_TYPE_CHECKBOX)) {
+			setRequired(false);
+		} else {
+			setRequired(true);
+		}
+	}
 
 	private boolean doBuild() throws Exception {
 
@@ -207,7 +215,7 @@ public class EntityElement implements Serializable {
 			
 			setId(field.getName());
 			setIdentity(idField);
-			setRequired(formField.required());
+			setRequiredProp(formField );
 			setMultiple(formField.multipleImage());
 			setClassName(field.getType().getCanonicalName());
 			setShowDetail(formField.showDetail());

@@ -18,26 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
 
-	@Autowired
-	private ImageUploadService imageUploadService;
+	
 	@Override
 	public WebResponse saveEntity(BaseEntity entity, boolean newRecord, HttpServletRequest httpServletRequest) {
 		log.info("saving entity: {}", entity.getClass());
 		entity = copyNewElement(entity, newRecord);
-
-		validateEntityFields(entity, newRecord);
 		
-		if (entity instanceof SingleImageModel) {
-			imageUploadService.uploadImage((SingleImageModel) entity);
-		}
-		if (entity instanceof MultipleImageModel) {
-			if (newRecord) {
-				imageUploadService.writeNewImages((MultipleImageModel) entity, httpServletRequest);
-			}else {
-				MultipleImageModel existing = (MultipleImageModel) entityRepository.findById(entity.getClass(), entity.getId());
-				imageUploadService.updateImages((MultipleImageModel) entity, existing , httpServletRequest);
-			}
-		}
+		validateEntityFields(entity, newRecord, httpServletRequest);
 		
 		interceptPreUpdate(entity);
 		BaseEntity newEntity = entityRepository.save(entity);

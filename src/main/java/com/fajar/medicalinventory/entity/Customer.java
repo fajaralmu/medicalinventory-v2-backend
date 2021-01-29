@@ -55,7 +55,7 @@ public class Customer extends BaseEntity implements Serializable{
 	@Enumerated(EnumType.STRING)
 	@FormField(type=FieldType.FIELD_TYPE_PLAIN_LIST)
 	private Gender gender;
-	@Column
+	@Column(name="date_of_birth")
 	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date birthDate;
 	 

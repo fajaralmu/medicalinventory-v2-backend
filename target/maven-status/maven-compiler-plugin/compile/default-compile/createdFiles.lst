@@ -84,7 +84,6 @@ com\fajar\medicalinventory\config\FilterChannelInterceptor.class
 com\fajar\medicalinventory\dto\WebRequest$WebRequestBuilder.class
 com\fajar\medicalinventory\service\config\WebConfigService.class
 com\fajar\medicalinventory\config\security\SimpleAuthenticationSuccessHandler.class
-com\fajar\medicalinventory\service\entity\ShopProfileUpdateService.class
 com\fajar\medicalinventory\util\FontAwesomeIcons.class
 com\fajar\medicalinventory\constants\FormInputColumn.class
 com\fajar\medicalinventory\entity\setting\Sequenced.class

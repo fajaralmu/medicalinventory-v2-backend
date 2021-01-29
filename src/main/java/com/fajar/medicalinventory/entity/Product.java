@@ -53,7 +53,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	@JoinColumn(name = "unit_id")
 	private Unit unit;
-	@FormField
+	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	@Column(name = "utility_tool")
 	private boolean utilityTool;
 
@@ -88,10 +88,13 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@Column(name="imahe_names")
 	@FormField(multipleImage = true, type=FieldType.FIELD_TYPE_IMAGE)
 	private String imageNames;
+	
+	@JsonIgnore
 	@Override
 	public void setImageNamesArray(String[] image) {
 
 		this.imageNames = String.join("~", image);
+		System.out.println("imageNamesArray: "+imageNames);
 	}
 	
 	@JsonIgnore
