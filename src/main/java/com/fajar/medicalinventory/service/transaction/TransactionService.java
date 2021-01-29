@@ -17,6 +17,8 @@ import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
+import com.fajar.medicalinventory.repository.ProductFlowRepository;
+import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
@@ -32,6 +34,23 @@ public class TransactionService {
 	private SessionValidationService sessionValidationService;
 	@Autowired
 	private DefaultHealthCenterMasterService defaultHealthCenterMasterService;
+	@Autowired
+	private TransactionRepository transactionRepository;
+	@Autowired
+	private ProductFlowRepository productFlowRepository;
+	
+	public WebResponse getTransactionByCode(String code) {
+		Transaction transaction = transactionRepository.findByCode(code);
+		if (null == transaction) {
+			throw new DataNotFoundException("transaction not found");
+		}
+		List<ProductFlow> productFlows = productFlowRepository.findByTransaction(transaction);
+		transaction.setProductFlows(productFlows);
+		
+		WebResponse response = new WebResponse();
+		response.setTransaction(transaction);
+		return response ;
+	}
 
 	public WebResponse performTransactionIN(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();

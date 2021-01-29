@@ -144,4 +144,12 @@ public class StringUtil {
 		byte[] encoded = Base64.getEncoder().encode(src);
 		return new String(encoded);
 	}
+
+
+	public static String twoDigits(int number) {
+		if (number >= 10) {
+			return String.valueOf(number);
+		}
+		return "0"+number;
+	}
 }

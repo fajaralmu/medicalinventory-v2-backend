@@ -7,6 +7,8 @@ import com.fajar.medicalinventory.entity.Transaction;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long>  {
+
+	Transaction findByCode(String code);
  
 	  
 }

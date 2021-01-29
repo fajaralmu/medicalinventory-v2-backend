@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,11 @@ public class RestTransactionController extends BaseController {
 	public WebResponse transactionin(@RequestBody WebRequest request, HttpServletRequest httpRequest) {
 		log.info("transactionin {}", request.getEntity());
 		return transactionService.performTransactionIN(request, httpRequest);
+	}
+	@PostMapping(value = "/gettransaction/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
+	public WebResponse gettransactionbycode(@PathVariable String code, HttpServletRequest httpRequest) {
+		log.info("gettransactionbycode {}", code);
+		return transactionService.getTransactionByCode(code);
 	}
 
 	 
