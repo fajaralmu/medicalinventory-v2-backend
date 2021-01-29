@@ -13,12 +13,10 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 
 import com.fajar.medicalinventory.util.EntityUtil;
-public class TypeScriptModelCreators {
-	final static String inputDir = "D:\\Development\\Fajar\\medicalinventory\\src\\"
-			+ "main\\java\\com\\fajar\\medicalinventory\\entity\\";
+public class TypeScriptModelCreators { 
 	final static String outputDir = "D:\\Development\\Fajar\\generated_models\\";
 	public static void main(String[] args) {
-		List<String> names = getJavaFiles(inputDir);
+		List<String> names = getJavaFiles(HibernateSessions.inputDir);
 		List<Class> classes = getJavaClasses("com.fajar.medicalinventory.entity", names);
 		for (Class class1 : classes) {
 			String content = printClass(class1);
