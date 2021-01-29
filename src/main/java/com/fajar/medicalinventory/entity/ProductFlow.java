@@ -14,9 +14,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,18 +45,21 @@ public class ProductFlow extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 8839593046741372229L;
 
+	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "transaction_id")
+	@JoinColumn(name = "transaction_id", nullable = false)
 	private Transaction transaction;
 
 	@ManyToOne
-	@JoinColumn(name = "product_id")
+	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
 	@Column(name="expired_date")
 	private Date expiredDate;
 	@Column
 	private int count;
+	
+	@Nullable
 	@ManyToOne
 	@JoinColumn(name = "reference_flow_id")
 	private ProductFlow referenceProductFlow;
@@ -66,13 +71,15 @@ public class ProductFlow extends BaseEntity {
 	private long price;
 	@Column
 	private boolean generic;
+	
+	// transients //
 
 	@Transient
-	Integer hargaPerItem;
+	private int hargaPerItem;
 	@Transient
-	private Integer hargatotal = 0;
+	private int hargatotal;
 	@Transient
-	private Integer jumlahobatLama = 0;
+	private int jumlahobatLama;
 
 	// WEB STUFF
 	@Transient
