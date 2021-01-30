@@ -45,6 +45,9 @@ public class Customer extends BaseEntity implements Serializable{
 	 */
 	private static final long serialVersionUID = -2953923202077469683L;
 	 
+	@Column(unique = true)
+	@FormField
+	private String code;
 	@Column
 	@FormField
 	private String name;

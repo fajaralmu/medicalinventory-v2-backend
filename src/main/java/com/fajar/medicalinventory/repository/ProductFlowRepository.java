@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 
@@ -12,6 +13,8 @@ import com.fajar.medicalinventory.entity.Transaction;
 public interface ProductFlowRepository extends JpaRepository<ProductFlow, Integer> {
 
 	List<ProductFlow> findByTransaction(Transaction transaction);
+
+	List<ProductFlow> findByProduct_codeAndTransaction_type(String code, TransactionType transIn);
 
 	 
 	
