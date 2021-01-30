@@ -56,8 +56,12 @@
 	</listener>
 	
 	<error-page>
-		 <exception-type>com.fajar.medicalinventory.config.exception.DataNotFoundException</exception-type>
+		 <exception-type>com.fajar.medicalinventory.exception.DataNotFoundException</exception-type>
 		 <location>/web/error-not-found</location>
+	</error-page>
+	<error-page>
+		 <exception-type>com.fajar.medicalinventory.exception.ApplicationException</exception-type>
+		 <location>/web/error-general</location>
 	</error-page>
 	<error-page>
 		<location>/web/app-error</location>

@@ -71,6 +71,26 @@ public class UtilitiesController extends BaseController{
 		printHttpRequestAttrs(httpRequest);
 		
 	}
+	@RequestMapping(value = "/error-general", produces = MediaType.APPLICATION_JSON_VALUE, method = {RequestMethod.POST, RequestMethod.GET}) 
+	public void errorGeneral(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+		 
+		int httpErrorCode = getErrorCode(httpRequest);
+
+		if (200 == httpErrorCode) {
+			httpResponse.sendRedirect(httpRequest.getContextPath()+"/index");
+			return;
+		}
+
+		Object message = getAttribute(httpRequest, "javax.servlet.error.exception");
+		WebResponse payload = WebResponse.failed(String.valueOf(message));
+		payload.setCode("400");
+		httpResponse.setStatus(400);
+
+		String jsonString = objectMapper.writeValueAsString(payload); 
+		httpResponse.getWriter().write(jsonString);
+		printHttpRequestAttrs(httpRequest);
+		
+	}
 
 	private void printHttpRequestAttrs(HttpServletRequest httpRequest) {
 		Enumeration<String> attrNames = httpRequest.getAttributeNames();

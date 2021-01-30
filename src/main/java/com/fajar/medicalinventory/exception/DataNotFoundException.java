@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.config.exception;
+package com.fajar.medicalinventory.exception;
 
 public class DataNotFoundException extends RuntimeException{
 

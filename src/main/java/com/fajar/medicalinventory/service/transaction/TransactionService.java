@@ -10,13 +10,14 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fajar.medicalinventory.config.exception.DataNotFoundException;
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
+import com.fajar.medicalinventory.exception.ApplicationException;
+import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
 import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
@@ -134,7 +135,7 @@ public class TransactionService {
 			List<ProductFlow> productFlows = transaction.getProductFlows();
 			for (ProductFlow productFlow : productFlows) {
 				if (productFlow.getReferenceProductFlow() == null) {
-					throw new RuntimeException("Reference flow does not exist");
+					throw new ApplicationException("Reference flow does not exist");
 				}
 				productFlow.setTransaction(transaction);
 				DatabaseProcessor.save(productFlow, session);
