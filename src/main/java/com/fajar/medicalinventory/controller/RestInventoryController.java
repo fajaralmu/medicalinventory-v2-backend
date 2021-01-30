@@ -39,10 +39,10 @@ public class RestInventoryController extends BaseController {
 		LogProxyFactory.setLoggers(this);
 	}
  
-	@PostMapping(value = "/availableproducts/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
-	public WebResponse gettransactionbycode(@PathVariable String code, HttpServletRequest httpRequest) {
-		log.info("availableproducts {}", code);
-		return inventoryService.getAvailableProducts(code);
+	@PostMapping(value = "/availableproducts/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
+	public WebResponse gettransactionbycode(@PathVariable String code, @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+		log.info("availableproducts {} at ", code, webRequest.getHealthcenter().getName());
+		return inventoryService.getAvailableProducts(code, webRequest);
 	}
 
 	 

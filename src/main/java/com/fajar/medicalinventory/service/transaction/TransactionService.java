@@ -1,6 +1,7 @@
 package com.fajar.medicalinventory.service.transaction;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,6 +18,7 @@ import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
+import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
@@ -38,6 +40,8 @@ public class TransactionService {
 	private TransactionRepository transactionRepository;
 	@Autowired
 	private ProductFlowRepository productFlowRepository;
+	@Autowired
+	private HealthCenterRepository healthCenterRepository;
 	
 	public WebResponse getTransactionByCode(String code) {
 		Transaction transaction = transactionRepository.findByCode(code);
@@ -57,7 +61,7 @@ public class TransactionService {
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buildTransactionObject(webRequest, httpServletRequest);
+			Transaction transaction = buildTransactionINObject(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getSupplier()) {
@@ -89,13 +93,69 @@ public class TransactionService {
 		}
 	}
 
-	private Transaction buildTransactionObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	private Transaction buildTransactionINObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		HealthCenter masterHealthCenter = defaultHealthCenterMasterService.getMasterHealthCenter();
 		Transaction transaction = webRequest.getTransaction();
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
-		transaction.generateUniqueCode();
+		transaction.generateUniqueCode(TransactionType.TRANS_IN);
 		transaction.setType(TransactionType.TRANS_IN);
 		transaction.setHealthCenter(masterHealthCenter);
 		return transaction;
 	}
+	private Transaction buildTransactionOUTObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+		
+		Transaction transaction = webRequest.getTransaction();
+		
+		Optional<HealthCenter> locationOptional = healthCenterRepository.findById(transaction.getHealthCenter().getId());
+		if (locationOptional.isPresent() == false) {
+			throw new DataNotFoundException("Location not found");
+		}
+		
+		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
+		transaction.generateUniqueCode(TransactionType.TRANS_OUT);
+		transaction.setType(TransactionType.TRANS_OUT); 
+		return transaction;
+	}
+
+	public WebResponse performTransactionOUT(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+		Session session = sessionFactory.openSession();
+		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
+		try {
+			 
+			Transaction transaction = buildTransactionOUTObject(webRequest, httpServletRequest);
+			progressService.sendProgress(10, httpServletRequest);
+			
+			if (null == transaction.getCustomer()) {
+				throw new DataNotFoundException("Customer Missing");
+			}
+			transaction = DatabaseProcessor.save(transaction, session);
+			
+			progressService.sendProgress(10, httpServletRequest);
+			List<ProductFlow> productFlows = transaction.getProductFlows();
+			for (ProductFlow productFlow : productFlows) {
+				if (productFlow.getReferenceProductFlow() == null) {
+					throw new RuntimeException("Reference flow does not exist");
+				}
+				productFlow.setTransaction(transaction);
+				DatabaseProcessor.save(productFlow, session);
+				
+				progressService.sendProgress(1, productFlows.size(), 80, httpServletRequest);
+			}
+			hibernateTransaction.commit();
+			
+			WebResponse response = new WebResponse();
+			response.setTransaction(transaction);
+			return response;
+		} catch (Exception e) {
+
+			if (null != hibernateTransaction) {
+				hibernateTransaction.rollback();
+			}
+			throw e;
+		} finally {
+			session.close();
+		}
+	}
+
+	
 }

@@ -41,8 +41,14 @@ public class RestTransactionController extends BaseController {
 	@PostMapping(value = "/transactionin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse transactionin(@RequestBody WebRequest request, HttpServletRequest httpRequest) {
-		log.info("transactionin {}", request.getEntity());
+		log.info("transactionin ");
 		return transactionService.performTransactionIN(request, httpRequest);
+	}
+	@PostMapping(value = "/transactionout", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse transactionout(@RequestBody WebRequest request, HttpServletRequest httpRequest) {
+		log.info("transactionout ");
+		return transactionService.performTransactionOUT(request, httpRequest);
 	}
 	@PostMapping(value = "/gettransaction/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse gettransactionbycode(@PathVariable String code, HttpServletRequest httpRequest) {

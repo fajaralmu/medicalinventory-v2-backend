@@ -92,12 +92,12 @@ public class Transaction extends BaseEntity implements Serializable {
 	@Default
 	private List<ProductFlow> productFlows = new ArrayList<>();
 
-	public void generateUniqueCode() {
+	public void generateUniqueCode(TransactionType type) {
 		int year = DateUtil.getCalendarYear(transactionDate);
 		int month = DateUtil.getCalendarMonth(transactionDate);
 		int day = DateUtil.getCalendarDayOfMonth(transactionDate);
 		String dateCode = year + StringUtil.twoDigits(month+1) + StringUtil.twoDigits(day);
-		this.code = dateCode + StringUtil.generateRandomNumber(6);
+		this.code = dateCode + type.ordinal()+"-" + StringUtil.generateRandomNumber(6);
 	}
 
 }
