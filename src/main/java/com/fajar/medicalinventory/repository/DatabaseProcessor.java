@@ -25,8 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DatabaseProcessor {
-
-	private Transaction currentTransaction;
+ 
 	private Session hibernateSession;
 	boolean removeTransactionAfterPersistence = true;
 	private final SessionFactory sessionFactory;
@@ -37,39 +36,17 @@ public class DatabaseProcessor {
 		this.hibernateSession = sessionFactory.openSession();
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public boolean isTransactionNotKept() {
-		return removeTransactionAfterPersistence;
-	}
-
-	public void keepTransaction() {
-		this.removeTransactionAfterPersistence = false;
-	}
-
-	public void notKeepingTransaction() {
-		this.removeTransactionAfterPersistence = true;
-	}
-
-	public static <T extends BaseEntity> void saveNewRecord(T entity, Session hibernateSession) {
-
-		Long id = (Long) hibernateSession.save(entity);
-		entity.setId(id);
-	}
-
 	private void checkSession() {
 		if (null == hibernateSession || hibernateSession.isConnected() == false) {
 			hibernateSession = sessionFactory.openSession();
 		}
 	}
 
-	public long getRowCount(Class<? extends BaseEntity> _class, Filter filter) {
-
+	public long getRowCount(Class<? extends BaseEntity> _class, Filter filter) { 
+		log.info("getRowCount {}", _class);
 		try {
 			checkSession();
-			CriteriaBuilder criteriaBuilder = new CriteriaBuilder(hibernateSession, _class, filter);
+			CriteriaBuilder criteriaBuilder = getCriteriaBuilder(_class, filter);
 			Criteria criteria = criteriaBuilder.createRowCountCriteria();
 
 			return (long) criteria.uniqueResult();
@@ -79,11 +56,16 @@ public class DatabaseProcessor {
 			refresh();
 		}
 	}
+	
+	private CriteriaBuilder getCriteriaBuilder(Class<? extends BaseEntity> _class, Filter filter) {
+		return new CriteriaBuilder(hibernateSession, _class, filter);
+	}
 
 	public <T extends BaseEntity> List<T> filterAndSortv2(Class<T> _class, Filter filter) {
+		log.info("filterAndSortv2 : {}", _class);
 		try {
 			checkSession();
-			CriteriaBuilder criteriaBuilder = new CriteriaBuilder(hibernateSession, _class, filter);
+			CriteriaBuilder criteriaBuilder = getCriteriaBuilder(_class, filter);
 			Criteria criteria = criteriaBuilder.createCriteria();
 			List<T> resultList = criteria.list();
 
@@ -112,7 +94,6 @@ public class DatabaseProcessor {
 		}
 		for (Field field : joinColumnFields) {
 			BaseEntity fieldValue = (BaseEntity) field.get(entity);
-			// check from DB
 			log.info("check join column field: {}->value: {}", field.getName(), fieldValue);
 			if (null == fieldValue)
 				continue;
@@ -128,7 +109,7 @@ public class DatabaseProcessor {
 
 	}
 
-	public void refresh() {
+	private void refresh() {
 		log.info("Refresh DB Processor with id: {}", id);
 		try {
 			if (null == hibernateSession)
@@ -146,7 +127,7 @@ public class DatabaseProcessor {
 	}
 
 	/**
-	 * inser new record or update
+	 * insert new record or update existing record
 	 * 
 	 * @param <T>
 	 * @param object

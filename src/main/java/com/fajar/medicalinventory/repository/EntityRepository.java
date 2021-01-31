@@ -155,7 +155,7 @@ public class EntityRepository {
 	public <T extends BaseEntity> T savev2(T entity) {
 		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
 		T result = databatseProcessor.saveObject(entity); 
-		databatseProcessor.refresh();
+		 
 		return result;
 
 	}
