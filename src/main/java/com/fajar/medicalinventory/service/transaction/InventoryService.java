@@ -23,7 +23,7 @@ public class InventoryService {
 	@Autowired
 	private HealthCenterRepository healthCenterRepository;
 	@Autowired
-	private DefaultHealthCenterMasterService  healthCenterMasterService;
+	private DefaultHealthCenterMasterService healthCenterMasterService;
 
 	public WebResponse getAvailableProducts(String code, WebRequest webRequest) {
 		HealthCenter healthCenter = healthCenterRepository.findTop1ByCode(webRequest.getHealthcenter().getCode());
@@ -31,15 +31,16 @@ public class InventoryService {
 			throw new DataNotFoundException("Health center not found");
 		}
 		WebResponse response = new WebResponse();
-		
-		if (healthCenterMasterService.isMasterHealthCenter(healthCenter)) { 
-			List<ProductFlow> availableProductFlows = productFlowRepository.findAvailabeProductsComingFromMainWareHouse(code);
-			response.setEntities(availableProductFlows);
+		List<ProductFlow> availableProductFlows;
+		if (healthCenterMasterService.isMasterHealthCenter(healthCenter)) {
+			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(code);
+
+		} else {
+			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId());
 
 		}
-
+		response.setEntities(availableProductFlows);
 		return response;
 	}
 
-	 
 }

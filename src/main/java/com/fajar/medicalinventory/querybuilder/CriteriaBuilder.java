@@ -327,7 +327,7 @@ public class CriteriaBuilder {
 		String alias = isJoinColumn ? getAlias(field.getName()) : getAlias(THIS);
 		
 		//TODO: change to Like if using mysql
-		Criterion sqlRestriction = Restrictions.sqlRestriction(alias + "." + columnName + " ILIKE '%" + value + "%'");
+		Criterion sqlRestriction = Restrictions.sqlRestriction(alias + "." + columnName + "::varchar(255) ILIKE '%" + value + "%'");
 
 		return sqlRestriction;
 	}

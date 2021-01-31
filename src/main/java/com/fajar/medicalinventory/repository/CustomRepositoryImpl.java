@@ -16,7 +16,7 @@ public class CustomRepositoryImpl {
 	private SessionFactory sessionFactory;
 
 	public DatabaseProcessor createDatabaseProcessor() {
-		return new DatabaseProcessor(sessionFactory, sessionFactory.openSession());
+		return new DatabaseProcessor(sessionFactory );
 	}
 
 	public static <O> O fillObject(Class<O> objectClass, Object[] propertiesArray, String[] propertyOrder)
