@@ -22,6 +22,6 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 			+ "from product_flow pf left join  transaction  tx on transaction_id = tx.id "
 			+ "left join product p on p.id = product_id where tx.type = 'TRANS_IN'   and p.code=?1 and "
 			+ "(pf.count- coalesce((select sum(pf_used.count) from product_flow pf_used where pf_used.reference_flow_id = pf.id), 0) ) > 0")
-	List<ProductFlow> findAvailabeProductsForTransactionIN(String code);
+	List<ProductFlow> findAvailabeProductsComingFromMainWareHouse(String code);
 
 }

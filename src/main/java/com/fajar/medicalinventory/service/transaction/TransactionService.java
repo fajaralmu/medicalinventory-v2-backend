@@ -98,26 +98,31 @@ public class TransactionService {
 		HealthCenter masterHealthCenter = defaultHealthCenterMasterService.getMasterHealthCenter();
 		Transaction transaction = webRequest.getTransaction();
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
-		transaction.generateUniqueCode(TransactionType.TRANS_IN);
-		transaction.setType(TransactionType.TRANS_IN);
+		transaction.setTypeAndCode();
 		transaction.setHealthCenter(masterHealthCenter);
 		return transaction;
 	}
+	
 	private Transaction buildTransactionOUTObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		
 		Transaction transaction = webRequest.getTransaction();
+		HealthCenter healthCenter = transaction.getHealthCenter();
 		
+		if (!defaultHealthCenterMasterService.isMasterHealthCenter(healthCenter )) {
+			throw new ApplicationException("Not Supported");
+		}
 		Optional<HealthCenter> locationOptional = healthCenterRepository.findById(transaction.getHealthCenter().getId());
 		if (locationOptional.isPresent() == false) {
 			throw new DataNotFoundException("Location not found");
 		}
 		
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
-		transaction.generateUniqueCode(TransactionType.TRANS_OUT);
-		transaction.setType(TransactionType.TRANS_OUT); 
+		transaction.setTypeAndCode();
+		 
 		return transaction;
 	}
 
+	
 	public WebResponse performTransactionOUT(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
@@ -126,8 +131,8 @@ public class TransactionService {
 			Transaction transaction = buildTransactionOUTObject(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
-			if (null == transaction.getCustomer()) {
-				throw new DataNotFoundException("Customer Missing");
+			if (null == transaction.getCustomer() && transaction.getHealthCenterDestionation() == null) {
+				throw new ApplicationException("Fields Missing");
 			}
 			transaction = DatabaseProcessor.save(transaction, session);
 			

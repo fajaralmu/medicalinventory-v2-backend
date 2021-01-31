@@ -18,6 +18,7 @@ public class DefaultHealthCenterMasterService {
 	private HealthCenterRepository healthCenterRepository;
 	@Autowired
 	private EntityRepository entityRepository;
+	
 
 	/**
 	 * 
@@ -37,6 +38,14 @@ public class DefaultHealthCenterMasterService {
 		healthCenter.setName(bindedValues.getMasterHealthCenterName());
 		healthCenter.setAddress("Address");
 		return entityRepository.save(healthCenter);
+	}
+	
+	public boolean isMasterHealthCenter(HealthCenter healthCenter) { 
+		String code = healthCenter.getCode();
+		return getMasterHealthCenterCode().equals(code);
+	}
+	public String getMasterHealthCenterCode() {
+		return bindedValues.getMasterHealthCenterCode();
 	}
 
 }

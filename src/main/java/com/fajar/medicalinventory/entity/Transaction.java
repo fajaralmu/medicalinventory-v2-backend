@@ -26,6 +26,7 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.StringUtil;
 
@@ -83,6 +84,10 @@ public class Transaction extends BaseEntity implements Serializable {
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	@Nullable
 	private HealthCenter healthCenterDestionation;
+	
+	/**
+	 * health center where transaction is performed
+	 */
 	@ManyToOne
 	@JoinColumn(name = "health_center_location_id")
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
@@ -92,12 +97,31 @@ public class Transaction extends BaseEntity implements Serializable {
 	@Default
 	private List<ProductFlow> productFlows = new ArrayList<>();
 
-	public void generateUniqueCode(TransactionType type) {
+	private void generateUniqueCode(TransactionType type) {
 		int year = DateUtil.getCalendarYear(transactionDate);
 		int month = DateUtil.getCalendarMonth(transactionDate);
 		int day = DateUtil.getCalendarDayOfMonth(transactionDate);
 		String dateCode = year + StringUtil.twoDigits(month+1) + StringUtil.twoDigits(day);
 		this.code = dateCode + type.ordinal()+"-" + StringUtil.generateRandomNumber(6);
+	}
+
+	/**
+	 * determine type 
+	 */
+	public void setTypeAndCode() {
+		TransactionType type;
+		if (supplier != null) {
+			type = TransactionType.TRANS_IN;
+		} else if (customer != null) {
+			type = TransactionType.TRANS_OUT;
+		} else if (healthCenterDestionation != null) {
+			type = TransactionType.TRANS_OUT_TO_WAREHOUSE;
+		} else {
+			throw new ApplicationException("Missing transaction data!");
+		}
+		setType(type);
+		generateUniqueCode(type);
+		
 	}
 
 }

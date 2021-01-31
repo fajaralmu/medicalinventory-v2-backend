@@ -8,6 +8,6 @@ package com.fajar.medicalinventory.constants;
  
 public enum TransactionType{
 	
-	TRANS_IN, TRANS_OUT
+	TRANS_IN, TRANS_OUT, TRANS_OUT_TO_WAREHOUSE
 	
 }
