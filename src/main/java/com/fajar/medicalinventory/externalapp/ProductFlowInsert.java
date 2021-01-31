@@ -22,7 +22,8 @@ public class ProductFlowInsert {
 		org.hibernate.Transaction tx = session.beginTransaction();
 		try {
 			fillProducts();
-			insertProductFlows_TRANS_OUT();
+//		DONE	insertProductFlows_TRANS_IN();
+//		DONE	insertProductFlows_TRANS_OUT();
 			tx.commit();
 		}catch (Exception e) {
 			tx.rollback();

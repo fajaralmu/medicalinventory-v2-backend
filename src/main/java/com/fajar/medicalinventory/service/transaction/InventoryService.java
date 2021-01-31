@@ -1,18 +1,26 @@
 package com.fajar.medicalinventory.service.transaction;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.HealthCenter;
+import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
+import com.fajar.medicalinventory.repository.ProductRepository;
+import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 
 @Service
@@ -21,9 +29,13 @@ public class InventoryService {
 	@Autowired
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
+	private ProductRepository productRepository;
+	@Autowired
 	private HealthCenterRepository healthCenterRepository;
 	@Autowired
 	private DefaultHealthCenterMasterService healthCenterMasterService;
+	@Autowired
+	private ProgressService progressService;
 
 	public WebResponse getAvailableProducts(String code, WebRequest webRequest) {
 		HealthCenter healthCenter = healthCenterRepository.findTop1ByCode(webRequest.getHealthcenter().getCode());
@@ -36,10 +48,47 @@ public class InventoryService {
 			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(code);
 
 		} else {
-			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),code);
+			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
+					code);
 
 		}
 		response.setEntities(availableProductFlows);
+		return response;
+	}
+
+	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+
+		HealthCenter healthCenter = webRequest.getHealthcenter();
+		boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(healthCenter);
+
+		int page = webRequest.getFilter().getPage();
+		int size = webRequest.getFilter().getLimit();
+		List<Product> products = productRepository.findByOrderByName(PageRequest.of(page, size));
+		BigInteger totalData = productRepository.countAll();
+		progressService.sendProgress(20, httpServletRequest);
+		
+		List<ProductStock> productStocks = new ArrayList<ProductStock>();
+		for (int i = 0; i < products.size(); i++) {
+			Product product = products.get(i);
+			List<ProductFlow> productFlows;
+			
+			if (isMasterHealthCenter) {
+				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getCode());
+
+			} else {
+				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
+						product.getCode());
+
+			}
+			ProductStock productStock = new ProductStock(product, productFlows);
+			productStocks.add(productStock);
+			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
+		}
+		
+		WebResponse response = new WebResponse();
+		
+		response.setTotalData(totalData.intValue());
+		response.setGeneralList(productStocks);
 		return response;
 	}
 

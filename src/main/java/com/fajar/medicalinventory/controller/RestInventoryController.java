@@ -17,7 +17,6 @@ import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.transaction.InventoryService;
-import com.fajar.medicalinventory.service.transaction.TransactionService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,9 +40,14 @@ public class RestInventoryController extends BaseController {
  
 	@PostMapping(value = "/availableproducts/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse gettransactionbycode(@PathVariable String code, @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
-		log.info("availableproducts {} at ", code, webRequest.getHealthcenter().getName());
+		log.info("availableproducts {} at {} ", code, webRequest.getHealthcenter().getName());
 		return inventoryService.getAvailableProducts(code, webRequest);
 	}
-
+	@PostMapping(value = "/getproducts", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse getproducts(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+		log.info("getproducts   at {} ", webRequest.getHealthcenter().getName());
+		return inventoryService.getProducts( webRequest, httpRequest);
+	}
 	 
 }
