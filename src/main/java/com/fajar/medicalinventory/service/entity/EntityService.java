@@ -195,7 +195,7 @@ public class EntityService {
 			count.put("value", 0L);
 			e.printStackTrace();
 		}
-		filterDatabaseProcessor.refresh();
+		 
 		return EntityResult.builder().entities(CollectionUtil.convertList(entities))
 				.count(count.get("value").intValue()).build();
 	}
@@ -205,8 +205,9 @@ public class EntityService {
 	 * 
 	 * @param request
 	 * @return
+	 * @throws Exception 
 	 */
-	public WebResponse delete(WebRequest request) {
+	public WebResponse delete(WebRequest request) throws Exception {
 		DatabaseProcessor filterDatabaseProcessor = customRepository.createDatabaseProcessor();
 		try {
 			Map<String, Object> filter = request.getFilter().getFieldsFilter();
@@ -218,23 +219,14 @@ public class EntityService {
 			if (null == entityClass || User.class.equals(entityClass)) {
 				throw new Exception("Invalid entity");
 			}
-			if(null == entityRepository.findById(entityClass, id)) {
-				throw new RuntimeException("Record does not exist");
-			}
-			
 			boolean result = filterDatabaseProcessor.deleteObjectById(entityClass, id);
-			if(!result) {
-				throw new RuntimeException("Failed deleting");
-			}
-			//databaseProcessorNotifier.refresh();
 			return WebResponse.builder().code("00").message("deleted :" + result).build();
 
-		} catch (Exception ex) {
+		} catch (Exception e) {
 
-			ex.printStackTrace();
-			return WebResponse.builder().code("01").message("failed: " + ex.getMessage()).build();
+			throw e;
 		} finally {
-			filterDatabaseProcessor.refresh();
+			 
 		}
 	}
  

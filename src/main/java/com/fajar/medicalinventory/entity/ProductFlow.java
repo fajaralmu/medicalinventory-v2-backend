@@ -74,19 +74,19 @@ public class ProductFlow extends BaseEntity {
 	
 	// transients //
 
-	@Transient
-	private int hargaPerItem;
-	@Transient
-	private int hargatotal;
-	@Transient
-	private int jumlahobatLama;
-
-	// WEB STUFF
-	@Transient
-	private String namaobat;
-	@Transient
-	private boolean terdaftar;
-	@Transient
-	private boolean sudah_diedit;
+//	@Transient
+//	private int hargaPerItem;
+//	@Transient
+//	private int hargatotal;
+//	@Transient
+//	private int jumlahobatLama;
+//
+//	// WEB STUFF
+//	@Transient
+//	private String namaobat;
+//	@Transient
+//	private boolean terdaftar;
+//	@Transient
+//	private boolean sudah_diedit;
 
 }

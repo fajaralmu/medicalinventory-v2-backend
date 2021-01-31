@@ -15,6 +15,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.querybuilder.CriteriaBuilder;
 import com.fajar.medicalinventory.querybuilder.QueryUtil;
 import com.fajar.medicalinventory.util.CollectionUtil;
@@ -148,6 +149,9 @@ public class DatabaseProcessor {
 		Transaction transaction = hibernateSession.beginTransaction();
 		try {
 			Object object = hibernateSession.get(entityClass, id2);
+			if (null == object) {
+				throw new DataNotFoundException("Record not found");
+			}
 			hibernateSession.delete(object);
 			transaction.commit();
 			return true;
@@ -155,11 +159,11 @@ public class DatabaseProcessor {
 			if (null != transaction) {
 				transaction.rollback();
 			}
+			throw e;
 		} finally {
 
 			refresh();
-		}
-		return false;
+		} 
 	}
 
 	public <T> List<T> findByKeyAndValues(Class<T> entityClass, String key, Object... values) {
