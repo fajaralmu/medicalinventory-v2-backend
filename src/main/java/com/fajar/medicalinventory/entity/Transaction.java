@@ -20,7 +20,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
@@ -35,6 +34,7 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
@@ -47,6 +47,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Slf4j
 public class Transaction extends BaseEntity implements Serializable {
 
 	/**
@@ -91,7 +92,7 @@ public class Transaction extends BaseEntity implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "health_center_location_id")
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
-	private HealthCenter healthCenter;
+	private HealthCenter healthCenterLocation;
 
 	@Transient
 	@Default
@@ -119,6 +120,7 @@ public class Transaction extends BaseEntity implements Serializable {
 		} else {
 			throw new ApplicationException("Missing transaction data!");
 		}
+		log.info("Transaction type: {}", type);
 		setType(type);
 		generateUniqueCode(type);
 		

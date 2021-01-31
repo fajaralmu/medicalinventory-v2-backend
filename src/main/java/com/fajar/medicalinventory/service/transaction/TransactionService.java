@@ -99,19 +99,15 @@ public class TransactionService {
 		Transaction transaction = webRequest.getTransaction();
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
 		transaction.setTypeAndCode();
-		transaction.setHealthCenter(masterHealthCenter);
+		transaction.setHealthCenterLocation(masterHealthCenter);
 		return transaction;
 	}
 	
 	private Transaction buildTransactionOUTObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		
 		Transaction transaction = webRequest.getTransaction();
-		HealthCenter healthCenter = transaction.getHealthCenter();
-		
-		if (!defaultHealthCenterMasterService.isMasterHealthCenter(healthCenter )) {
-			throw new ApplicationException("Not Supported");
-		}
-		Optional<HealthCenter> locationOptional = healthCenterRepository.findById(transaction.getHealthCenter().getId());
+		 
+		Optional<HealthCenter> locationOptional = healthCenterRepository.findById(transaction.getHealthCenterLocation().getId());
 		if (locationOptional.isPresent() == false) {
 			throw new DataNotFoundException("Location not found");
 		}

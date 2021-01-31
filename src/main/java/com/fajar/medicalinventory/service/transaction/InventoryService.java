@@ -36,7 +36,7 @@ public class InventoryService {
 			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(code);
 
 		} else {
-			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId());
+			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),code);
 
 		}
 		response.setEntities(availableProductFlows);

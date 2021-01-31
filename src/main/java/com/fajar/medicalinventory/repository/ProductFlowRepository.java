@@ -28,8 +28,8 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 			+ "(pf.count-  coalesce((select sum(pf_used.count) from product_flow pf_used where pf_used.reference_flow_id = pf.id),0)  ) as count "
 			+ "from product_flow pf left join  transaction  tx on transaction_id = tx.id "
 			+ "left join product p on p.id = product_id where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
-			+ "and tx.health_center_destination_id = ?1 and "
+			+ "and tx.health_center_destination_id = ?1 and p.code = ?2 and "
 			+ " (pf.count- coalesce((select sum(pf_used.count) from product_flow pf_used where pf_used.reference_flow_id = pf.id), 0) ) > 0 ")
-	List<ProductFlow> findAvailabeProductsAtBranchWareHouse(Long locationId);
+	List<ProductFlow> findAvailabeProductsAtBranchWareHouse(Long locationId, String productCode);
 
 }
