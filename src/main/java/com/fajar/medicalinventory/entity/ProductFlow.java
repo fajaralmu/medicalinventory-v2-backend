@@ -21,10 +21,12 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -60,6 +62,7 @@ public class ProductFlow extends BaseEntity {
 	@Column
 	private int count;
 	@Column(name="used_count")
+	@Getter(value = AccessLevel.NONE)
 	private Integer usedCount;
 	
 	@Nullable
@@ -74,6 +77,13 @@ public class ProductFlow extends BaseEntity {
 	private long price;
 	@Column
 	private boolean generic;
+	
+	public Integer getUsedCount() {
+		if (null == usedCount) {
+			return 0;
+		}
+		return usedCount;
+	}
 	
 	public void addUsedCount(int count) {
 		if (null == usedCount) {
