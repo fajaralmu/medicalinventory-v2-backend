@@ -52,7 +52,7 @@ public class ProductFlowsData {
 			ProductFlow pf = new ProductFlow(
 					Transaction.builder().code(trxCode).build(), 
 					Product.builder().code(productCode).build(), 
-					expDate, count, reference , suitable, price, 
+					expDate, count, 0, reference , suitable, price, 
 					generic);
 			pf.setId(id);
 			if (map.get(trxCode) == null) {

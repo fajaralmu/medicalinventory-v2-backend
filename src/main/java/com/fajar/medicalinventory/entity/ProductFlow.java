@@ -18,6 +18,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -58,6 +59,8 @@ public class ProductFlow extends BaseEntity {
 	private Date expiredDate;
 	@Column
 	private int count;
+	@Column(name="used_count")
+	private Integer usedCount;
 	
 	@Nullable
 	@ManyToOne
@@ -71,6 +74,22 @@ public class ProductFlow extends BaseEntity {
 	private long price;
 	@Column
 	private boolean generic;
+	
+	public void addUsedCount(int count) {
+		if (null == usedCount) {
+			setUsedCount(0);
+		}
+		if (count - (getUsedCount()+count) < 0) {
+			throw new ApplicationException("Stock not enough");
+		}
+		setUsedCount(getUsedCount()+count);
+	}
+	
+	
+	public int getStock() {
+		if (null == usedCount) return count;
+		return count - usedCount;
+	}
 	
 	// transients //
 

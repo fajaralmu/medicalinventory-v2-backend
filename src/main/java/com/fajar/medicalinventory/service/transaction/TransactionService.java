@@ -136,9 +136,16 @@ public class TransactionService {
 			List<ProductFlow> productFlows = transaction.getProductFlows();
 			for (ProductFlow productFlow : productFlows) {
 				if (productFlow.getReferenceProductFlow() == null) {
-					throw new ApplicationException("Reference flow does not exist");
+					throw new ApplicationException("Reference flow does not exist in the request");
 				}
 				productFlow.setTransaction(transaction);
+				ProductFlow referenceFlow = (ProductFlow)session.get(ProductFlow.class, productFlow.getReferenceProductFlow().getId());
+				if (null == referenceFlow) {
+					throw new ApplicationException("Reference flow does not exist in the DB");
+				}
+				referenceFlow.addUsedCount(productFlow.getCount());
+				
+				DatabaseProcessor.save(referenceFlow, session);
 				DatabaseProcessor.save(productFlow, session);
 				
 				progressService.sendProgress(1, productFlows.size(), 80, httpServletRequest);
