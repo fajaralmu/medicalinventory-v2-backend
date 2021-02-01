@@ -1,5 +1,7 @@
 package com.fajar.medicalinventory.repository;
 
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,5 +31,12 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 			+ " and location.id = ?1 and p.code = ?2 and "
 			+ " (pf.count- pf.usedCount)  > 0 ")
 	List<ProductFlow> findAvailabeProductsAtBranchWareHouse(Long locationId, String productCode);
+
+	@Query("select pf.price from ProductFlow pf " + 
+			"left join pf.transaction tx " + 
+			"left join pf.product p " + 
+			"where tx.transactionDate <= ?2 and tx.type = 'TRANS_IN' " + 
+			"and p.id = ?1")
+	BigInteger getProductPriceAtDate(Long id, Date d);
 
 }

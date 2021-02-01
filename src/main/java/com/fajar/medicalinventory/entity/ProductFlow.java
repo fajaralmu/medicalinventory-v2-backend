@@ -6,6 +6,7 @@
 package com.fajar.medicalinventory.entity;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -95,6 +96,14 @@ public class ProductFlow extends BaseEntity {
 	public int getStock() {
 	 
 		return count - usedCount;
+	}
+
+	public static int sumCount(List<ProductFlow> productFlows) {
+		int sum = 0;
+		for (ProductFlow productFlow : productFlows) {
+			sum+=productFlow.getStock();
+		}
+		return sum;
 	}
 	
 	// transients //
