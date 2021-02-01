@@ -89,8 +89,8 @@ public class ProductFlow extends BaseEntity {
 		if (null == usedCount) {
 			setUsedCount(0);
 		}
-		if (this.count - (getUsedCount()+count) < 0) {
-			throw new ApplicationException("Stock not enough: "+(this.count - getUsedCount()+count));
+		if (getStock() - count < 0) {
+			throw new ApplicationException("Stock not enough: "+(getStock() - count));
 		}
 		setUsedCount(getUsedCount()+count);
 	}
