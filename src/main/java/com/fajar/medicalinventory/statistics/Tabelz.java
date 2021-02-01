@@ -18,53 +18,48 @@ public class Tabelz implements Serializable {
 	 */
 	private static final long serialVersionUID = -4329849240459301059L; 
 	private double z; 
-	private double nol; 
-	private double satu; 
-	private double dua; 
-	private double tiga; 
-	private double empat; 
-	private double lima; 
-	private double enam; 
-	private double tujuh; 
-	private double delapan; 
-	private double sembilan;
+	private double zero; 
+	private double one; 
+	private double two; 
+	private double three; 
+	private double four; 
+	private double five; 
+	private double six; 
+	private double seven; 
+	private double eight; 
+	private double nine;
  
 
 	public double get_Value(int column) {
 		switch (column) {
 		case 0:
-			System.out.println(nol);
-			return nol;
+			System.out.println(zero);
+			return zero;
 		case 1:
-			return satu;
+			return one;
 		case 2:
-			return dua;
+			return two;
 		case 3:
-			return tiga;
+			return three;
 		case 4:
-			return empat;
+			return four;
 		case 5:
-			return lima;
+			return five;
 		case 6:
-			return enam;
+			return six;
 		case 7:
-			return tujuh;
+			return seven;
 		case 8:
-			return delapan;
+			return eight;
 		case 9:
-			return sembilan;
+			return nine;
 		default:
-			return nol;
+			return zero;
 
 		}
 
 	}
 
-	@Override
-	public String toString() {
-		return "Ztabel [Z=" + z + ", nol=" + nol + ", satu=" + satu + ", dua=" + dua + ", tiga=" + tiga + ", empat="
-				+ empat + ", lima=" + lima + ", enam=" + enam + ", tujuh=" + tujuh + ", delapan=" + delapan
-				+ ", sembilan=" + sembilan + "]";
-	}
+ 
 
 }

@@ -21,7 +21,7 @@ public class Tabelchi implements Serializable {
 	 */
 	private static final long serialVersionUID = 2352164113699963729L;
 	 
-	private int derajatbebas; 
+	private int degree; 
 	private double sig90; 
 	private double sig95; 
 	private double sig97p5; 
