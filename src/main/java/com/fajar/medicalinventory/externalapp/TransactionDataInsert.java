@@ -88,7 +88,7 @@ public class TransactionDataInsert {
 			List result = getObjectByCode(HealthCenter.class, healthCenterCode);
 			System.out.println("HealthCenter result: " + result.size() + " with code:  " + "PKM" + healthCenterCode);
 			if (result.size() > 0) {
-				transaction.setHealthCenterDestionation((HealthCenter) result.get(0));
+				transaction.setHealthCenterDestination((HealthCenter) result.get(0));
 			}
 			transaction.setType(TransactionType.TRANS_OUT_TO_WAREHOUSE);
 		}
@@ -110,7 +110,7 @@ public class TransactionDataInsert {
 		}
 		
 		if (transaction.getSupplier() == null && transaction.getCustomer() == null
-				&& transaction.getHealthCenterDestionation() == null) {
+				&& transaction.getHealthCenterDestination() == null) {
 			return null;
 		}
 		

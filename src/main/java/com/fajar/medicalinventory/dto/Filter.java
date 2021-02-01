@@ -6,6 +6,8 @@ import java.util.Map;
 
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(value = Include.NON_NULL)
 public class Filter implements Serializable {
 	/**
 	* 
@@ -27,11 +30,7 @@ public class Filter implements Serializable {
 	@Builder.Default
 	private Integer page = 0;
 	private String orderType;
-	private String orderBy;
-	@Builder.Default
-	private boolean contains = true;
-	@Builder.Default
-	private boolean beginsWith = true;
+	private String orderBy; 
 	@Builder.Default
 	private boolean exacts = false;
 	@Builder.Default
@@ -39,14 +38,14 @@ public class Filter implements Serializable {
 	@Builder.Default
 	private Integer year = 0;
 	@Builder.Default
-	private Integer month = 0;
-	@Builder.Default
-	private String module = "IN";
+	private Integer month = 0; 
 	@Builder.Default
 	private Map<String, Object> fieldsFilter = new HashMap<>();
 	
 	private Integer monthTo;
 	private Integer yearTo; 
+	
+	private boolean ignoreEmptyValue;
 	
 	@JsonIgnore
 	private int maxValue;

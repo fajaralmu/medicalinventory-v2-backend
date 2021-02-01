@@ -85,7 +85,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@JsonIgnore
 	private String keterangan;
 	
-	@Column(name="imahe_names")
+	@Column(name="image_names")
 	@FormField(multipleImage = true, type=FieldType.FIELD_TYPE_IMAGE)
 	private String imageNames;
 	

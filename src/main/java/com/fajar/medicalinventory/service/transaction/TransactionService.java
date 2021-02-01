@@ -127,7 +127,7 @@ public class TransactionService {
 			Transaction transaction = buildTransactionOUTObject(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
-			if (null == transaction.getCustomer() && transaction.getHealthCenterDestionation() == null) {
+			if (null == transaction.getCustomer() && transaction.getHealthCenterDestination() == null) {
 				throw new ApplicationException("Fields Missing");
 			}
 			transaction = DatabaseProcessor.save(transaction, session);

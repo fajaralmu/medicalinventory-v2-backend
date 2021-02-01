@@ -61,9 +61,9 @@ public class ProductFlow extends BaseEntity {
 	private Date expiredDate;
 	@Column
 	private int count;
-	@Column(name="used_count")
+	@Column(name="used_count", nullable = false)
 	@Getter(value = AccessLevel.NONE)
-	private Integer usedCount;
+	private int usedCount;
 	
 	@Nullable
 	@ManyToOne
@@ -79,16 +79,12 @@ public class ProductFlow extends BaseEntity {
 	private boolean generic;
 	
 	public Integer getUsedCount() {
-		if (null == usedCount) {
-			return 0;
-		}
+		 
 		return usedCount;
 	}
 	
 	public void addUsedCount(int count) {
-		if (null == usedCount) {
-			setUsedCount(0);
-		}
+		 
 		if (getStock() - count < 0) {
 			throw new ApplicationException("Stock not enough: "+(getStock() - count));
 		}
@@ -97,7 +93,7 @@ public class ProductFlow extends BaseEntity {
 	
 	
 	public int getStock() {
-		if (null == usedCount) return count;
+	 
 		return count - usedCount;
 	}
 	

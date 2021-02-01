@@ -21,4 +21,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	List<Product> findByOrderByName(Pageable of);
 	@Query("select count(p) from Product p")
 	BigInteger countAll();
+	
+	@Query("select distinct(p) from " + 
+			"ProductFlow pf " + 
+			"left join pf.product p " + 
+			"left join pf.transaction tx " + 
+			"where tx.type = 'TRANS_IN' and (pf.count- pf.usedCount) > 0 order by p.name")
+	List<Product> findNotEmptyProductInMasterWarehouse(Pageable of);
+	
+	@Query("select distinct(p) from " + 
+			"ProductFlow pf " + 
+			"left join pf.product p " + 
+			"left join pf.transaction tx " + 
+			" left join tx.healthCenterDestination location "+
+			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and location.id = ?1 and (pf.count- pf.usedCount) > 0 order by p.name")
+	List<Product> findNotEmptyProductInSpecifiedWarehouse(Long location, Pageable of);
 }

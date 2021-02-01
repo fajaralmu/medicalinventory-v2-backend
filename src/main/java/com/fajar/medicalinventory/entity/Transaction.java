@@ -84,7 +84,7 @@ public class Transaction extends BaseEntity implements Serializable {
 	@JoinColumn(name = "health_center_destination_id")
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	@Nullable
-	private HealthCenter healthCenterDestionation;
+	private HealthCenter healthCenterDestination;
 	
 	/**
 	 * health center where transaction is performed
@@ -115,7 +115,7 @@ public class Transaction extends BaseEntity implements Serializable {
 			type = TransactionType.TRANS_IN;
 		} else if (customer != null) {
 			type = TransactionType.TRANS_OUT;
-		} else if (healthCenterDestionation != null) {
+		} else if (healthCenterDestination != null) {
 			type = TransactionType.TRANS_OUT_TO_WAREHOUSE;
 		} else {
 			throw new ApplicationException("Missing transaction data!");

@@ -23,8 +23,10 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 	List<ProductFlow> findAvailabeProductsAtMainWareHouse(String code);
 
 	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "
-			+ " left join pf.product p where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
-			+ " and tx.healthCenterDestination.id = ?1 and p.code = ?2 and "
+			+ " left join pf.product p "
+			+ " left join tx.healthCenterDestination location "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
+			+ " and location.id = ?1 and p.code = ?2 and "
 			+ " (pf.count- pf.usedCount)  > 0 ")
 	List<ProductFlow> findAvailabeProductsAtBranchWareHouse(Long locationId, String productCode);
 

@@ -63,7 +63,20 @@ public class InventoryService {
 
 		int page = webRequest.getFilter().getPage();
 		int size = webRequest.getFilter().getLimit();
-		List<Product> products = productRepository.findByOrderByName(PageRequest.of(page, size));
+		PageRequest pageReuqest = PageRequest.of(page, size);
+		boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
+		
+		List<Product> products;
+		if (ignoreEmptyValue) {
+			
+			if (isMasterHealthCenter) {
+				products = productRepository.findNotEmptyProductInMasterWarehouse(pageReuqest);
+			} else {
+				products = productRepository.findNotEmptyProductInSpecifiedWarehouse(healthCenter.getId(), pageReuqest);
+			}
+		} else {
+			products = productRepository.findByOrderByName(pageReuqest);
+		}
 		BigInteger totalData = productRepository.countAll();
 		progressService.sendProgress(20, httpServletRequest);
 		

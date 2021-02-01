@@ -57,7 +57,7 @@ public class WebRequest implements Serializable {
 	private Transaction transaction;
 	private List<BaseEntity> orderedEntities; 
 	
-	private boolean regularTransaction;
+	private boolean regularTransaction; 
 	
 	private String imageData; 
 
