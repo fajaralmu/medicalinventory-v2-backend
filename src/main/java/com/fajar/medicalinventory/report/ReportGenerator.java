@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
@@ -40,6 +40,7 @@ import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.BindedValues;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
+import com.fajar.medicalinventory.util.DateUtil;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -69,6 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReportGenerator {
 
+	private static final String DATE_PATTERN = "dd-MM-yyyy";
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
@@ -912,7 +914,8 @@ public class ReportGenerator {
 		return false;
 	}
 
-	public void printStockOpnameReport(Date d, HealthCenter location, OutputStream os, HttpServletRequest httpServletRequest) {
+	public XSSFWorkbook getStockOpnameReport(Date d, HealthCenter location, HttpServletRequest httpServletRequest)
+			throws Exception {
 
 		List<Product> listObat = (List<Product>) obatRepository.findAll();
 		progressService.sendProgress(10, httpServletRequest);
@@ -922,42 +925,36 @@ public class ReportGenerator {
 			log.info("get stock info for: {}", product.getName());
 			List<ProductFlow> productFlows;
 			if (isMasterHealthCenter) {
-				productFlows = aliranObatRepository.findAvailabeProductsAtMainWareHouse(product.getCode());
+				productFlows = aliranObatRepository.findAvailabeProductsAtMainWareHouseAtDate(product.getId(), d);
 			} else {
-				productFlows = aliranObatRepository.findAvailabeProductsAtBranchWareHouse(location.getId(), product.getCode());
+				productFlows = aliranObatRepository.findAvailabeProductsAtBranchWareHouseAtDate(location.getId(),
+						product.getId(), d);
 			}
-			BigInteger price = aliranObatRepository.getProductPriceAtDate(product.getId(), d);
+			List<Long> prices = aliranObatRepository.getProductPriceAtDate(product.getId(), d, PageRequest.of(0, 1));
 			int count = ProductFlow.sumCount(productFlows);
 			product.setJmlobat(count);
-			product.setHargasatuan(price == null ? 0 : price.intValue());
-			
+			product.setHargasatuan(prices.size() == 0 ? 0 : prices.get(0).intValue());
+
 			progressService.sendProgress(1, listObat.size(), 80, httpServletRequest);
 		}
-		
-		
+
 		try {
-			printStockOpnameReport(location, listObat, d, os);
+			XSSFWorkbook wb = generateStockOpnameReport(location, listObat, d);
 			progressService.sendProgress(10, httpServletRequest);
+
+			return wb;
 		} catch (Exception e) {
+			log.error("Error generating stock opname report: {}", e);
 			e.printStackTrace();
+			throw e;
 		}
-	}
+	} 
 
-	private void printStockOpnameReport(HealthCenter location, List<Product> daftarObatDanHarga, Date d,
-			OutputStream os) throws Exception {
+	private XSSFWorkbook generateStockOpnameReport(HealthCenter location, List<Product> daftarObatDanHarga, Date date)
+			throws Exception {
 
-		Integer harga = 0;
-
-		WritableWorkbook wb = Workbook.createWorkbook(os);
-		WritableSheet sheet = wb.createSheet("Stok Opname", 0);
-		WritableCellFormat formatNama = new WritableCellFormat();
-		WritableCellFormat formatJudul = new WritableCellFormat();
-		WritableCellFormat formatUmum = new WritableCellFormat();
-		formatJudul.setAlignment(Alignment.CENTRE);
-
-		formatUmum.setBorder(Border.ALL, BorderLineStyle.THIN);
-		// formatNama.setShrinkToFit(true);
-		formatNama.setBorder(Border.ALL, BorderLineStyle.THIN);
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet sheet = wb.createSheet("Stock Opname " + DateUtil.formatDate(date, DATE_PATTERN));
 		Label labels[] = new Label[8];
 		labels[0] = new Label(2, 3, "No");
 		labels[1] = new Label(3, 3, "Nama");
@@ -965,48 +962,63 @@ public class ReportGenerator {
 		labels[3] = new Label(5, 3, "Sisa Stok");
 		labels[4] = new Label(6, 3, "Harga Satuan");
 		labels[5] = new Label(7, 3, "Harga Total");
-		sheet.mergeCells(2, 1, 7, 1);
-		sheet.mergeCells(2, 2, 7, 2);
-		labels[6] = new Label(2, 1, "STOK OPNAME");
+		labels[6] = new Label(2, 1, "STOK OPNAME "+DateUtil.formatDate(date, DATE_PATTERN));
 		labels[7] = new Label(2, 2, location.getName().toUpperCase());
+		
+		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1, 1, 2, 7));
+		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2, 2, 2, 7));
 
 		for (int i = 0; i < labels.length; i++) {
-			if (i < 6) {
-				labels[i].setCellFormat(formatUmum);
+			Label label = labels[i];
+			int row = label.getRow();
+			XSSFRow xssfRow;
+			if (sheet.getRow(row) == null) {
+				xssfRow = sheet.createRow(row);
 			} else {
-				labels[i].setCellFormat(formatJudul);
+				xssfRow = sheet.getRow(row);
 			}
-			sheet.addCell(labels[i]);
+			xssfRow.createCell(label.getColumn()).setCellValue(label.getContents());
+		
 		}
-		Integer baris = 4, no = 1;
+		Integer totalPrice = 0, totalCount = 0;
+		Integer currentRow = 4, number = 1;
 		for (Product ob : daftarObatDanHarga) {
-			System.out.print("*");
-			jxl.write.Number labelobat[] = new jxl.write.Number[4];
-			labelobat[0] = new jxl.write.Number(2, baris, no);
-			labelobat[1] = new jxl.write.Number(5, baris, ob.getJmlobat());
-			labelobat[2] = new jxl.write.Number(6, baris, ob.getHargasatuan());
-			Integer total = ob.getHargasatuan() * ob.getJmlobat();
-			labelobat[3] = new jxl.write.Number(7, baris, total);
-			Label labelNama = new Label(3, baris, ob.getName(), formatNama);
-			harga += total;
-			Label labelSatuan = new Label(4, baris, ob.getUnit().getName(), formatUmum);
-			sheet.addCell(labelNama);
-			sheet.addCell(labelSatuan);
-
-			for (jxl.write.Number labelobat1 : labelobat) {
-				labelobat1.setCellFormat(formatUmum);
-				sheet.addCell(labelobat1);
+			XSSFRow xssfRow;
+			if (sheet.getRow(currentRow) == null) {
+				xssfRow = sheet.createRow(currentRow);
+			} else {
+				xssfRow = sheet.getRow(currentRow);
 			}
-			baris++;
-			no++;
+
+			jxl.write.Number labelobat[] = new jxl.write.Number[4];
+			labelobat[0] = new jxl.write.Number(2, currentRow, number);
+			labelobat[1] = new jxl.write.Number(5, currentRow, ob.getJmlobat());
+			labelobat[2] = new jxl.write.Number(6, currentRow, ob.getHargasatuan());
+			Integer total = ob.getHargasatuan() * ob.getJmlobat();
+			labelobat[3] = new jxl.write.Number(7, currentRow, total);
+			totalPrice += total;
+			totalCount += ob.getJmlobat();
+
+			xssfRow.createCell(3).setCellValue(ob.getName());
+			xssfRow.createCell(4).setCellValue(ob.getUnit().getName());
+			
+			for (jxl.write.Number labelobat1 : labelobat) {
+				XSSFCell cell = xssfRow.createCell(labelobat1.getColumn());
+				cell.setCellValue(labelobat1.getContents());
+			}
+			currentRow++;
+			number++;
 		}
-		sheet.mergeCells(2, baris, 6, baris);
-		Label lblTotal = new Label(2, baris, "Total", formatUmum);
-		jxl.write.Number totalHarga = new jxl.write.Number(7, baris, harga, formatUmum);
-		sheet.addCell(lblTotal);
-		sheet.addCell(totalHarga);
-		wb.write();
-		wb.close();
+		
+		XSSFRow xssfRow = sheet.createRow(currentRow); 
+
+		xssfRow.createCell(2).setCellValue("Total");
+		xssfRow.createCell(5).setCellValue(totalCount);
+		xssfRow.createCell(7).setCellValue(totalPrice);
+		
+		return wb;
+
+//		wb.close();
 
 	}
 

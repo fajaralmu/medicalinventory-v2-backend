@@ -42,14 +42,19 @@ public class InventoryService {
 		if (null == healthCenter) {
 			throw new DataNotFoundException("Health center not found");
 		}
+		Product product = productRepository.findTop1ByCode(code);
+		if (null == product) {
+			throw new DataNotFoundException("Product not found");
+		}
 		WebResponse response = new WebResponse();
 		List<ProductFlow> availableProductFlows;
+		
 		if (healthCenterMasterService.isMasterHealthCenter(healthCenter)) {
-			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(code);
+			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId());
 
 		} else {
 			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
-					code);
+					product.getId());
 
 		}
 		response.setEntities(availableProductFlows);
@@ -77,6 +82,7 @@ public class InventoryService {
 		} else {
 			products = productRepository.findByOrderByName(pageReuqest);
 		}
+		//TODO: count only product available
 		BigInteger totalData = productRepository.countAll();
 		progressService.sendProgress(20, httpServletRequest);
 		
@@ -86,11 +92,11 @@ public class InventoryService {
 			List<ProductFlow> productFlows;
 			
 			if (isMasterHealthCenter) {
-				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getCode());
+				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId());
 
 			} else {
 				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
-						product.getCode());
+						product.getId());
 
 			}
 			ProductStock productStock = new ProductStock(product, productFlows);

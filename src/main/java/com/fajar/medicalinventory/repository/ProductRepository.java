@@ -36,4 +36,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			" left join tx.healthCenterDestination location "+
 			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and location.id = ?1 and (pf.count- pf.usedCount) > 0 order by p.name")
 	List<Product> findNotEmptyProductInSpecifiedWarehouse(Long location, Pageable of);
+	Product findTop1ByCode(String code);
 }

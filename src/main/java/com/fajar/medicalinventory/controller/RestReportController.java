@@ -43,8 +43,8 @@ public class RestReportController extends BaseController {
 			HttpServletResponse httpServletResponse) throws Exception {
 		log.info("stockopname {} at {} ", webRequest.getHealthcenter().getName());
 		httpServletResponse.setContentType("text/xls");
-		httpServletResponse.setHeader("Content-disposition", "attachment;filename=STOCKOPNAME.xls");
 		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		
 		reportService.printStockOpname(webRequest, httpRequest, httpServletResponse);
 	}
 
