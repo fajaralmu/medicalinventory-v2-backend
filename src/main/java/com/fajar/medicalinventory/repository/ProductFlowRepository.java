@@ -17,9 +17,12 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 
 	List<ProductFlow> findByProduct_codeAndTransaction_type(String code, TransactionType transIn);
 
-	@Query(nativeQuery = true, value = "select  * from product_flow pf left join  transaction  tx on transaction_id = tx.id "
-			+ "left join product p on p.id = product_id where tx.type = 'TRANS_IN'   and p.code=?1 and "
-			+ "(pf.count- coalesce(pf.used_count, 0) ) > 0")
+	@Query("select pf from ProductFlow pf left join pf.transaction tx "
+			+ " left join pf.product p "
+			+ " where tx.type='TRANS_IN' and p.code = ?1 and (pf.count- pf.usedCount) > 0 ")
+//	@Query(nativeQuery = true, value = "select  * from product_flow pf left join  transaction  tx on transaction_id = tx.id "
+//			+ "left join product p on p.id = product_id where tx.type = 'TRANS_IN'   and p.code=?1 and "
+//			+ "(pf.count- coalesce(pf.used_count, 0) ) > 0")
 	List<ProductFlow> findAvailabeProductsAtMainWareHouse(String code);
 
 	@Query(nativeQuery = true, value = "select * from product_flow pf left join  transaction  tx on transaction_id = tx.id "
