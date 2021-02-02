@@ -36,9 +36,7 @@ public class MonthlyReportGenerator {
 	private final List<Transaction> transactionsOneMonth;
 	private final int month, year;
 	private final List<Product> allProducts;
-	private final List<HealthCenter> locations;
-	private List<DailyConsumption> dailyConsumptionPerProduct = new ArrayList<>();
-	private List<Product> productListPerDay = new ArrayList<>();
+	private final List<HealthCenter> locations; 
 	private final XSSFCellStyle productNameStyle;
 	private final XSSFCellStyle regularStyle;
 	final ProgressNotifier progressNotifier;
@@ -55,6 +53,10 @@ public class MonthlyReportGenerator {
 		this.productNameStyle = createProductNameStyle(xwb);
 		this.regularStyle = createRegularStyle(xwb);
 		this.progressNotifier = progressNotifier;
+		
+		allProducts.forEach(p -> {
+			p.setCount(0); 
+		});
 
 	}
 
@@ -70,13 +72,7 @@ public class MonthlyReportGenerator {
 		return map;
 	}
 
-	public XSSFWorkbook generateReport(ProgressService progressService, HttpServletRequest httpServletRequest) {
-
-		allProducts.forEach(p -> {
-			p.setCount(0);
-			productListPerDay.add(p);
-		});
-		
+	public XSSFWorkbook generateReport( ) { 
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
 		mainLoop: for (Integer day = 1; day <= 31; day++) {
@@ -84,66 +80,59 @@ public class MonthlyReportGenerator {
 			int allProductCountDaily = 0;
 			// JUDUL TABEL//
 			XSSFSheet sheet = xwb.createSheet(day.toString());
-			createProductNameCells(sheet.createRow(3), sheet);
-
-			boolean lanjut = false;
-
-			// KONTEN TABEL//
-			Integer no = 1;
+			createProductNameCells(sheet.createRow(3), sheet);  
+			 
+			Integer number = 1;
 			int row = 4;
 			List<Transaction> transactions = transactionMapped.get(day) == null ? new ArrayList<>()
 					: transactionMapped.get(day);
-			for (Transaction transaction : transactions) {
+			/**
+			 * list of customer transactions
+			 */
+			loop: for (Transaction transaction : transactions) {
 
 				if (!transaction.getType().equals(TransactionType.TRANS_OUT)
 						|| transaction.getCustomer() == null) {
-					continue;
+					continue loop;
 				}
-				lanjut = true;
 
 				XSSFRow cunsumptionRow = sheet.createRow(row);
-				XSSFCell[] xkolomRincian = new XSSFCell[4 + productCount()];
+				XSSFCell[] customerConsumptionCells = new XSSFCell[4 + productCount()];
 
-				xkolomRincian[0] = createCellWithString(cunsumptionRow, 2, String.valueOf(no));
-				xkolomRincian[1] = createCellWithString(cunsumptionRow, 3, transaction.getCustomer().getName());
-				xkolomRincian[2] = createCellWithString(cunsumptionRow, 4,
+				customerConsumptionCells[0] = createCellWithString(cunsumptionRow, 2, String.valueOf(number));
+				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3, transaction.getCustomer().getName());
+				customerConsumptionCells[2] = createCellWithString(cunsumptionRow, 4,
 						transaction.getHealthCenterLocation().getName());
 				sheet.autoSizeColumn(3);
 
-				Integer totalProductsPerCustomer = 0;
-				for (ProductFlow ao : transaction.getProductFlows()) {
-					totalProductsPerCustomer += ao.getCount();
-				}
-				allProductCountDaily += totalProductsPerCustomer;
-
-				xkolomRincian[3] = cunsumptionRow.createCell(5);
-				xkolomRincian[3].setCellValue(totalProductsPerCustomer);
+				int totalProductPerCustomer = transaction.getTotalProductFlowCount();
+				allProductCountDaily += totalProductPerCustomer;
+				customerConsumptionCells[3] = createCellWithNumber(cunsumptionRow, 5, (double) totalProductPerCustomer);
 
 				// rincian obat per orang
-				int kolomObatPerOrang = 5;
+				int consumptionColumn = 5;
 				int idxObat = 3;
+				/**
+				 * consumptions per product for each products (transaction details)
+				 */
 				for (Product product : productsPerDay) {
 					idxObat++;
-					kolomObatPerOrang++;
-					for (ProductFlow productFlow : transaction.getProductFlows()) {
-						if (productFlow.getProduct().idEquals(product)) {
-							product.addCount(productFlow.getCount()); 
-							
-							xkolomRincian[idxObat] = cunsumptionRow.createCell(kolomObatPerOrang);
-							xkolomRincian[idxObat].setCellValue(productFlow.getCount());
-						} else {
-						}
+					consumptionColumn++;
+					int productCount = transaction.getProductCount(product);
+					product.addCount(productCount);
+					if (productCount > 0) {
+						customerConsumptionCells[idxObat] = createCellWithNumber(cunsumptionRow, consumptionColumn, (double) productCount);
 					}
+				
 				}
-				no++;
+				number++;
 				row++;
-				setRegularStyle(xkolomRincian);
+				setRegularStyle(customerConsumptionCells);
 			}
-//			// Jumlah obat
-//			if (!lanjut) {
-//				progressNotifier.nofity(1, 31, 50);
-//				continue mainLoop;
-//			}
+			
+			/**
+			 * total consumption
+			 */
 			sheet.addMergedRegion(new CellRangeAddress(row, row, 2, 4));
 			XSSFRow summaryRow = sheet.createRow(row);
 			XSSFCell[] summaryCells = new XSSFCell[6 + productCount()];
@@ -151,22 +140,14 @@ public class MonthlyReportGenerator {
 			summaryCells[1] = summaryRow.createCell(3);
 			summaryCells[2] = summaryRow.createCell(4);
 			summaryCells[3] = summaryRow.createCell(5);
-
-			DailyConsumption dailyConsumption = new DailyConsumption(allProductCountDaily, day);
-			dailyConsumptionPerProduct.add(dailyConsumption);
-
+ 
 			int columnProductPerDay = 6;
 			int idxTotal = 5;
 			for (Product o : productsPerDay) {
 				idxTotal++;
-				for (DailyConsumption totalConsumption : dailyConsumptionPerProduct) {
-					if (totalConsumption.getDay().equals(day)) {
-						DrugConsumption consumption = new DrugConsumption(day, o.getCount(), o.getCode());
-						totalConsumption.addConsumption(consumption);
-					}
-					summaryCells[idxTotal] = summaryRow.createCell(columnProductPerDay);
-					summaryCells[idxTotal].setCellValue(o.getCount());
-				}
+				 
+				summaryCells[idxTotal] = summaryRow.createCell(columnProductPerDay);
+				summaryCells[idxTotal].setCellValue(o.getCount());
 				columnProductPerDay++;
 			}
 
@@ -178,7 +159,7 @@ public class MonthlyReportGenerator {
 		}
 		/**************** END DAILY CONSUMPTION ***********************/
 
-		writeSummary();
+		writeConsumptionByLocations();
 
 		return xwb;
 	}
@@ -188,7 +169,7 @@ public class MonthlyReportGenerator {
 		List<Transaction> result = new ArrayList<>();
 		for (Transaction transaction : transactionsOneMonth) {
 			TransactionType type = transaction.getType();
-			boolean isTransOut = (type.equals(TRANS_OUT) || type.equals(TRANS_OUT_TO_WAREHOUSE));
+			boolean isTransOut = (type.equals(TRANS_OUT));// || type.equals(TRANS_OUT_TO_WAREHOUSE));
 			if (isTransOut && transaction.getHealthCenterLocation().idEquals(healthCenter)) {
 				result.add(transaction);
 			}
@@ -196,15 +177,14 @@ public class MonthlyReportGenerator {
 		return result;
 	}
 
-	private void writeSummary( ) {
+	private void writeConsumptionByLocations( ) {
 
 		/**************** BEGIN SUMMARY ***********************/
 		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + month);
 		XSSFRow titleRow = xsheetpkm.createRow(3);
 		createSummaryTableHeader(xsheetpkm, titleRow);
 		writeProductNames(titleRow);
-
-		int totalProductsAllLocation = 0;
+ 
 		int column = 5, locationRowNum = 4;
 		progressNotifier.nofity(10,10,10);
 
@@ -231,8 +211,10 @@ public class MonthlyReportGenerator {
 
 				int count = getCountProduct(product, transactions);
 				product.addCount(count);
-				rowDataCells[locationRowItem + 4] = createCellWithNumber(locationRow, column,
-						(double) product.getCount());
+				if (product.getCount() > 0) {
+					rowDataCells[locationRowItem + 4] = createCellWithNumber(locationRow, column,
+							(double) product.getCount());
+				}
 				locationRowItem++;
 				column++;
 				totalProductsPerLocation += product.getCount();
@@ -244,9 +226,7 @@ public class MonthlyReportGenerator {
 					}
 				}
 			}
-			rowDataCells[2] = createCellWithNumber(locationRow, 4, (double) totalProductsPerLocation);
-
-			totalProductsAllLocation += totalProductsPerLocation;
+			rowDataCells[2] = createCellWithNumber(locationRow, 4, (double) totalProductsPerLocation); 
 			column = 5;
 			locationRowNum++;
 			setRegularStyle(rowDataCells);
@@ -254,17 +234,32 @@ public class MonthlyReportGenerator {
 			progressNotifier.nofity(1, locations.size(), 30);
 		}
 
+		/**
+		 * summary
+		 */
+		writeAccumulationForSummarySheet(xsheetpkm, locationRowNum, productsTotal);
+		 
+	}
+
+	private void writeAccumulationForSummarySheet(XSSFSheet xsheetpkm, int locationRowNum,
+			List<Product> productsTotal) {
+		int column = 5;
+		int totalProductsAllLocation = 0;
 		XSSFRow summaryRow = xsheetpkm.createRow(locationRowNum);
 		XSSFCell[] summaryCells = new XSSFCell[3 + productCount()];
 		summaryCells[0] = createCellWithString(summaryRow, 3, "Total");
-		summaryCells[1] = createCellWithNumber(summaryRow, 4, (double) totalProductsAllLocation);
-
+		
 		for (int i = 0; i < productsTotal.size(); i++) {
 			double value = (double) productsTotal.get(i).getCount();
 			summaryCells[i + 2] = createCellWithNumber(summaryRow, column, value);
 			column++;
+			totalProductsAllLocation+= value;
 		}
+		
+		summaryCells[1] = createCellWithNumber(summaryRow, 4, (double) totalProductsAllLocation);
+
 		setRegularStyle(summaryCells);
+		
 	}
 
 	private int getCountProduct(Product product, List<Transaction> transactions) {

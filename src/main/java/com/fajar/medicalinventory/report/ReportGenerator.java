@@ -95,7 +95,7 @@ public class ReportGenerator {
 		progressService.sendProgress(4, httpServletRequest);
 		 
 		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter, transactionsOneMonth, products, locations, notifier(httpServletRequest));
-		return generator.generateReport(progressService, httpServletRequest);
+		return generator.generateReport( );
 	}
 
 	

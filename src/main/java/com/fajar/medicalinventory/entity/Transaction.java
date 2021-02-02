@@ -125,9 +125,29 @@ public class Transaction extends BaseEntity implements Serializable {
 		generateUniqueCode(type);
 		
 	}
+	
+	public int getTotalProductFlowCount() {
+		if (null == productFlows) return 0;
+		int count = 0;
+		for (ProductFlow productFlow : productFlows) {
+			count += productFlow.getCount();
+		}
+		return count;
+	}
 
 	public void addProductFlow(ProductFlow productFlow) {
 		productFlows.add(productFlow);
+	}
+	
+	public int getProductCount(Product product) {
+		if (null == productFlows) return 0;
+		int count = 0;
+		for (ProductFlow productFlow : productFlows) {
+			if (product.idEquals(productFlow.getProduct())) {
+				count += productFlow.getCount();
+			}
+		}
+		return count;
 	}
 	
 	 
