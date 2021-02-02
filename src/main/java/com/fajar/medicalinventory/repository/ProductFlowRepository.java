@@ -1,6 +1,5 @@
 package com.fajar.medicalinventory.repository;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 
 	List<ProductFlow> findByTransaction(Transaction transaction);
 
-	List<ProductFlow> findByProduct_codeAndTransaction_type(String code, TransactionType transIn);
+	List<ProductFlow> findByProductAndTransaction_type(Product p, TransactionType transIn);
 
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
 			+ " left join pf.product p "
@@ -28,7 +27,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 	
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
 			+ " left join pf.product p "
-			+ " where tx.type='TRANS_IN' and tx.transactionDate <= ?2 and p.code = ?1 and (pf.count- pf.usedCount) > 0 ") 
+			+ " where tx.type='TRANS_IN' and tx.transactionDate <= ?2 and p.id = ?1 and (pf.count- pf.usedCount) > 0 ") 
 	List<ProductFlow> findAvailabeProductsAtMainWareHouseAtDate(Long productId, Date date);
 
 	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "

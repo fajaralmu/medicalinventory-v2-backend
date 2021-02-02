@@ -607,17 +607,7 @@ public class ReportGenerator {
 //		return null;
 //
 //	}
-
-	private String changeDateStringFormat(String tgl) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		try {
-			Date date = sdf.parse(tgl);
-			return dateToString(date);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+ 
 
 	public String printLable(Transaction t, String path)
 			throws FileNotFoundException, DocumentException, SQLException, com.itextpdf.text.DocumentException {
@@ -939,7 +929,8 @@ public class ReportGenerator {
 		}
 
 		try {
-			XSSFWorkbook wb = generateStockOpnameReport(location, listObat, d);
+			StockOpnameGenerator generator = new StockOpnameGenerator(location,  listObat, d);
+			XSSFWorkbook wb =generator. generateReport();
 			progressService.sendProgress(10, httpServletRequest);
 
 			return wb;
@@ -950,79 +941,7 @@ public class ReportGenerator {
 		}
 	} 
 
-	private XSSFWorkbook generateStockOpnameReport(HealthCenter location, List<Product> daftarObatDanHarga, Date date)
-			throws Exception {
-
-		XSSFWorkbook wb = new XSSFWorkbook();
-		XSSFSheet sheet = wb.createSheet("Stock Opname " + DateUtil.formatDate(date, DATE_PATTERN));
-		Label labels[] = new Label[8];
-		labels[0] = new Label(2, 3, "No");
-		labels[1] = new Label(3, 3, "Nama");
-		labels[2] = new Label(4, 3, "Satuan");
-		labels[3] = new Label(5, 3, "Sisa Stok");
-		labels[4] = new Label(6, 3, "Harga Satuan");
-		labels[5] = new Label(7, 3, "Harga Total");
-		labels[6] = new Label(2, 1, "STOK OPNAME "+DateUtil.formatDate(date, DATE_PATTERN));
-		labels[7] = new Label(2, 2, location.getName().toUpperCase());
-		
-		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1, 1, 2, 7));
-		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2, 2, 2, 7));
-
-		for (int i = 0; i < labels.length; i++) {
-			Label label = labels[i];
-			int row = label.getRow();
-			XSSFRow xssfRow;
-			if (sheet.getRow(row) == null) {
-				xssfRow = sheet.createRow(row);
-			} else {
-				xssfRow = sheet.getRow(row);
-			}
-			xssfRow.createCell(label.getColumn()).setCellValue(label.getContents());
-		
-		}
-		Integer totalPrice = 0, totalCount = 0;
-		Integer currentRow = 4, number = 1;
-		for (Product ob : daftarObatDanHarga) {
-			XSSFRow xssfRow;
-			if (sheet.getRow(currentRow) == null) {
-				xssfRow = sheet.createRow(currentRow);
-			} else {
-				xssfRow = sheet.getRow(currentRow);
-			}
-
-			jxl.write.Number labelobat[] = new jxl.write.Number[4];
-			labelobat[0] = new jxl.write.Number(2, currentRow, number);
-			labelobat[1] = new jxl.write.Number(5, currentRow, ob.getJmlobat());
-			labelobat[2] = new jxl.write.Number(6, currentRow, ob.getHargasatuan());
-			Integer total = ob.getHargasatuan() * ob.getJmlobat();
-			labelobat[3] = new jxl.write.Number(7, currentRow, total);
-			totalPrice += total;
-			totalCount += ob.getJmlobat();
-
-			xssfRow.createCell(3).setCellValue(ob.getName());
-			xssfRow.createCell(4).setCellValue(ob.getUnit().getName());
-			
-			for (jxl.write.Number labelobat1 : labelobat) {
-				XSSFCell cell = xssfRow.createCell(labelobat1.getColumn());
-				cell.setCellValue(labelobat1.getContents());
-			}
-			currentRow++;
-			number++;
-		}
-		
-		XSSFRow xssfRow = sheet.createRow(currentRow); 
-
-		xssfRow.createCell(2).setCellValue("Total");
-		xssfRow.createCell(5).setCellValue(totalCount);
-		xssfRow.createCell(7).setCellValue(totalPrice);
-		
-		return wb;
-
-//		wb.close();
-
-	}
-
-	public String numbToCurrencyString(Integer Int) {
+ 	public String numbToCurrencyString(Integer Int) {
 		String nominal = Int.toString();
 		String hasil = "";
 		if (nominal.length() > 3) {
