@@ -83,15 +83,14 @@ public class Product extends BaseEntity implements MultipleImageModel {
 
 		return imageNames.split("~");
 	}
- 
+
 	@Transient
 	@JsonIgnore
 	private Integer count;
 	@Transient
-	@JsonIgnore 
+	@JsonIgnore
 	private Integer price;
-	
-	
+
 	@Transient
 	@JsonIgnore
 	@Getter(value = AccessLevel.NONE)
@@ -102,7 +101,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@Getter(value = AccessLevel.NONE)
 	@Setter(value = AccessLevel.NONE)
 	private double nextorder;
-	
+
 	@Transient
 	@JsonIgnore
 	@Getter(value = AccessLevel.NONE)
@@ -124,8 +123,6 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@Setter(value = AccessLevel.NONE)
 	private String keterangan;
 
-	 
-
 	public double getStokaman() {
 		return stokaman;
 	}
@@ -140,7 +137,8 @@ public class Product extends BaseEntity implements MultipleImageModel {
 
 	public void setNextorder(double nextorder) {
 		this.nextorder = nextorder;
-	} 
+	}
+
 	public Integer getKumulatifpakai() {
 		return kumulatifpakai;
 	}
@@ -173,5 +171,10 @@ public class Product extends BaseEntity implements MultipleImageModel {
 		this.keterangan = keterangan;
 	}
 
-	
+	public void addCount(int count2) {
+		if (count == null)
+			count = 0;
+		setCount(getCount() + count2);
+	}
+
 }

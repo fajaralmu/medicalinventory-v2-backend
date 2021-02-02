@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.poi.hssf.util.CellRangeAddress;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -46,6 +48,7 @@ import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.BindedValues;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.util.DateUtil;
+import com.fajar.medicalinventory.util.MapUtil;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -107,32 +110,28 @@ public class ReportGenerator {
 		List<Product> productListPerDay = new ArrayList<>();
 		List<Product> allProducts = (List<Product>) productRepository.findAll();
 		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
-
+		List<Product> products = productRepository.findByOrderByUtilityTool(); 
+		List<Transaction> transactionsOneMonth = fillProductFlows(transactionRepository.findByMonthAndYear(month, year)); 
+		Map<Integer, List<Transaction>> transactionMapped = mapTransactionByDay(transactionsOneMonth);
+		
 		dailyConsumptionPerProduct.clear();
 
-		for (Product o : allProducts) {
-			o.setCount(0);
-			productListPerDay.add(o);
-		}
-		// Laporan tiap bulan
-		Integer i;
-
+		allProducts.forEach(p->{
+			p.setCount(0);
+			productListPerDay.add(p);
+		});
 		progressService.sendProgress(10, httpServletRequest);
 
 		xwb = new XSSFWorkbook();
 		XSSFCellStyle styleNamaobat = createProductNameStyle(xwb);
-		XSSFCellStyle regularStyle = createRegularStyle(xwb);
-
-		List<Transaction> transactionInOneMonth = transactionRepository.findByMonthAndYear(month, year);
-		List<Transaction> transactionSortedByDay = new ArrayList<>();
+		XSSFCellStyle regularStyle = createRegularStyle(xwb); 
 		
-		transactionInOneMonth = fillProductFlows(transactionInOneMonth);
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
-		for (i = 1; i <= 31; i++) {
+		mainLoop: for ( Integer day = 1; day <= 31; day++) {
 
 			// JUDUL TABEL//
-			XSSFSheet xsheet = xwb.createSheet(i.toString());
+			XSSFSheet xsheet = xwb.createSheet(day.toString());
 			XSSFRow xbarisJudulTabel = xsheet.createRow(3);
 			XSSFCell[] xkolomAtas = new XSSFCell[4];
 			xkolomAtas[0] = xbarisJudulTabel.createCell(2);
@@ -167,19 +166,12 @@ public class ReportGenerator {
 			// KONTEN TABEL//
 			Integer no = 1;
 			int barisKonten = 4;
-
-			for (Transaction transaction : transactionInOneMonth) {
-
-				Date d = transaction.getTransactionDate();
-				if (i != getCalendarDayOfMonth(d) || month != DateUtil.getCalendarMonth(d)+1 || (year) != getCalendarYear(d))
+			List<Transaction> transactions = transactionMapped.get(day) == null? new ArrayList<>() : transactionMapped.get(day);
+			for (Transaction transaction : transactions) { 
+				 
+				if (!transaction.getType().equals(TransactionType.TRANS_OUT) || transaction.getHealthCenterDestination() != null) {
 					continue;
-
-				if (!transaction.getType().equals(TransactionType.TRANS_OUT)
-						|| transaction.getHealthCenterDestination() != null) {
-					continue;
-				}
-				
-				transactionSortedByDay.add(transaction);
+				} 
 				lanjut = true;
 
 				XSSFRow xbarisPerUser = xsheet.createRow(barisKonten);
@@ -213,10 +205,10 @@ public class ReportGenerator {
 					idxObat++;
 					kolomObatPerOrang++;
 					for (ProductFlow ao : transaction.getProductFlows()) {
-						if (ao.getProduct().getId().equals(o.getId())) {
+						if (ao.getProduct().idEquals(o)) {
 							for (Product ob : allProducts) {
-								if (ob.getId().equals(ao.getProduct().getId())) {
-									ob.setCount(ob.getCount() + ao.getCount());
+								if (ob.idEquals(ao.getProduct())) {
+									ob.addCount( ao.getCount());
 								}
 							}
 							xkolomRincian[idxObat] = xbarisPerUser.createCell(kolomObatPerOrang);
@@ -245,7 +237,7 @@ public class ReportGenerator {
 				xSummaryColumn[3] = xbarisBawah.createCell(5);
 				xSummaryColumn[0].setCellValue("Jumlah");
 
-				DailyConsumption dailyConsumption = new DailyConsumption(_JmlobatSemuaOrangPerHari, i);
+				DailyConsumption dailyConsumption = new DailyConsumption(_JmlobatSemuaOrangPerHari, day);
 				dailyConsumptionPerProduct.add(dailyConsumption);
 
 				int kolomJumlahObatPerHari = 6;
@@ -253,8 +245,8 @@ public class ReportGenerator {
 				for (Product o : allProducts) {
 					idxTotal++;
 					for (DailyConsumption toh : dailyConsumptionPerProduct) {
-						if (toh.getDay().equals(i)) {
-							DrugConsumption ko = new DrugConsumption(i, o.getCount(), o.getCode());
+						if (toh.getDay().equals(day)) {
+							DrugConsumption ko = new DrugConsumption(day, o.getCount(), o.getCode());
 							toh.addDrugConsumption(ko);
 						}
 						xSummaryColumn[idxTotal] = xbarisBawah.createCell(kolomJumlahObatPerHari);
@@ -305,30 +297,12 @@ public class ReportGenerator {
 
 			_JmlobatSemuaOrangPerHari = 0;
 		}
-		Integer kol = 5, barPerPkm = 4;
-		/*
-		 * int[] filter_date = { 0, bulan, tahun, tahun }; String filterQuery =
-		 * dataAccess.allFilterQuery(new com.fajar.modelJPA.Transaksi(), 100000, 0,
-		 * false, false, "tanggal", "none", false, "none", "none", filter_date);
-		 * 
-		 * List<com.fajar.modelJPA.Transaksi> daftarTransaksiDgnTgl =
-		 * transaksiRepository.filterAndSort(filterQuery, new
-		 * com.fajar.modelJPA.Transaksi());
-		 */
-		List<Product> listObatNonAlat = productRepository.findByUtilityTool(false);
-		List<Product> listObatAlat = productRepository.findByUtilityTool(true);
-
-		progressService.sendProgress(10, httpServletRequest);
-
-		List<Product> daftarSemuaObatUrutAlat = new ArrayList<>(); // untuk kolom total sheet terakhir
-		daftarSemuaObatUrutAlat.addAll(listObatNonAlat);
-		daftarSemuaObatUrutAlat.addAll(listObatAlat);
-		List<Product> daftarObatUrutAlatRaw = daftarSemuaObatUrutAlat;
+		Integer kol = 5, barPerPkm = 4; 
+		progressService.sendProgress(10, httpServletRequest); 
 
 		// ************************SHEET TERAKHIR***********************//
 
-		for (HealthCenter pkm : locations) {
-			System.out.print("*");
+		for (HealthCenter location : locations) { 
 			Integer totalObatPerPkm = 0;
 
 			XSSFRow xbarisPerPkm = xsheetpkm.createRow(barPerPkm);
@@ -337,36 +311,35 @@ public class ReportGenerator {
 			xkolomRincian[0] = xbarisPerPkm.createCell(2);
 			xkolomRincian[0].setCellValue(barPerPkm - 3);
 			xkolomRincian[1] = xbarisPerPkm.createCell(3);
-			xkolomRincian[1].setCellValue(pkm.getName());
+			xkolomRincian[1].setCellValue(location.getName());
 
-			List<Product> daftarObatPerPkm = daftarObatUrutAlatRaw;
+			List<Product> productsPerLocation = (List<Product>) SerializationUtils.clone((Serializable) products);
 
 			int idxKolomRincianPerPkm = 0;
-			for (Product o : daftarObatPerPkm) {
-				o.setCount(0);
-				looptransaksi: for (Transaction tr : transactionSortedByDay) {
-					if (!tr.getType().equals(TransactionType.TRANS_OUT) || tr.getHealthCenterDestination() != null
-							|| tr.getCustomer() == null
-							|| !tr.getHealthCenterLocation().getCode().equals(pkm.getCode())) {
-						continue looptransaksi;
+			List<Transaction> transactions = MapUtil.mappedListToList(transactionMapped );
+			for (Product product : productsPerLocation) {
+				product.setCount(0);
+				loop: for (Transaction tr : transactions) {
+					if (!tr.getType().equals(TransactionType.TRANS_OUT) || tr.getCustomer() == null
+							|| !tr.getHealthCenterLocation().idEquals(location)) {
+						continue loop;
 					}
 					for (ProductFlow ao : tr.getProductFlows()) {
-						if (o.getId().equals(ao.getProduct().getId())) {
-							o.setCount(o.getCount() + ao.getCount());
+						if (product.idEquals(ao.getProduct())) {
+							product.addCount( ao.getCount());
 						}
 					}
 					xkolomRincian[idxKolomRincianPerPkm + 4] = xbarisPerPkm.createCell(kol);
-					xkolomRincian[idxKolomRincianPerPkm + 4].setCellValue(o.getCount());
+					xkolomRincian[idxKolomRincianPerPkm + 4].setCellValue(product.getCount());
 				}
 				idxKolomRincianPerPkm++;
 				kol++;
-				totalObatPerPkm += o.getCount();
+				totalObatPerPkm += product.getCount();
 
 				// *********************KOLOM TOTAL OBAT*************************//
-				for (Product ot : daftarSemuaObatUrutAlat) {
-					if (ot.getId().equals(o.getId())) {
-						int t = o.getCount() + ot.getCount();
-						ot.setCount(t);
+				for (Product productTotal : products) {
+					if (productTotal.idEquals(product)) { 
+						productTotal.addCount(product.getCount());
 					}
 				}
 			}
@@ -393,9 +366,9 @@ public class ReportGenerator {
 		xkolomTotal[1].setCellValue(_JmlobatSemuaPkm);
 
 		int idxtotalpkm = 0;
-		for (Product o : daftarSemuaObatUrutAlat) {
+		for (Product product : products) {
 			xkolomTotal[idxtotalpkm + 2] = xbarisBawah.createCell(kol);
-			xkolomTotal[idxtotalpkm + 2].setCellValue(o.getCount());
+			xkolomTotal[idxtotalpkm + 2].setCellValue(product.getCount());
 
 			kol++;
 			idxtotalpkm++;
@@ -407,6 +380,18 @@ public class ReportGenerator {
 		}
 
 		return xwb;
+	}
+
+	private Map<Integer, List<Transaction>> mapTransactionByDay(List<Transaction> transactions) {
+		Map<Integer, List<Transaction>> map = new HashMap<>();
+		for (Transaction transaction : transactions) {
+			int day = DateUtil.getCalendarDayOfMonth(transaction.getTransactionDate());
+			if (map.get(day) == null) {
+				map.put(day, new ArrayList<>());
+			}
+			map.get(day).add(transaction);
+		}
+		return map ;
 	}
 
 	private List<Transaction> fillProductFlows(List<Transaction> transactions) {

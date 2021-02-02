@@ -14,7 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MapUtil {
 
-	public static <T> List<T> convertMapList(List<Map<?, ?>> mapList, Class<T> objectClass) {
+	public static <T> List<T> mappedListToList(Map<?,List<T>> mappedList) {
+		List<T> result = new ArrayList<T>();
+
+		for (Object key : mappedList.keySet()) {
+			result.addAll((List<T>) mappedList.get(key));
+		}
+
+		return result;
+	}
+	public static <K, T> List<T> convertMapList(List<Map<K, T>> mapList, Class<T> objectClass) {
 
 		List<T> result = new ArrayList<T>();
 
