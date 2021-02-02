@@ -7,16 +7,14 @@ public class DailyConsumption {
 
     private Integer count;
     private Integer day;
-    public List<DrugConsumption> drugConsumptions;
+    public List<DrugConsumption> drugConsumptions  = new ArrayList<>();;
 
-    public DailyConsumption() {
-        drugConsumptions = new ArrayList<>();
+    public DailyConsumption() { 
     }
 
     public DailyConsumption(Integer jumlah, Integer hari) {
         this.count = jumlah;
-        this.day = hari;
-        drugConsumptions = new ArrayList<>();
+        this.day = hari; 
     }
     
     public List<DrugConsumption> getDrugConsumptions(){
@@ -38,6 +36,11 @@ public class DailyConsumption {
     public void setDay(Integer hari) {
         this.day = hari;
     }
+
+	public void addDrugConsumption(DrugConsumption ko) {
+		 
+		drugConsumptions.add(ko);
+	}
 
 }
 

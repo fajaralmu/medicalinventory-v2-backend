@@ -126,4 +126,10 @@ public class Transaction extends BaseEntity implements Serializable {
 		
 	}
 
+	public void addProductFlow(ProductFlow productFlow) {
+		productFlows.add(productFlow);
+	}
+	
+	 
+
 }

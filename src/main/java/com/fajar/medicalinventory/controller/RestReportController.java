@@ -47,5 +47,15 @@ public class RestReportController extends BaseController {
 		
 		reportService.printStockOpname(webRequest, httpRequest, httpServletResponse);
 	}
+	@PostMapping(value = "/monthly", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public void monthly(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest,
+			HttpServletResponse httpServletResponse) throws Exception {
+		log.info("monthly report");
+		httpServletResponse.setContentType("text/xls");
+		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		
+		reportService.printMonthlyReport(webRequest, httpRequest, httpServletResponse);
+	}
 
 }

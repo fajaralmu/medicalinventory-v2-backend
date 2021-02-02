@@ -9,9 +9,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Dto
@@ -33,15 +35,19 @@ public class Filter implements Serializable {
 	private String orderBy; 
 	@Builder.Default
 	private boolean exacts = false;
-	@Builder.Default
-	private Integer day = 0;
+	@Builder.Default 
+	private Integer day = 1;
+	@Builder.Default 
+	private Integer dayTo = 1;
 	@Builder.Default
 	private Integer year = 0;
-	@Builder.Default
-	private Integer month = 0; 
+	@Builder.Default //starts at 1
+	@Getter(value=AccessLevel.NONE)
+	private Integer month = 1; 
 	@Builder.Default
 	private Map<String, Object> fieldsFilter = new HashMap<>();
 	
+	@Getter(value=AccessLevel.NONE)
 	private Integer monthTo;
 	private Integer yearTo; 
 	
@@ -49,5 +55,21 @@ public class Filter implements Serializable {
 	
 	@JsonIgnore
 	private int maxValue;
+	
+	/**
+	 * starts at 1
+	 * @return
+	 */
+	public Integer getMonth() {
+		return month;
+	}
+	/**
+	 * starts at 1
+	 * @return
+	 */
+	public Integer getMonthTo() {
+		return monthTo;
+	}
+
 
 }

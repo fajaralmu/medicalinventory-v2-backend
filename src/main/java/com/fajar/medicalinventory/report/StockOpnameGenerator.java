@@ -72,12 +72,12 @@ public class StockOpnameGenerator {
 
 			jxl.write.Number labelobat[] = new jxl.write.Number[4];
 			labelobat[0] = new jxl.write.Number(2, currentRow, number);
-			labelobat[1] = new jxl.write.Number(5, currentRow, ob.getJmlobat());
-			labelobat[2] = new jxl.write.Number(6, currentRow, ob.getHargasatuan());
-			Integer total = ob.getHargasatuan() * ob.getJmlobat();
+			labelobat[1] = new jxl.write.Number(5, currentRow, ob.getCount());
+			labelobat[2] = new jxl.write.Number(6, currentRow, ob.getPrice());
+			Integer total = ob.getPrice() * ob.getCount();
 			labelobat[3] = new jxl.write.Number(7, currentRow, total);
 			totalPrice += total;
-			totalCount += ob.getJmlobat();
+			totalCount += ob.getCount();
 
 			xssfRow.createCell(3).setCellValue(ob.getName());
 			xssfRow.createCell(4).setCellValue(ob.getUnit().getName());

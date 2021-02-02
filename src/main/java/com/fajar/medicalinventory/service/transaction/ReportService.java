@@ -23,13 +23,26 @@ public class ReportService {
 	public void printStockOpname(WebRequest webRequest, HttpServletRequest httpRequest,
 			HttpServletResponse httpServletResponse) throws Exception {
 		Filter filter = webRequest.getFilter();
-		Date d = DateUtil.getDate(filter.getYear(), filter.getMonth()-1, filter.getDay());
-		String fileName = "StockOpname-"+webRequest.getHealthcenter().getName()+filter.getYear()+ filter.getMonth()+ filter.getDay();
+		Date date = DateUtil.getDate(filter);
+		String locationName = webRequest.getHealthcenter().getName();
+		String fileName = "StockOpname_"+locationName+"_"+filter.getYear()+ filter.getMonth()+ filter.getDay();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
 
-		XSSFWorkbook wb = reportGenerator.getStockOpnameReport(d, webRequest.getHealthcenter(), httpRequest);
+		XSSFWorkbook wb = reportGenerator.getStockOpnameReport(date, webRequest.getHealthcenter(), httpRequest);
 		wb.write(httpServletResponse.getOutputStream());
 		
+		
+	}
+
+	public void printMonthlyReport(WebRequest webRequest, HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse) throws Exception {
+		Filter filter = webRequest.getFilter();
+		 
+		String fileName = "MONTHLY_"+filter.getYear()+"-"+ filter.getMonth();
+		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
+
+		XSSFWorkbook wb = reportGenerator.getMonthyReport(filter.getMonth(), filter.getYear(), httpServletRequest);
+		wb.write(httpServletResponse.getOutputStream());
 		
 	}
 

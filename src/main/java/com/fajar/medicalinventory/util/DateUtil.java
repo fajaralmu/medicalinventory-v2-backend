@@ -10,17 +10,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.KeyValue;
 
 public class DateUtil {
 
 	static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat();
-	
+
 	public static void main(String[] args) {
 		double x = 9000.12;
-		System.out.println("res: "+ (x < 5000));
+		System.out.println("res: " + (x < 5000));
 	}
-	
+
 	static final Calendar cal() {
 		return Calendar.getInstance();
 	}
@@ -41,12 +42,19 @@ public class DateUtil {
 
 	}
 
+	public static Date getDate(Filter filter) { 
+		return getDate(filter.getYear(), filter.getMonth() - 1, filter.getDay()); 
+	}
+	public static Date getDateTo(Filter filter) { 
+		return getDate(filter.getYearTo(), filter.getMonthTo() - 1, filter.getDayTo()); 
+	}
+
 	public static Calendar cal(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		return calendar;
 	}
-	
+
 	/**
 	 * 
 	 * @param date
@@ -57,61 +65,51 @@ public class DateUtil {
 		Calendar cal = cal(date);
 		return cal.get(type);
 	}
-	
+
 	public static int getCalendarYear(Date date) {
 		return getCalendarItem(date, Calendar.YEAR);
 	}
-	
+
 	/**
 	 * month starts at 0
+	 * 
 	 * @param date
 	 * @return
 	 */
 	public static int getCalendarMonth(Date date) {
 		return getCalendarItem(date, Calendar.MONTH);
 	}
-	
+
 	public static int getCurrentYear() {
 		return getCalendarYear(new Date());
 	}
-	
+
 	/**
 	 * month starts at 0
+	 * 
 	 * @return
 	 */
 	public static int getCurrentMonth() {
 		return getCalendarMonth(new Date());
 	}
-	
+
 	public static int getCalendarDayOfMonth(Date date) {
 		return getCalendarItem(date, Calendar.DAY_OF_MONTH);
 	}
-	
-	static Integer[] kabisatMonths = new Integer[] { 31, (  29  ), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	static Integer[] regularMonths = new Integer[] { 31, (  28  ), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+	static Integer[] kabisatMonths = new Integer[] { 31, (29), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	static Integer[] regularMonths = new Integer[] { 31, (28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	public static Integer[] getMonthsDay(int year) {
 		boolean kabisat = year % 4 == 0;
-		return  kabisat ? kabisatMonths : regularMonths;
+		return kabisat ? kabisatMonths : regularMonths;
 	}
-	
-	public static final String[] MONTH_NAMES = new String[] {
-		"Januari",
-		"Februari",
-		"Maret",
-		"April",
-		"Mei",
-		"Juni",
-		"Juli",
-		"Agustus",
-		"September",
-		"Oktober",
-		"November",
-		"Desember"
-	};
-	
-	public static List<KeyValue<String, Integer>> months(){
-		
+
+	public static final String[] MONTH_NAMES = new String[] { "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+			"Juli", "Agustus", "September", "Oktober", "November", "Desember" };
+
+	public static List<KeyValue<String, Integer>> months() {
+
 		return new ArrayList<KeyValue<String, Integer>>() {
 			/**
 			 * 
@@ -119,13 +117,13 @@ public class DateUtil {
 			private static final long serialVersionUID = 1L;
 
 			{
-				for (int i = 1; i <=12; i++) {
-					add(new KeyValue<String, Integer>(MONTH_NAMES[i - 1] + "("+i+")", i, true));
+				for (int i = 1; i <= 12; i++) {
+					add(new KeyValue<String, Integer>(MONTH_NAMES[i - 1] + "(" + i + ")", i, true));
 				}
 			}
 		};
 	}
-	
+
 	public static <K, V> Map<K, V> map(final K key, final V value) {
 		return new HashMap<K, V>() {
 			/**
@@ -181,43 +179,43 @@ public class DateUtil {
 	 */
 	public static int getMonthsDay(int month, int year) {
 		// TODO Auto-generated method stub
-		return getMonthsDay(year)[month ];
+		return getMonthsDay(year)[month];
 	}
- 
+
 	/**
 	 * 
 	 * @param dayIndex starts at 1
-	 * @param month starts at 0
+	 * @param month    starts at 0
 	 * @param year
 	 * @return
 	 */
 	public static Date[] getDaysInOneMonth(int dayIndex, int month, int year) {
-		
-		Date[] result = new Date[5]; 
+
+		Date[] result = new Date[5];
 		int monthDay = DateUtil.getMonthsDay(month, year);
 		int arrayIndex = 0;
-		
-		for(int i = 1; i <= monthDay; i++) {
-			
+
+		for (int i = 1; i <= monthDay; i++) {
+
 			Date currentDate = DateUtil.getDate(year, month, i);
 			int dayOfWeek = DateUtil.getCalendarItem(currentDate, Calendar.DAY_OF_WEEK);
-			
-			if(dayOfWeek == dayIndex && arrayIndex <= 5) {
+
+			if (dayOfWeek == dayIndex && arrayIndex <= 5) {
 				result[arrayIndex] = currentDate;
 				arrayIndex++;
 			}
 		}
-		
-		return result ;
+
+		return result;
 	}
 
 	public static List<KeyValue<Integer, Integer>> yearArray(int minYear, int i) {
-		
+
 		List<KeyValue<Integer, Integer>> years = new ArrayList<>();
 		for (int j = minYear; j <= i; j++) {
 			years.add(new KeyValue<Integer, Integer>(j, j, true));
 		}
-		return years ;
+		return years;
 	}
 
 	/**
@@ -232,13 +230,13 @@ public class DateUtil {
 		int diff = 0;
 		for (int i = y0; i <= y1; i++) {
 
-			int beginMonth = 1; 
-			if (i == y0) { 
+			int beginMonth = 1;
+			if (i == y0) {
 				beginMonth = m0;
 			}
 
-			for (int j = beginMonth; j <= 12; j++) { 
-				if (i == y1 && j == m1) { 
+			for (int j = beginMonth; j <= 12; j++) {
+				if (i == y1 && j == m1) {
 					return diff;
 				}
 				diff++;
@@ -247,9 +245,10 @@ public class DateUtil {
 		}
 		return diff;
 	}
-	
+
 	/**
 	 * get difference day from now
+	 * 
 	 * @param date
 	 * @return
 	 */
@@ -258,9 +257,10 @@ public class DateUtil {
 		long diffDays = diff / (24 * 60 * 60 * 1000);
 		return diffDays;
 	}
-	
+
 	/**
 	 * get list of months with length: diff
+	 * 
 	 * @param calendar
 	 * @param diff
 	 * @return
@@ -274,7 +274,7 @@ public class DateUtil {
 
 		periods.add(new int[] { currentYear, Integer.parseInt(monthString) });
 
-		for (int i = 1; i <= diff  ; i++) {
+		for (int i = 1; i <= diff; i++) {
 			currentMonth--;
 			if (currentMonth <= 0) {
 				currentMonth = 12;
@@ -285,29 +285,30 @@ public class DateUtil {
 		}
 		return reverse(periods);
 	}
-	
+
 	/**
 	 * get day of month count
+	 * 
 	 * @param year
 	 * @param month
 	 * @return
 	 */
 	public static int getMonthDayCount(int year, int month) {
-		
+
 		int day = 30;
-		
-		if(month == 2 && year % 4 == 0) {
+
+		if (month == 2 && year % 4 == 0) {
 			return 29;
-		}else if(month == 2) {
+		} else if (month == 2) {
 			return 28;
 		}
-		
-		if(month < 8 && month % 2 != 0) {
+
+		if (month < 8 && month % 2 != 0) {
 			return 30;
-		}else if(month >= 8 && month % 2 == 0) {
+		} else if (month >= 8 && month % 2 == 0) {
 			return 31;
 		}
-		
+
 		return day;
 	}
 }

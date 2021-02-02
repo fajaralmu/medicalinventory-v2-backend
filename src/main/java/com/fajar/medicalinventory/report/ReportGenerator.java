@@ -1,5 +1,8 @@
 package com.fajar.medicalinventory.report;
 
+import static com.fajar.medicalinventory.util.DateUtil.getCalendarDayOfMonth;
+import static com.fajar.medicalinventory.util.DateUtil.getCalendarYear;
+
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -70,17 +75,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReportGenerator {
 
-	private static final String DATE_PATTERN = "dd-MM-yyyy";
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
 	private ProductFlowRepository aliranObatRepository;
 	@Autowired
-	private ProductRepository obatRepository;
+	private ProductRepository productRepository;
 	@Autowired
-	private TransactionRepository transaksiRepository;
+	private TransactionRepository transactionRepository;
 	@Autowired
-	private HealthCenterRepository puskesmasRepository;
+	private HealthCenterRepository healthCenterRepository;
 	@Autowired
 	private BindedValues bindedValues;
 	@Autowired
@@ -94,50 +98,39 @@ public class ReportGenerator {
 
 	}
 
-	public XSSFWorkbook reportXlsx(int bulan, int tahun) throws Exception {
+	public XSSFWorkbook getMonthyReport(int month, int year, HttpServletRequest httpServletRequest) throws Exception {
 
 		XSSFWorkbook xwb;
-		XSSFCellStyle styleUmum;
-		XSSFCellStyle styleNamaobat;
 
 		Integer _JmlobatSemuaOrangPerHari = 0;
-		List<DailyConsumption> totalObatHarianPerObat = new ArrayList<>();
-		List<Product> daftarTotalMasingMasingObatPerHari = new ArrayList<>();
-		List<Product> daftarObat = (List<Product>) obatRepository.findAll();
-		List<Product> daftarObatRinci = daftarObat;
-		List<HealthCenter> daftarPuseksmas = (List<HealthCenter>) puskesmasRepository.findAll();
+		List<DailyConsumption> dailyConsumptionPerProduct = new ArrayList<>();
+		List<Product> productListPerDay = new ArrayList<>();
+		List<Product> allProducts = (List<Product>) productRepository.findAll();
+		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
 
-		totalObatHarianPerObat.clear();
+		dailyConsumptionPerProduct.clear();
 
-		for (Product o : daftarObat) {
-			o.setJmlobat(0);
-			daftarTotalMasingMasingObatPerHari.add(o);
+		for (Product o : allProducts) {
+			o.setCount(0);
+			productListPerDay.add(o);
 		}
 		// Laporan tiap bulan
 		Integer i;
 
+		progressService.sendProgress(10, httpServletRequest);
+
 		xwb = new XSSFWorkbook();
-		styleNamaobat = xwb.createCellStyle();
-		styleUmum = xwb.createCellStyle();
-		styleNamaobat.setRotation((short) 90);
+		XSSFCellStyle styleNamaobat = createProductNameStyle(xwb);
+		XSSFCellStyle regularStyle = createRegularStyle(xwb);
 
-		styleNamaobat.setWrapText(true);
-		styleNamaobat.setBorderBottom(BorderStyle.THIN);
-		styleNamaobat.setBorderTop(BorderStyle.THIN);
-		styleNamaobat.setBorderRight(BorderStyle.THIN);
-		styleNamaobat.setBorderLeft(BorderStyle.THIN);
-
-		styleUmum.setBorderBottom(BorderStyle.THIN);
-		styleUmum.setBorderTop(BorderStyle.THIN);
-		styleUmum.setBorderRight(BorderStyle.THIN);
-		styleUmum.setBorderLeft(BorderStyle.THIN);
-
-		List<Transaction> listTransaksiDalamSebulan = transaksiRepository.findByMonthAndYear(bulan, tahun);
-		List<Transaction> listTransaksiUrutLengkap = new ArrayList<>();
+		List<Transaction> transactionInOneMonth = transactionRepository.findByMonthAndYear(month, year);
+		List<Transaction> transactionSortedByDay = new ArrayList<>();
+		
+		transactionInOneMonth = fillProductFlows(transactionInOneMonth);
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
 		for (i = 1; i <= 31; i++) {
-			System.out.print("*");
+
 			// JUDUL TABEL//
 			XSSFSheet xsheet = xwb.createSheet(i.toString());
 			XSSFRow xbarisJudulTabel = xsheet.createRow(3);
@@ -152,7 +145,7 @@ public class ReportGenerator {
 			xkolomAtas[3].setCellValue("Jumlah Obat");
 
 			for (int c = 0; c < xkolomAtas.length; c++) {
-				xkolomAtas[c].setCellStyle(styleUmum);
+				xkolomAtas[c].setCellStyle(regularStyle);
 				xsheet.autoSizeColumn(c);
 			}
 
@@ -160,13 +153,13 @@ public class ReportGenerator {
 			int kolom = 5;
 			// Membuat daftar obat di atas tabel//
 
-			for (Product o : daftarObat) {
+			for (Product o : allProducts) {
 				kolom++;
 
 				XSSFCell xcellNamaobat = xbarisJudulTabel.createCell(kolom);
 				xcellNamaobat.setCellValue(o.getName());
 				xcellNamaobat.setCellStyle(styleNamaobat);
-				o.setJmlobat(0);
+				o.setCount(0);
 				_JmlobatSemuaOrangPerHari = 0;
 			}
 			// JUDUL TABEL SELESAI//
@@ -175,37 +168,37 @@ public class ReportGenerator {
 			Integer no = 1;
 			int barisKonten = 4;
 
-			for (Transaction tr : listTransaksiDalamSebulan) {
+			for (Transaction transaction : transactionInOneMonth) {
 
-				Date d = tr.getTransactionDate();
-				if (i != d.getDate() || bulan != (d.getMonth() + 1) || (tahun - 1900) != d.getYear())
+				Date d = transaction.getTransactionDate();
+				if (i != getCalendarDayOfMonth(d) || month != DateUtil.getCalendarMonth(d)+1 || (year) != getCalendarYear(d))
 					continue;
 
-				if (!tr.getType().equals(TransactionType.TRANS_OUT) || tr.getHealthCenterDestination() != null) {
+				if (!transaction.getType().equals(TransactionType.TRANS_OUT)
+						|| transaction.getHealthCenterDestination() != null) {
 					continue;
 				}
-				List<ProductFlow> ao_tr = aliranObatRepository.findByTransaction(tr);
-				tr.setProductFlows(ao_tr);
-				listTransaksiUrutLengkap.add(tr);
+				
+				transactionSortedByDay.add(transaction);
 				lanjut = true;
 
 				XSSFRow xbarisPerUser = xsheet.createRow(barisKonten);
-				XSSFCell[] xkolomRincian = new XSSFCell[4 + daftarObat.size()];
+				XSSFCell[] xkolomRincian = new XSSFCell[4 + allProducts.size()];
 
 				xkolomRincian[0] = xbarisPerUser.createCell(2);
 				xkolomRincian[0].setCellValue(no);
 
 				// nama penerima
-				Customer p = tr.getCustomer();
+				Customer customer = transaction.getCustomer();
 
 				xkolomRincian[1] = xbarisPerUser.createCell(3);
-				xkolomRincian[1].setCellValue(p.getName());
+				xkolomRincian[1].setCellValue(customer.getName());
 				xsheet.autoSizeColumn(3);
 				xkolomRincian[2] = xbarisPerUser.createCell(4);
-				xkolomRincian[2].setCellValue((tr.getHealthCenterLocation()).getName());
+				xkolomRincian[2].setCellValue((transaction.getHealthCenterLocation()).getName());
 
 				Integer _JmlobatPerOrang = 0;
-				for (ProductFlow ao : tr.getProductFlows()) {
+				for (ProductFlow ao : transaction.getProductFlows()) {
 					_JmlobatPerOrang += ao.getCount();
 				}
 				_JmlobatSemuaOrangPerHari += _JmlobatPerOrang;
@@ -216,14 +209,14 @@ public class ReportGenerator {
 				// rincian obat per orang
 				int kolomObatPerOrang = 5;
 				int idxObat = 3;
-				for (Product o : daftarObat) {
+				for (Product o : allProducts) {
 					idxObat++;
 					kolomObatPerOrang++;
-					for (ProductFlow ao : tr.getProductFlows()) {
+					for (ProductFlow ao : transaction.getProductFlows()) {
 						if (ao.getProduct().getId().equals(o.getId())) {
-							for (Product ob : daftarObat) {
+							for (Product ob : allProducts) {
 								if (ob.getId().equals(ao.getProduct().getId())) {
-									ob.setJmlobat(ob.getJmlobat() + ao.getCount());
+									ob.setCount(ob.getCount() + ao.getCount());
 								}
 							}
 							xkolomRincian[idxObat] = xbarisPerUser.createCell(kolomObatPerOrang);
@@ -237,7 +230,7 @@ public class ReportGenerator {
 				barisKonten++;
 				for (XSSFCell xkolomRincian1 : xkolomRincian) {
 					if (xkolomRincian1 != null) {
-						xkolomRincian1.setCellStyle(styleUmum);
+						xkolomRincian1.setCellStyle(regularStyle);
 					}
 				}
 			}
@@ -245,45 +238,47 @@ public class ReportGenerator {
 			if (lanjut) {
 				xsheet.addMergedRegion(new CellRangeAddress(barisKonten, barisKonten, 2, 4));
 				XSSFRow xbarisBawah = xsheet.createRow(barisKonten);
-				XSSFCell[] xkolomTotal = new XSSFCell[6 + daftarObat.size()];
-				xkolomTotal[0] = xbarisBawah.createCell(2);
-				xkolomTotal[1] = xbarisBawah.createCell(3);
-				xkolomTotal[2] = xbarisBawah.createCell(4);
-				xkolomTotal[3] = xbarisBawah.createCell(5);
-				xkolomTotal[0].setCellValue("Jumlah");
+				XSSFCell[] xSummaryColumn = new XSSFCell[6 + allProducts.size()];
+				xSummaryColumn[0] = xbarisBawah.createCell(2);
+				xSummaryColumn[1] = xbarisBawah.createCell(3);
+				xSummaryColumn[2] = xbarisBawah.createCell(4);
+				xSummaryColumn[3] = xbarisBawah.createCell(5);
+				xSummaryColumn[0].setCellValue("Jumlah");
 
-				DailyConsumption oh = new DailyConsumption(_JmlobatSemuaOrangPerHari, i);
-				totalObatHarianPerObat.add(oh);
+				DailyConsumption dailyConsumption = new DailyConsumption(_JmlobatSemuaOrangPerHari, i);
+				dailyConsumptionPerProduct.add(dailyConsumption);
 
 				int kolomJumlahObatPerHari = 6;
 				int idxTotal = 5;
-				for (Product o : daftarObat) {
+				for (Product o : allProducts) {
 					idxTotal++;
-					for (DailyConsumption toh : totalObatHarianPerObat) {
+					for (DailyConsumption toh : dailyConsumptionPerProduct) {
 						if (toh.getDay().equals(i)) {
-							DrugConsumption ko = new DrugConsumption(i, o.getJmlobat(), o.getCode());
-							toh.drugConsumptions.add(ko);
+							DrugConsumption ko = new DrugConsumption(i, o.getCount(), o.getCode());
+							toh.addDrugConsumption(ko);
 						}
-						xkolomTotal[idxTotal] = xbarisBawah.createCell(kolomJumlahObatPerHari);
-						xkolomTotal[idxTotal].setCellValue(o.getJmlobat());
+						xSummaryColumn[idxTotal] = xbarisBawah.createCell(kolomJumlahObatPerHari);
+						xSummaryColumn[idxTotal].setCellValue(o.getCount());
 					}
 					kolomJumlahObatPerHari++;
 				}
 
-				xkolomTotal[4] = xbarisBawah.createCell(5);
-				xkolomTotal[4].setCellValue(_JmlobatSemuaOrangPerHari);
+				xSummaryColumn[4] = xbarisBawah.createCell(5);
+				xSummaryColumn[4].setCellValue(_JmlobatSemuaOrangPerHari);
 
-				for (XSSFCell xkolomTotal1 : xkolomTotal) {
+				for (XSSFCell xkolomTotal1 : xSummaryColumn) {
 					if (xkolomTotal1 != null) {
-						xkolomTotal1.setCellStyle(styleUmum);
+						xkolomTotal1.setCellStyle(regularStyle);
 					}
 				}
 			}
+
+			progressService.sendProgress(1, 31, 50, httpServletRequest);
 		}
 		/**************** END DAILY CONSUMPTION ***********************/
 
 		/**************** BEGIN SUMMARY ***********************/
-		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + bulan);
+		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + month);
 
 		XSSFRow xbarisJudulTabel = xsheetpkm.createRow(3);
 		XSSFCell[] xkolomAtas = new XSSFCell[3];
@@ -294,14 +289,14 @@ public class ReportGenerator {
 		xkolomAtas[2] = xbarisJudulTabel.createCell(4);
 		xkolomAtas[2].setCellValue("Jumlah Obat");
 		for (int c = 0; c < xkolomAtas.length; c++) {
-			xkolomAtas[c].setCellStyle(styleUmum);
+			xkolomAtas[c].setCellStyle(regularStyle);
 			xsheetpkm.autoSizeColumn(c);
 		}
 
 		Integer _JmlobatSemuaPkm = 0;
 
 		int kolomRinciPkm = 4;
-		for (Product o : daftarObat) {
+		for (Product o : allProducts) {
 			kolomRinciPkm++;
 
 			XSSFCell xcellNamaobat = xbarisJudulTabel.createCell(kolomRinciPkm);
@@ -320,23 +315,24 @@ public class ReportGenerator {
 		 * transaksiRepository.filterAndSort(filterQuery, new
 		 * com.fajar.modelJPA.Transaksi());
 		 */
-		List<Product> listObatNonAlat = obatRepository.findByUtilityTool(false);
-		List<Product> listObatAlat = obatRepository.findByUtilityTool(true);
+		List<Product> listObatNonAlat = productRepository.findByUtilityTool(false);
+		List<Product> listObatAlat = productRepository.findByUtilityTool(true);
+
+		progressService.sendProgress(10, httpServletRequest);
 
 		List<Product> daftarSemuaObatUrutAlat = new ArrayList<>(); // untuk kolom total sheet terakhir
 		daftarSemuaObatUrutAlat.addAll(listObatNonAlat);
 		daftarSemuaObatUrutAlat.addAll(listObatAlat);
-
 		List<Product> daftarObatUrutAlatRaw = daftarSemuaObatUrutAlat;
 
 		// ************************SHEET TERAKHIR***********************//
 
-		for (HealthCenter pkm : daftarPuseksmas) {
+		for (HealthCenter pkm : locations) {
 			System.out.print("*");
 			Integer totalObatPerPkm = 0;
 
 			XSSFRow xbarisPerPkm = xsheetpkm.createRow(barPerPkm);
-			XSSFCell[] xkolomRincian = new XSSFCell[4 + daftarObat.size()];
+			XSSFCell[] xkolomRincian = new XSSFCell[4 + allProducts.size()];
 
 			xkolomRincian[0] = xbarisPerPkm.createCell(2);
 			xkolomRincian[0].setCellValue(barPerPkm - 3);
@@ -347,8 +343,8 @@ public class ReportGenerator {
 
 			int idxKolomRincianPerPkm = 0;
 			for (Product o : daftarObatPerPkm) {
-				o.setJmlobat(0);
-				looptransaksi: for (Transaction tr : listTransaksiUrutLengkap) {
+				o.setCount(0);
+				looptransaksi: for (Transaction tr : transactionSortedByDay) {
 					if (!tr.getType().equals(TransactionType.TRANS_OUT) || tr.getHealthCenterDestination() != null
 							|| tr.getCustomer() == null
 							|| !tr.getHealthCenterLocation().getCode().equals(pkm.getCode())) {
@@ -356,21 +352,21 @@ public class ReportGenerator {
 					}
 					for (ProductFlow ao : tr.getProductFlows()) {
 						if (o.getId().equals(ao.getProduct().getId())) {
-							o.setJmlobat(o.getJmlobat() + ao.getCount());
+							o.setCount(o.getCount() + ao.getCount());
 						}
 					}
 					xkolomRincian[idxKolomRincianPerPkm + 4] = xbarisPerPkm.createCell(kol);
-					xkolomRincian[idxKolomRincianPerPkm + 4].setCellValue(o.getJmlobat());
+					xkolomRincian[idxKolomRincianPerPkm + 4].setCellValue(o.getCount());
 				}
 				idxKolomRincianPerPkm++;
 				kol++;
-				totalObatPerPkm += o.getJmlobat();
+				totalObatPerPkm += o.getCount();
 
 				// *********************KOLOM TOTAL OBAT*************************//
 				for (Product ot : daftarSemuaObatUrutAlat) {
 					if (ot.getId().equals(o.getId())) {
-						int t = o.getJmlobat() + ot.getJmlobat();
-						ot.setJmlobat(t);
+						int t = o.getCount() + ot.getCount();
+						ot.setCount(t);
 					}
 				}
 			}
@@ -382,13 +378,15 @@ public class ReportGenerator {
 			barPerPkm++;
 			for (XSSFCell xkolom : xkolomRincian) {
 				if (xkolom != null) {
-					xkolom.setCellStyle(styleUmum);
+					xkolom.setCellStyle(regularStyle);
 				}
 			}
+
+			progressService.sendProgress(1, locations.size(), 30, httpServletRequest);
 		}
 
 		XSSFRow xbarisBawah = xsheetpkm.createRow(barPerPkm);
-		XSSFCell[] xkolomTotal = new XSSFCell[3 + daftarObat.size()];
+		XSSFCell[] xkolomTotal = new XSSFCell[3 + allProducts.size()];
 		xkolomTotal[0] = xbarisBawah.createCell(3);
 		xkolomTotal[0].setCellValue("Total");
 		xkolomTotal[1] = xbarisBawah.createCell(4);
@@ -397,18 +395,62 @@ public class ReportGenerator {
 		int idxtotalpkm = 0;
 		for (Product o : daftarSemuaObatUrutAlat) {
 			xkolomTotal[idxtotalpkm + 2] = xbarisBawah.createCell(kol);
-			xkolomTotal[idxtotalpkm + 2].setCellValue(o.getJmlobat());
+			xkolomTotal[idxtotalpkm + 2].setCellValue(o.getCount());
 
 			kol++;
 			idxtotalpkm++;
 		}
 		for (XSSFCell xkolom : xkolomTotal) {
 			if (xkolom != null) {
-				xkolom.setCellStyle(styleUmum);
+				xkolom.setCellStyle(regularStyle);
 			}
 		}
 
 		return xwb;
+	}
+
+	private List<Transaction> fillProductFlows(List<Transaction> transactions) {
+
+		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
+		List<Transaction> result = new ArrayList<>();
+		Map<Long, Transaction> transactionMap = new HashMap<>();
+		for (Transaction transaction : transactions) {
+			transactionMap.put(transaction.getId(), transaction);
+			
+		}
+		
+		for (ProductFlow productFlow : productFlows) {
+			Long trxId = productFlow.getTransaction().getId();
+			if (null == transactionMap.get(trxId)) continue;
+			transactionMap.get(trxId).addProductFlow(productFlow);
+			 
+		}
+		for(Long id : transactionMap.keySet()) {
+			result.add(transactionMap.get(id));
+		}
+		return result;
+	}
+
+	private XSSFCellStyle createRegularStyle(XSSFWorkbook xwb) {
+		XSSFCellStyle regularStyle = xwb.createCellStyle();
+		;
+
+		regularStyle.setBorderBottom(BorderStyle.THIN);
+		regularStyle.setBorderTop(BorderStyle.THIN);
+		regularStyle.setBorderRight(BorderStyle.THIN);
+		regularStyle.setBorderLeft(BorderStyle.THIN);
+		return regularStyle;
+	}
+
+	private XSSFCellStyle createProductNameStyle(XSSFWorkbook xwb) {
+		XSSFCellStyle style = xwb.createCellStyle();
+		style.setRotation((short) 90);
+		style.setWrapText(true);
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		return style;
 	}
 
 //	public String transactionNote(Transaction t, boolean includeED, String path, AliranObatRepository aorepo,
@@ -607,10 +649,8 @@ public class ReportGenerator {
 //		return null;
 //
 //	}
- 
 
-	public String printLable(Transaction t, String path)
-			throws FileNotFoundException, DocumentException, SQLException, com.itextpdf.text.DocumentException {
+	public String printLable(Transaction t, String path) throws Exception {
 		if (!t.getType().equals(TransactionType.TRANS_IN))
 			return null;
 		System.out.println(t.toString());
@@ -701,8 +741,8 @@ public class ReportGenerator {
 
 		WritableWorkbook wb;
 		List<Product> daftarObatLpLpo = new ArrayList<>();
-		List<Product> obatNonAlat = obatRepository.findByUtilityTool(false);
-		List<Product> obatAlat = obatRepository.findByUtilityTool(true);
+		List<Product> obatNonAlat = productRepository.findByUtilityTool(false);
+		List<Product> obatAlat = productRepository.findByUtilityTool(true);
 
 		daftarObatLpLpo.addAll(obatNonAlat);
 		daftarObatLpLpo.addAll(obatAlat);
@@ -721,7 +761,7 @@ public class ReportGenerator {
 
 		// JUDUL
 
-		sheet.addCell(new Label(3, 3, puskesmasRepository.findTop1ByCode(kodeLokasiTr).getName()));
+		sheet.addCell(new Label(3, 3, healthCenterRepository.findTop1ByCode(kodeLokasiTr).getName()));
 		sheet.addCell(new Label(6, 2, "Pelaporan pemakaian: " + strMonth(bulan, tahun)));
 		sheet.addCell(new Label(6, 3, "Permintaan bulan: " + strMonth(bulan + 1, tahun)));
 
@@ -767,9 +807,9 @@ public class ReportGenerator {
 		cal.set(Calendar.DAY_OF_MONTH, 1);
 		cal.set(Calendar.MONTH, bulan - 1);
 		cal.set(Calendar.YEAR, tahun);
-		List<Transaction> trSblm = transaksiRepository.findByTransactionDateBefore(cal.getTime());
+		List<Transaction> trSblm = transactionRepository.findByTransactionDateBefore(cal.getTime());
 
-		List<Transaction> trBulanIni = transaksiRepository.findByMonthAndYear(bulan, tahun);
+		List<Transaction> trBulanIni = transactionRepository.findByMonthAndYear(bulan, tahun);
 		List<ProductFlow> daftarAO = new ArrayList<>();
 		int no = 1;
 		System.out.println("ukuran tr: " + trSblm.size());
@@ -907,7 +947,7 @@ public class ReportGenerator {
 	public XSSFWorkbook getStockOpnameReport(Date d, HealthCenter location, HttpServletRequest httpServletRequest)
 			throws Exception {
 
-		List<Product> listObat = (List<Product>) obatRepository.findAll();
+		List<Product> listObat = (List<Product>) productRepository.findAll();
 		progressService.sendProgress(10, httpServletRequest);
 		log.info("products: {}", listObat.size());
 		boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
@@ -922,15 +962,15 @@ public class ReportGenerator {
 			}
 			List<Long> prices = aliranObatRepository.getProductPriceAtDate(product.getId(), d, PageRequest.of(0, 1));
 			int count = ProductFlow.sumCount(productFlows);
-			product.setJmlobat(count);
-			product.setHargasatuan(prices.size() == 0 ? 0 : prices.get(0).intValue());
+			product.setCount(count);
+			product.setPrice(prices.size() == 0 ? 0 : prices.get(0).intValue());
 
 			progressService.sendProgress(1, listObat.size(), 80, httpServletRequest);
 		}
 
 		try {
-			StockOpnameGenerator generator = new StockOpnameGenerator(location,  listObat, d);
-			XSSFWorkbook wb =generator. generateReport();
+			StockOpnameGenerator generator = new StockOpnameGenerator(location, listObat, d);
+			XSSFWorkbook wb = generator.generateReport();
 			progressService.sendProgress(10, httpServletRequest);
 
 			return wb;
@@ -939,9 +979,9 @@ public class ReportGenerator {
 			e.printStackTrace();
 			throw e;
 		}
-	} 
+	}
 
- 	public String numbToCurrencyString(Integer Int) {
+	public String numbToCurrencyString(Integer Int) {
 		String nominal = Int.toString();
 		String hasil = "";
 		if (nominal.length() > 3) {

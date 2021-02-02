@@ -52,6 +52,8 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 			"and p.id = ?1 order by tx.transactionDate desc")
 	List<Long> getProductPriceAtDate(Long id, Date d, Pageable pageable);
 
+	List<ProductFlow> findByTransactionIn(List<Transaction> transactions);
+
 
 
 }
