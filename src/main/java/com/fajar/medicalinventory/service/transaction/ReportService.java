@@ -41,7 +41,7 @@ public class ReportService {
 		String fileName = "MONTHLY_"+filter.getYear()+"-"+ filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
 
-		XSSFWorkbook wb = reportGenerator.getMonthyReport(filter.getMonth(), filter.getYear(), httpServletRequest);
+		XSSFWorkbook wb = reportGenerator.getMonthyReport(filter, httpServletRequest);
 		wb.write(httpServletResponse.getOutputStream());
 		
 	}

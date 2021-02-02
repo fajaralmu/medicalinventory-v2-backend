@@ -1,17 +1,9 @@
 package com.fajar.medicalinventory.report;
 
-import static com.fajar.medicalinventory.util.DateUtil.getCalendarDayOfMonth;
-import static com.fajar.medicalinventory.util.DateUtil.getCalendarYear;
-
 import java.awt.Desktop;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -21,21 +13,14 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.poi.hssf.util.CellRangeAddress;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.entity.Configuration;
-import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -47,12 +32,9 @@ import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.BindedValues;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
-import com.fajar.medicalinventory.util.DateUtil;
-import com.fajar.medicalinventory.util.MapUtil;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
@@ -101,7 +83,7 @@ public class ReportGenerator {
 
 	}
 
-	public XSSFWorkbook getMonthyReport(int month, int year, HttpServletRequest httpServletRequest) throws Exception {
+	public XSSFWorkbook getMonthyReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
  
 		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
 		progressService.sendProgress(3, httpServletRequest);
@@ -109,14 +91,26 @@ public class ReportGenerator {
 		List<Product> products = productRepository.findByOrderByUtilityTool(); 
 		progressService.sendProgress(3, httpServletRequest);
 		
-		List<Transaction> transactionsOneMonth = fillProductFlows(transactionRepository.findByMonthAndYear(month, year)); 
+		List<Transaction> transactionsOneMonth = fillProductFlows(transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear())); 
 		progressService.sendProgress(4, httpServletRequest);
 		 
-		MonthlyReportGenerator generator = new MonthlyReportGenerator(month, year, transactionsOneMonth, products, locations);
+		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter, transactionsOneMonth, products, locations, notifier(httpServletRequest));
 		return generator.generateReport(progressService, httpServletRequest);
 	}
 
 	
+	private ProgressNotifier notifier(final HttpServletRequest httpServletRequest) {
+		 
+		return new ProgressNotifier() {
+			
+			@Override
+			public void nofity(int progress, int maxProgress, double percent) {
+				progressService.sendProgress(progress, maxProgress, percent, httpServletRequest);
+				
+			}
+		};
+	}
+
 	private List<Transaction> fillProductFlows(List<Transaction> transactions) {
 
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);

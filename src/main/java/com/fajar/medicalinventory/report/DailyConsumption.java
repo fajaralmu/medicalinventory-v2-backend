@@ -37,7 +37,7 @@ public class DailyConsumption {
         this.day = hari;
     }
 
-	public void addDrugConsumption(DrugConsumption ko) {
+	public void addConsumption(DrugConsumption ko) {
 		 
 		drugConsumptions.add(ko);
 	}

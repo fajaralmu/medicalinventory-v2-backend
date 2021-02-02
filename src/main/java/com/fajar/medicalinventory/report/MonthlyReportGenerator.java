@@ -21,7 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.fajar.medicalinventory.constants.TransactionType;
-import com.fajar.medicalinventory.entity.Customer;
+import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -29,7 +29,6 @@ import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
-import com.fajar.medicalinventory.util.MapUtil;
 
 public class MonthlyReportGenerator {
 	private final XSSFWorkbook xwb;
@@ -42,18 +41,20 @@ public class MonthlyReportGenerator {
 	private List<Product> productListPerDay = new ArrayList<>();
 	private final XSSFCellStyle productNameStyle;
 	private final XSSFCellStyle regularStyle;
+	final ProgressNotifier progressNotifier;
 
-	public MonthlyReportGenerator(int month, int year, List<Transaction> transactionsOneMonth, List<Product> products,
-			List<HealthCenter> locations) {
+	public MonthlyReportGenerator(Filter filter, List<Transaction> transactionsOneMonth, List<Product> products,
+			List<HealthCenter> locations, ProgressNotifier progressNotifier) {
 		this.transactionsOneMonth = transactionsOneMonth;
 		this.xwb = new XSSFWorkbook();
-		this.month = month;
-		this.year = year;
+		this.month = filter.getMonth();
+		this.year = filter.getYear();
 		this.transactionMapped = mapTransactionByDay(transactionsOneMonth);
 		this.allProducts = products;
 		this.locations = locations;
 		this.productNameStyle = createProductNameStyle(xwb);
 		this.regularStyle = createRegularStyle(xwb);
+		this.progressNotifier = progressNotifier;
 
 	}
 
@@ -95,7 +96,7 @@ public class MonthlyReportGenerator {
 			for (Transaction transaction : transactions) {
 
 				if (!transaction.getType().equals(TransactionType.TRANS_OUT)
-						|| transaction.getHealthCenterDestination() != null) {
+						|| transaction.getCustomer() == null) {
 					continue;
 				}
 				lanjut = true;
@@ -138,11 +139,11 @@ public class MonthlyReportGenerator {
 				row++;
 				setRegularStyle(xkolomRincian);
 			}
-			// Jumlah obat
-			if (!lanjut) {
-				progressService.sendProgress(1, 31, 50, httpServletRequest);
-				continue mainLoop;
-			}
+//			// Jumlah obat
+//			if (!lanjut) {
+//				progressNotifier.nofity(1, 31, 50);
+//				continue mainLoop;
+//			}
 			sheet.addMergedRegion(new CellRangeAddress(row, row, 2, 4));
 			XSSFRow summaryRow = sheet.createRow(row);
 			XSSFCell[] summaryCells = new XSSFCell[6 + productCount()];
@@ -161,7 +162,7 @@ public class MonthlyReportGenerator {
 				for (DailyConsumption totalConsumption : dailyConsumptionPerProduct) {
 					if (totalConsumption.getDay().equals(day)) {
 						DrugConsumption consumption = new DrugConsumption(day, o.getCount(), o.getCode());
-						totalConsumption.addDrugConsumption(consumption);
+						totalConsumption.addConsumption(consumption);
 					}
 					summaryCells[idxTotal] = summaryRow.createCell(columnProductPerDay);
 					summaryCells[idxTotal].setCellValue(o.getCount());
@@ -173,11 +174,11 @@ public class MonthlyReportGenerator {
 
 			setRegularStyle(summaryCells);
 
-			progressService.sendProgress(1, 31, 50, httpServletRequest);
+			progressNotifier.nofity(1, 31, 50);
 		}
 		/**************** END DAILY CONSUMPTION ***********************/
 
-		writeSummary(progressService, httpServletRequest);
+		writeSummary();
 
 		return xwb;
 	}
@@ -195,7 +196,7 @@ public class MonthlyReportGenerator {
 		return result;
 	}
 
-	private void writeSummary(ProgressService progressService, HttpServletRequest httpServletRequest) {
+	private void writeSummary( ) {
 
 		/**************** BEGIN SUMMARY ***********************/
 		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + month);
@@ -205,7 +206,7 @@ public class MonthlyReportGenerator {
 
 		int totalProductsAllLocation = 0;
 		int column = 5, locationRowNum = 4;
-		progressService.sendProgress(10, httpServletRequest);
+		progressNotifier.nofity(10,10,10);
 
 		// ************************SHEET TERAKHIR***********************//
 		List<Product> productsTotal = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
@@ -250,7 +251,7 @@ public class MonthlyReportGenerator {
 			locationRowNum++;
 			setRegularStyle(rowDataCells);
 
-			progressService.sendProgress(1, locations.size(), 30, httpServletRequest);
+			progressNotifier.nofity(1, locations.size(), 30);
 		}
 
 		XSSFRow summaryRow = xsheetpkm.createRow(locationRowNum);
