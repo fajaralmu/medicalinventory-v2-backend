@@ -29,6 +29,8 @@ public class BindedValues {
 	private String masterHealthCenterCode;
 	@Value("${app.config.masterHealthCenter.name}")
 	private String masterHealthCenterName;
+	@Value("${app.config.code}")
+	private String configCode;
 	
 	@Autowired
 	ApplicationContext applicationContext;

@@ -24,6 +24,8 @@ public class Configuration extends BaseEntity {
 	 */
 	private static final long serialVersionUID = -5536800374303913968L;
 	
+	@Column(name="code", nullable = false, unique = true)
+	private String code;
 	@Column(name = "expired_warning_days")
 	private int expiredWarningDays;
 	@Column(name = "lead_time")

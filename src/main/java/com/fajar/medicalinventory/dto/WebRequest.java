@@ -6,6 +6,7 @@ import java.util.List;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.entity.ApplicationProfile;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.Configuration;
 import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
@@ -52,7 +53,8 @@ public class WebRequest implements Serializable {
 	private Filter filter; 
 	
 	private User user; 
-	private ApplicationProfile profile;  
+	private ApplicationProfile profile; 
+	private Configuration inventoryConfiguration;
 	private BaseEntity entityObject; 
 	private Transaction transaction;
 	private List<BaseEntity> orderedEntities; 

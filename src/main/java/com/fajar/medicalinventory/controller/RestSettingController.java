@@ -18,6 +18,7 @@ import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.config.DefaultApplicationProfileService;
+import com.fajar.medicalinventory.service.transaction.InventoryConfigurationService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +30,8 @@ public class RestSettingController extends BaseController {
 
 	@Autowired
 	private DefaultApplicationProfileService defaultAppProfileService;
+	@Autowired
+	private InventoryConfigurationService inventoryConfigurationService;
 	public RestSettingController() {
 		log.info("------------------RestSettingController-----------------");
 	}
@@ -42,6 +45,11 @@ public class RestSettingController extends BaseController {
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse updateProfile(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) throws IOException {
 		return defaultAppProfileService.updateApplicationProfile(httpRequest, webRequest);
+	}
+	@PostMapping(value = "/updateconfig", produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse updateconfig(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) throws IOException {
+		return inventoryConfigurationService.updateConfig(httpRequest, webRequest);
 	}
 	 
 
