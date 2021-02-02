@@ -1,5 +1,6 @@
 package com.fajar.medicalinventory.util;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +9,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.SerializationUtils;
+
+import com.fajar.medicalinventory.entity.Product;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -117,6 +122,16 @@ public class MapUtil {
 			return null;
 		}
 
+	}
+	
+	public static void main(String[] args) {
+		List<Product > list1 = new ArrayList<>();
+		list1.add(Product.builder().name("NAME 1").build());
+		List<Product > list2 = (List<Product>) SerializationUtils.clone((Serializable) list1);
+		list2.get(0).setName("NAME 2");
+		System.out.println(list1.get(0).getName());
+		System.out.println(list2.get(0).getName());
+		
 	}
 
 	public static boolean objectEquals(Object object, Object... objects) {
