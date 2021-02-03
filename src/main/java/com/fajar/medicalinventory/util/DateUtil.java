@@ -318,7 +318,7 @@ public class DateUtil {
 		int year = getCalendarYear(date);
 		int prevMonth, prevYear = year;
 		if (month - 1 < 0) {
-			prevMonth = 12;
+			prevMonth = 11;
 			prevYear = year-1;
 		} else {
 			prevMonth = month -1;

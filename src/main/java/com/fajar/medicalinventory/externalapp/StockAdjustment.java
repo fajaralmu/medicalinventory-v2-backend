@@ -96,7 +96,27 @@ public class StockAdjustment {
 		session.close();
 		System.exit(0);
 	}
-	
+	/**
+	 * mismatch productFlow.product_id and productFlowReference.product_id
+	 * select  pf.id flow_id, pf_ref.id ref_id,p.id, p.name _NAME,p_ref.id , p_ref.name REF_NAME from product_flow pf
+left join product p on p.id = pf.product_id
+left join "transaction" tx on tx.id = pf.transaction_id
+left join product_flow pf_ref on pf_ref.id = pf.reference_flow_id
+left join "transaction" tx_ref on pf_ref.transaction_id = tx_ref.id
+left join product p_ref on p_ref.id = pf_ref.product_id
+where p_ref.id != p.id
+	 */
+	/**
+	 * GET DIFF DATE between supply and used
+	 * select 
+tx.transactiondate as date_used, tx_ref.transactiondate as date_supply, tx_ref.id as supply_id, pf.id as used_flow_id 
+from product_flow pf 
+left join product_flow pf_ref on pf_ref.id = pf.reference_flow_id
+left join "transaction" tx on tx.id = pf.transaction_id
+left join "transaction" tx_ref on tx_ref.id = pf_ref.transaction_id
+where tx_ref.transactiondate > tx.transactiondate and pf.reference_flow_id is not null
+order by tx_ref.id, tx.transactiondate 
+	 */
 	static final String FLOW_IDS = "5492\r\n" + 
 			"5507\r\n" + 
 			"5471\r\n" + 
