@@ -63,8 +63,8 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Intege
 	@Query("select   sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p "
-			+ "left join tx.healthCenterLocation location " + 
-			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p.id=?1 and tx.transactionDate <= ?2 and location.id = ?3")
+			+ "left join tx.healthCenterDestination destination " + 
+			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p.id=?1 and tx.transactionDate <= ?2 and destination.id = ?3")
 	BigInteger getTotalIncomingProductAtBranchWarehouse(long productId, Date date, long locationId);
 	
 	@Query("select   sum(pf.count)  from ProductFlow pf "  

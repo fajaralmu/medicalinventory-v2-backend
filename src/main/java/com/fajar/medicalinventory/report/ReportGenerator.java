@@ -115,7 +115,7 @@ public class ReportGenerator {
 	}
 
 	private List<Transaction> fillProductFlows(List<Transaction> transactions) {
-
+		if (transactions.size() == 0) return transactions;
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
 		List<Transaction> result = new ArrayList<>();
 		Map<Long, Transaction> transactionMap = new HashMap<>();
@@ -429,15 +429,7 @@ public class ReportGenerator {
 		Date prevDate = DateUtil.getPrevDateLastDay(date);
 		
 		List<Product> products = productRepository.findByOrderByUtilityTool();  
-		
-		//incoming
-		List<Transaction> incomingTransactions;
-		if (isMasterHealthCenter) {
-			incomingTransactions = transactionRepository.findByMonthAndYearAndType(month, year, TransactionType.TRANS_IN);
-		} else {
-			incomingTransactions = transactionRepository.findByMonthAndYearAndTypeAndDestination(month, year, TransactionType.TRANS_OUT_TO_WAREHOUSE, location);
-		}
-		
+		  
 		List<Transaction> transactionOneMonth = transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear());
 		List<ProductFlow> productFlows = new ArrayList<>();
 		//FIXME
@@ -629,15 +621,7 @@ public class ReportGenerator {
 		wb.close();
 
 	}
-
-	private Integer collectStocks(List<ProductFlow> startingStockList) {
-		int stock = 0;
-		for (ProductFlow productFlow : startingStockList) {
-			stock += productFlow.getStock();
-		}
-		return stock;
-	}
-
+	
 	public boolean transactionExist(String kodetransaksi, List<Transaction> list) {
 		for (Transaction t : list) {
 			if (t.getCode().equals(kodetransaksi)) {
