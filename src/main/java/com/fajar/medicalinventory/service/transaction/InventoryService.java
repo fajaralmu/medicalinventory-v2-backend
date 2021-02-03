@@ -78,12 +78,11 @@ public class InventoryService {
 
 		int page = webRequest.getFilter().getPage();
 		int size = webRequest.getFilter().getLimit();
-		PageRequest pageReuqest = PageRequest.of(page, size);
+		final PageRequest pageReuqest = PageRequest.of(page, size);
 		boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-		BigInteger totalData;
-		List<Product> products;
+		final BigInteger totalData;
+		final List<Product> products;
 		if (ignoreEmptyValue) {
-
 			if (isMasterHealthCenter) {
 				products = productRepository.findNotEmptyProductInMasterWarehouse(pageReuqest);
 				totalData = productRepository.countNotEmptyProductInMasterWareHouse();
