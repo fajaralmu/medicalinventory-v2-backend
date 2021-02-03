@@ -20,24 +20,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	List<Product> findByName(String name);
 	List<Product> findByUtilityTool(boolean isUtility);
 	List<Product> findByOrderByName(Pageable of);
-	@Query("select count(p) from Product p")
-	BigInteger countAll();
+	
 	
 	@Query("select distinct(p) from " + 
-			"ProductFlow pf " + 
-			"left join pf.product p " + 
-			"left join pf.transaction tx " + 
-			"where tx.type = 'TRANS_IN' and (pf.count- pf.usedCount) > 0 order by p.name")
+			" ProductFlow pf " + 
+			" left join pf.product p left join pf.transaction tx " + 
+			" where tx.type = 'TRANS_IN' and (pf.count- pf.usedCount) > 0 order by p.name")
 	List<Product> findNotEmptyProductInMasterWarehouse(Pageable of);
 	
+	
+	
 	@Query("select distinct(p) from " + 
-			"ProductFlow pf " + 
-			"left join pf.product p " + 
-			"left join pf.transaction tx " + 
-			" left join tx.healthCenterDestination location "+
-			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and location.id = ?1 and (pf.count- pf.usedCount) > 0 order by p.name")
+			" ProductFlow pf  left join pf.product p " + 
+			" left join pf.transaction tx left join tx.healthCenterDestination location "+
+			" where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and location.id = ?1 and (pf.count- pf.usedCount) > 0 order by p.name")
 	List<Product> findNotEmptyProductInSpecifiedWarehouse(Long location, Pageable of);
-	Product findTop1ByCode(String code);
+	
+	
 	
 	@Query("select p from Product p order by p.utilityTool, p.name")
 	List<Product> findByOrderByUtilityTool();
@@ -54,5 +53,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			"group by tx.transactiondate, pf.id, p.name " + 
 			"order by  tx.transactiondate desc limit 1) as price from product p1")
 	List<Object[]> getMappedPriceAndProductIdsAt(Date date);
+	
+	
+	@Query("select count(p) from Product p")
+	BigInteger countAll();
+	@Query(nativeQuery = true, value="select count(c) from (select distinct(p.id) from "
+			+ " product p " 
+			+ " left join product_flow pf on pf.product_id =  p.id "
+			+ " left join transaction tx on pf.transaction_id = tx.id" + 
+			" where tx.type = 'TRANS_IN' and (pf.count- pf.used_count) > 0)  c")
+	BigInteger countNotEmptyProductInMasterWareHouse();
+	@Query(nativeQuery = true, value="select count(c) from (select distinct(p.id) from " + 
+			" product p  left join product_flow pf on p.id = pf.product_id " + 
+			" left join  transaction tx on tx.id = pf.transaction_id " +
+			" where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
+			+ " and tx.health_center_destination_id = ?1 and (pf.count- pf.used_count) > 0)  c")
+	BigInteger countNotEmptyProductInSpecifiedWareHouse(Long location);
+	Product findTop1ByCode(String code);
 	
 }

@@ -70,7 +70,7 @@ public class InventoryService {
 		response.setEntities(availableProductFlows);
 		return response;
 	}
-
+	
 	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 
 		HealthCenter healthCenter = webRequest.getHealthcenter();
@@ -80,20 +80,23 @@ public class InventoryService {
 		int size = webRequest.getFilter().getLimit();
 		PageRequest pageReuqest = PageRequest.of(page, size);
 		boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-
+		BigInteger totalData;
 		List<Product> products;
 		if (ignoreEmptyValue) {
 
 			if (isMasterHealthCenter) {
 				products = productRepository.findNotEmptyProductInMasterWarehouse(pageReuqest);
+				totalData = productRepository.countNotEmptyProductInMasterWareHouse();
 			} else {
 				products = productRepository.findNotEmptyProductInSpecifiedWarehouse(healthCenter.getId(), pageReuqest);
+				totalData = productRepository.countNotEmptyProductInSpecifiedWareHouse(healthCenter.getId());
 			}
 		} else {
 			products = productRepository.findByOrderByName(pageReuqest);
+			totalData = productRepository.countAll();
 		}
-		// TODO: count only product available
-		BigInteger totalData = productRepository.countAll();
+		 
+		 
 		progressService.sendProgress(20, httpServletRequest);
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>();
