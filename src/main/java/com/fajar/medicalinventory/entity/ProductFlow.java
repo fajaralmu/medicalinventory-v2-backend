@@ -109,6 +109,10 @@ public class ProductFlow extends BaseEntity {
 	public void resetUsedCount() {
 		setUsedCount(0);
 	}
+	public boolean productsEquals(Product p) {
+		if (product == null) return false;
+		return product.idEquals(p);
+	}
 	
 	// transients //
 

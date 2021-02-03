@@ -2,6 +2,7 @@ package com.fajar.medicalinventory.report;
 
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT;
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;
+import static com.fajar.medicalinventory.util.DateUtil.MONTH_NAMES;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -87,49 +88,52 @@ public class ReportGenerator {
 	}
 
 	public XSSFWorkbook getMonthyReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
- 
+
 		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
 		progressService.sendProgress(3, httpServletRequest);
-		
-		List<Product> products = productRepository.findByOrderByUtilityTool(); 
+
+		List<Product> products = productRepository.findByOrderByUtilityTool();
 		progressService.sendProgress(3, httpServletRequest);
-		
-		List<Transaction> transactionsOneMonth = fillProductFlows(transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear())); 
+
+		List<Transaction> transactionsOneMonth = fillProductFlows(
+				transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear()));
 		progressService.sendProgress(4, httpServletRequest);
-		 
-		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter, transactionsOneMonth, products, locations, notifier(httpServletRequest));
-		return generator.generateReport( );
+
+		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter, transactionsOneMonth, products, locations,
+				notifier(httpServletRequest));
+		return generator.generateReport();
 	}
 
-	
 	private ProgressNotifier notifier(final HttpServletRequest httpServletRequest) {
-		 
+
 		return new ProgressNotifier() {
-			
+
 			@Override
 			public void nofity(int progress, int maxProgress, double percent) {
 				progressService.sendProgress(progress, maxProgress, percent, httpServletRequest);
-				
+
 			}
 		};
 	}
 
 	private List<Transaction> fillProductFlows(List<Transaction> transactions) {
-		if (transactions.size() == 0) return transactions;
+		if (transactions.size() == 0)
+			return transactions;
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
 		List<Transaction> result = new ArrayList<>();
 		Map<Long, Transaction> transactionMap = new HashMap<>();
 		for (Transaction transaction : transactions) {
 			transactionMap.put(transaction.getId(), transaction);
 		}
-		
+
 		for (ProductFlow productFlow : productFlows) {
 			Long trxId = productFlow.getTransaction().getId();
-			if (null == transactionMap.get(trxId)) continue;
+			if (null == transactionMap.get(trxId))
+				continue;
 			transactionMap.get(trxId).addProductFlow(productFlow);
-			 
+
 		}
-		for(Long id : transactionMap.keySet()) {
+		for (Long id : transactionMap.keySet()) {
 			result.add(transactionMap.get(id));
 		}
 		return result;
@@ -418,210 +422,167 @@ public class ReportGenerator {
 
 	}
 
-	public void printLPLPO(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest) throws Exception {
+	private int sumCountProduct(List<ProductFlow> productFlows, Product product) {
+		int count = 0;
+		for (ProductFlow ao : productFlows) {
+			if (ao.productsEquals(product)) {
+				count += ao.getCount();
+			}
+		}
+		return count;
+	}
+	
+	public void printLPLPO(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest)
+			throws Exception {
 		HealthCenter location = webRequest.getHealthcenter();
 		Filter filter = webRequest.getFilter();
-		WritableWorkbook wb; 
+		WritableWorkbook wb;
 		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
-		 
-		int month = filter.getMonth(), year = filter.getYear();
-		Date date = DateUtil.getDate(year, month-1, 1);
-		Date prevDate = DateUtil.getPrevDateLastDay(date);
-		
-		List<Product> products = productRepository.findByOrderByUtilityTool();  
-		  
-		List<Transaction> transactionOneMonth = transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear());
-		List<ProductFlow> productFlows = new ArrayList<>();
-		//FIXME
-		List<Transaction> transactionBefore = new ArrayList<>();
-		
-		fillProductFlows(transactionOneMonth);
 
+		int month = filter.getMonth(), year = filter.getYear();
+		Date date = DateUtil.getDate(year, month - 1, 1);
+		Date prevDate = DateUtil.getPrevDateLastDay(date);
+
+		List<Product> products = productRepository.findByOrderByUtilityTool();
+
+		List<Transaction> transactionOneMonth = transactionRepository.findByMonthAndYear(filter.getMonth(),
+				filter.getYear());
+
+		fillProductFlows(transactionOneMonth);
+		Map<Long, Integer> mappedProductIdAndStartingStock = new HashMap<>();
 		progressService.sendProgress(10, httpServletRequest);
+		 
+		for (Product product : products) {
+			int startingStock = inventoryService.getProductStockAtDate(product, location, prevDate);
+			mappedProductIdAndStartingStock.put(product.getId(), startingStock);
+			progressService.sendProgress(1, products.size(), 50, httpServletRequest);
+		}
 		
+		
+		/** build document **/
+
 		WritableCellFormat formatNama = new WritableCellFormat();
-		WritableCellFormat formatNamaobat = new WritableCellFormat();
-		WritableCellFormat formatUmum = new WritableCellFormat();
-		formatNamaobat.setBorder(Border.ALL, BorderLineStyle.THIN);
-		formatNamaobat.setShrinkToFit(true);
+		WritableCellFormat productNameStyle = new WritableCellFormat();
+		WritableCellFormat regularStyle = new WritableCellFormat();
+		productNameStyle.setBorder(Border.ALL, BorderLineStyle.THIN);
+		productNameStyle.setShrinkToFit(true);
 		formatNama.setBorder(Border.ALL, BorderLineStyle.THIN);
-		formatUmum.setBorder(Border.ALL, BorderLineStyle.THIN);
-		formatUmum.setAlignment(Alignment.CENTRE);
-		formatUmum.setVerticalAlignment(VerticalAlignment.CENTRE);
+		regularStyle.setBorder(Border.ALL, BorderLineStyle.THIN);
+		regularStyle.setAlignment(Alignment.CENTRE);
+		regularStyle.setVerticalAlignment(VerticalAlignment.CENTRE);
 
 		wb = Workbook.createWorkbook(os);
 		WritableSheet sheet = wb.createSheet("LPLPO " + filter.getMonth() + "-" + filter.getYear(), 0);
 
 		// JUDUL
-
+		int nextMonth = month + 1 > 11 ? 1 : month + 1;
+		int nextYear = month + 1 > 11 ? year + 1 : year;
 		sheet.addCell(new Label(3, 3, location.getName()));
-		sheet.addCell(new Label(6, 2, "Pelaporan pemakaian: " + strMonth(filter.getMonth(), filter.getYear())));
-		sheet.addCell(new Label(6, 3, "Permintaan bulan: " + strMonth(filter.getMonth() + 1, filter.getYear())));
+		sheet.addCell(new Label(6, 2, "Pelaporan pemakaian: " + MONTH_NAMES[month - 1] + " " + filter.getYear()));
+		sheet.addCell(new Label(6, 3, "Permintaan bulan: " + MONTH_NAMES[nextMonth - 1] + " " + nextYear));
 
 		Label[] labelJudul = new Label[18];
-		labelJudul[0] = new Label(2, 5, "No", formatUmum);
-		labelJudul[1] = new Label(3, 5, "Nama Obat/Alkes", formatUmum);
-		labelJudul[2] = new Label(4, 5, "Satuan", formatUmum);
-		labelJudul[3] = new Label(5, 5, "Stok Awal", formatUmum);
-		labelJudul[4] = new Label(6, 5, "Penerimaan", formatUmum);
-		labelJudul[5] = new Label(7, 5, "Persediaan", formatUmum);
-		labelJudul[6] = new Label(8, 5, "Pemakaian", formatUmum);
-		labelJudul[7] = new Label(9, 5, "Sisa Stok", formatUmum);
-		labelJudul[8] = new Label(10, 5, "Stok OPT", formatUmum);
-		labelJudul[9] = new Label(11, 5, "Permintaan", formatUmum);
+		labelJudul[0] = new Label(2, 5, "No", regularStyle);
+		labelJudul[1] = new Label(3, 5, "Nama Obat/Alkes", regularStyle);
+		labelJudul[2] = new Label(4, 5, "Satuan", regularStyle);
+		labelJudul[3] = new Label(5, 5, "Stok Awal", regularStyle);
+		labelJudul[4] = new Label(6, 5, "Penerimaan", regularStyle);
+		labelJudul[5] = new Label(7, 5, "Persediaan", regularStyle);
+		labelJudul[6] = new Label(8, 5, "Pemakaian", regularStyle);
+		labelJudul[7] = new Label(9, 5, "Sisa Stok", regularStyle);
+		labelJudul[8] = new Label(10, 5, "Stok OPT", regularStyle);
+		labelJudul[9] = new Label(11, 5, "Permintaan", regularStyle);
 
 		sheet.mergeCells(12, 5, 15, 5);
-		labelJudul[10] = new Label(12, 5, "Pemberian", formatUmum);
+		labelJudul[10] = new Label(12, 5, "Pemberian", regularStyle);
 		// labelJudul[13] = new Label(12, 6, "Obat", formatUmum);
 		for (int i = 0; i < 4; i++) {
-			sheet.addCell(new Label(12 + i, 6, "Obat", formatUmum));
+			sheet.addCell(new Label(12 + i, 6, "Obat", regularStyle));
 		}
-		labelJudul[11] = new Label(12, 7, "PKD", formatUmum);
-		labelJudul[12] = new Label(13, 7, "Askes", formatUmum);
-		labelJudul[13] = new Label(14, 7, "Program", formatUmum);
-		labelJudul[14] = new Label(15, 7, "Lain2", formatUmum);
+		labelJudul[11] = new Label(12, 7, "PKD", regularStyle);
+		labelJudul[12] = new Label(13, 7, "Askes", regularStyle);
+		labelJudul[13] = new Label(14, 7, "Program", regularStyle);
+		labelJudul[14] = new Label(15, 7, "Lain2", regularStyle);
 
-		labelJudul[15] = new Label(17, 5, "Ket", formatUmum);
-		labelJudul[16] = new Label(16, 5, "Jumlah", formatUmum);
+		labelJudul[15] = new Label(17, 5, "Ket", regularStyle);
+		labelJudul[16] = new Label(16, 5, "Jumlah", regularStyle);
 
-		int baris = 8;
-		int koljudul = 2;
+		int row = 8;
+		int titleColumn = 2;
 
 		for (int i = 0; i < labelJudul.length; i++) {
 			if (i < 10 || i >= 14) {
-				sheet.mergeCells(koljudul, 5, koljudul, 7);
+				sheet.mergeCells(titleColumn, 5, titleColumn, 7);
 			}
 			if (labelJudul[i] != null) {
 				sheet.addCell(labelJudul[i]);
 			}
-			koljudul++;
+			titleColumn++;
 		}
-		
-		int no = 1;
-		
-		for (Product product : products) {
-			 
-			// nomer
-			sheet.addCell(new jxl.write.Number(2, baris, no, formatUmum));
-			// nama obat
-			sheet.addCell(new Label(3, baris, product.getName(), formatNamaobat));
-			// satuan
-			sheet.addCell(new Label(4, baris, product.getUnit().getName(), formatUmum));
 
-			// STOK AWAL BULAN i
-			// transaksi sblm tgl
-			 
-			Integer startingStock =   inventoryService.getProductStockAtDate(product, location,  prevDate);
-			Integer incomingStock = 0;
-			Integer usedStock = 0;
-			if (isMasterHealthCenter) {
-				for (Transaction t : transactionBefore) {
-					productFlows = t.getProductFlows(); // daoao.listAliranObatDenganKodeTransaksi(t. getCode());
-					// tr masuk
+		int no = 1;
+
+		for (Product product : products) {
+
+			sheet.addCell(new jxl.write.Number(2, row, no, regularStyle));
+			sheet.addCell(new Label(3, row, product.getName(), productNameStyle));
+			sheet.addCell(new Label(4, row, product.getUnit().getName(), regularStyle));
+
+			int startingStock = mappedProductIdAndStartingStock.get(product.getId());
+			int suppliedCount = 0, distributedCount = 0;
+			for (Transaction t : transactionOneMonth) {
+				List<ProductFlow> productFlows = t.getProductFlows();
+
+				if (isMasterHealthCenter) {
+					/**
+					 * products supplied
+					 */
 					if (t.getType().equals(TransactionType.TRANS_IN)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								startingStock += ao.getCount();
-							}
-						}
-					} // tr keluar
-					else if (t.getType().equals(TRANS_OUT)|| t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
-//							&& t.getHealthCenterDestination() == null
-							) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								startingStock -= ao.getCount();
-							}
-						}
+						suppliedCount += sumCountProduct(productFlows, product);
 					}
-				}
-				// PENERIMAAN DAN PEMAKAIAN BULAN INI
-				for (Transaction t : transactionOneMonth) {
-					productFlows = t.getProductFlows();
-					// penerimaan
-					if (t.getType().equals(TransactionType.TRANS_IN)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								incomingStock += ao.getCount();
-							}
-						}
-					} // Pemakaian
+					/**
+					 * product distributed
+					 */
 					else if (t.getType().equals(TRANS_OUT) || t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
 //							&& t.getHealthCenterDestination() == null
-							) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								usedStock += ao.getCount();
-							}
-						}
+					) {
+						distributedCount += sumCountProduct(productFlows, product);
+					}
+				} else {
+					/**
+					 * products supplied
+					 */
+					if (t.getType().equals(TRANS_OUT_TO_WAREHOUSE) && t.getHealthCenterDestination().idEquals(location)) {
+						suppliedCount += sumCountProduct(productFlows, product);
+					}
+					/**
+					 * product distributed
+					 */
+					else if (t.getType().equals(TRANS_OUT) && t.getHealthCenterLocation().idEquals(location)) {
+						distributedCount += sumCountProduct(productFlows, product);
 					}
 				}
+			}
 
-			} else {
-				for (Transaction t : transactionBefore) {
-					productFlows = t.getProductFlows();
-					// tr masuk ke pustu
-					if (t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
-							&& t.getHealthCenterDestination() != null
-							&& t.getHealthCenterDestination().idEquals(location)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								startingStock += ao.getCount();
-							}
-						}
-					} // tr keluar
-					else if (t.getType().equals(TRANS_OUT) && t.getCustomer() != null
-							&& t.getHealthCenterLocation().idEquals(location)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								startingStock -= ao.getCount();
-							}
-						}
-					}
-				}
-				// PENERIMAAN DAN PEMAKAIAN BULAN INI
-				for (Transaction t : transactionOneMonth) {
-					productFlows = t.getProductFlows();
-					// penerimaan
-					if (t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
-							&& t.getHealthCenterDestination() != null
-							&& t.getHealthCenterDestination().idEquals(location)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								incomingStock += ao.getCount();
-							}
-						}
-					} // Pemakaian
-					else if (t.getType().equals(TRANS_OUT) && t.getCustomer() != null
-							&& t.getHealthCenterLocation().idEquals(location)) {
-						for (ProductFlow ao : productFlows) {
-							if (product.getId().equals(ao.getProduct().getId())) {
-								usedStock += ao.getCount();
-							}
-						}
-					}
-				}
-			} 
-
-			sheet.addCell(new jxl.write.Number(5, baris, startingStock, formatUmum));
-			sheet.addCell(new jxl.write.Number(6, baris, incomingStock, formatUmum));
-			sheet.addCell(new jxl.write.Number(7, baris, startingStock + incomingStock, formatUmum));
-			sheet.addCell(new jxl.write.Number(8, baris, usedStock, formatUmum));
-			sheet.addCell(new jxl.write.Number(9, baris, startingStock + incomingStock - usedStock, formatUmum));
+			sheet.addCell(new jxl.write.Number(5, row, startingStock, regularStyle));
+			sheet.addCell(new jxl.write.Number(6, row, suppliedCount, regularStyle));
+			sheet.addCell(new jxl.write.Number(7, row, startingStock + suppliedCount, regularStyle));
+			sheet.addCell(new jxl.write.Number(8, row, distributedCount, regularStyle));
+			sheet.addCell(new jxl.write.Number(9, row, startingStock + suppliedCount - distributedCount, regularStyle));
 			for (int i = 0; i < 8; i++) {
-				sheet.addCell(new Label(10 + i, baris, "", formatUmum));
+				sheet.addCell(new Label(10 + i, row, "", regularStyle));
 			}
 			no++;
-			baris++;
-			
-			progressService.sendProgress(1, products.size(), 90, httpServletRequest);
+			row++;
+
+			progressService.sendProgress(1, products.size(), 40, httpServletRequest);
 		}
 
 		wb.write();
 		wb.close();
 
 	}
-	
+
 	public boolean transactionExist(String kodetransaksi, List<Transaction> list) {
 		for (Transaction t : list) {
 			if (t.getCode().equals(kodetransaksi)) {
@@ -638,15 +599,15 @@ public class ReportGenerator {
 		List<Product> listObat = (List<Product>) productRepository.findAll();
 		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(d);
 		Map<Long, Long> mappedPrice = parseMap(mappedPricesAndIDs);
-		
-		log.info("products: {}", listObat.size()); 
+
+		log.info("products: {}", listObat.size());
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		progressService.sendProgress(10, httpServletRequest);
-		
+
 		for (Product product : listObat) {
-			log.info("get stock info for: {}", product.getName()); 
+			log.info("get stock info for: {}", product.getName());
 			Long price = mappedPrice.get(product.getId());
-			int count = inventoryService.getProductStockAtDate(product, location,  d);
+			int count = inventoryService.getProductStockAtDate(product, location, d);
 			product.setCount(count);
 			product.setPrice(price.intValue());
 
@@ -667,12 +628,13 @@ public class ReportGenerator {
 	}
 
 	private Map<Long, Long> parseMap(List<Object[]> list) {
-		 
+
 		Map<Long, Long> map = new HashMap<>();
-		for (Object[] object : list) { 
-			if (object[0]==null ) continue;
+		for (Object[] object : list) {
+			if (object[0] == null)
+				continue;
 			Long id = Long.valueOf(object[0].toString());
-			Long price = object[1]==null?0L: Long.valueOf(object[1].toString());
+			Long price = object[1] == null ? 0L : Long.valueOf(object[1].toString());
 			map.put(id, price);
 		}
 		return map;
@@ -699,53 +661,4 @@ public class ReportGenerator {
 		return hasil;
 	}
 
-	public String strMonth(Integer bulan, Integer tahun) {
-		String tgl = "";
-		switch (bulan) {
-		case 1:
-			tgl = "Januari";
-			break;
-		case 2:
-			tgl = "Februari";
-			break;
-		case 3:
-			tgl = "Maret";
-			break;
-		case 4:
-			tgl = "April";
-			break;
-		case 5:
-			tgl = "Mei";
-			break;
-		case 6:
-			tgl = "Juni";
-			break;
-		case 7:
-			tgl = "Juli";
-			break;
-		case 8:
-			tgl = "Agustus";
-			break;
-		case 9:
-			tgl = "September";
-			break;
-		case 10:
-			tgl = "Oktotber";
-			break;
-		case 11:
-			tgl = "Nopember";
-			break;
-		case 12:
-			tgl = "Desembar";
-			break;
-		case 13:
-		default:
-			tgl = "Januari";
-			tahun++;
-			break;
-
-		}
-		tgl += " " + tahun.toString();
-		return tgl;
-	}
 }
