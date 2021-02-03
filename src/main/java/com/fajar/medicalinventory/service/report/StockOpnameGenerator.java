@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.report;
+package com.fajar.medicalinventory.service.report;
 
 import java.util.Date;
 import java.util.List;

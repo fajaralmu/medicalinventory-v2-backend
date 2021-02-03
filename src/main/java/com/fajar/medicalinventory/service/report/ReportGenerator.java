@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.report;
+package com.fajar.medicalinventory.service.report;
 
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT;
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;

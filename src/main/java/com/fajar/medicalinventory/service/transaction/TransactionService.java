@@ -138,6 +138,7 @@ public class TransactionService {
 				if (productFlow.getReferenceProductFlow() == null) {
 					throw new ApplicationException("Reference flow does not exist in the request");
 				}
+				productFlow.setProduct(productFlow.getReferenceProductFlow().getProduct());
 				productFlow.setTransaction(transaction);
 				ProductFlow referenceFlow = (ProductFlow)session.get(ProductFlow.class, productFlow.getReferenceProductFlow().getId());
 				if (null == referenceFlow) {

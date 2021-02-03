@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.WebRequest;
-import com.fajar.medicalinventory.report.ReportGenerator;
+import com.fajar.medicalinventory.service.report.ReportGenerator;
 
 @Service
 public class ReportService {
