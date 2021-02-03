@@ -57,5 +57,16 @@ public class RestReportController extends BaseController {
 		
 		reportService.printMonthlyReport(webRequest, httpRequest, httpServletResponse);
 	}
+	
+	@PostMapping(value = "/receiverequestsheet", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public void receiveRequestSheet(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest,
+			HttpServletResponse httpServletResponse) throws Exception {
+		log.info("receiverequestsheet");
+		httpServletResponse.setContentType("text/xls");
+		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		
+		reportService.receiveRequestSheet(webRequest, httpRequest, httpServletResponse);
+	}
 
 }

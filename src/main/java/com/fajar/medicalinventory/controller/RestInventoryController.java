@@ -49,5 +49,12 @@ public class RestInventoryController extends BaseController {
 		log.info("getproducts   at {} ", webRequest.getHealthcenter().getName());
 		return inventoryService.getProducts( webRequest, httpRequest);
 	}
+	
+	@PostMapping("/recalculatestock") 
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse recalculatestock( HttpServletRequest httpRequest) {
+		log.info("recalculatesting STOCK");
+		return inventoryService.adjustStock(httpRequest);
+	}
 	 
 }

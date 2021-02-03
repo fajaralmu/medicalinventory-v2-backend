@@ -105,6 +105,10 @@ public class ProductFlow extends BaseEntity {
 		}
 		return sum;
 	}
+
+	public void resetUsedCount() {
+		setUsedCount(0);
+	}
 	
 	// transients //
 

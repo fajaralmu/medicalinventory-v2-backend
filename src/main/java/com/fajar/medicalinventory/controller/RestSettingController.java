@@ -46,8 +46,7 @@ public class RestSettingController extends BaseController {
 	public WebResponse updateProfile(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) throws IOException {
 		return defaultAppProfileService.updateApplicationProfile(httpRequest, webRequest);
 	}
-	@PostMapping(value = "/updateconfig", produces = MediaType.APPLICATION_JSON_VALUE)
-	@CustomRequestInfo(withRealtimeProgress = true)
+	@PostMapping(value = "/updateconfig", produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse updateconfig(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) throws IOException {
 		return inventoryConfigurationService.updateConfig(httpRequest, webRequest);
 	}

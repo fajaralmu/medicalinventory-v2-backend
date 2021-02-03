@@ -3,6 +3,7 @@ package com.fajar.medicalinventory.report;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -53,8 +54,8 @@ public class StockOpnameGenerator {
 		labels[6] = new Label(2, 1, "STOK OPNAME " + DateUtil.formatDate(date, DATE_PATTERN));
 		labels[7] = new Label(2, 2, location.getName().toUpperCase());
 
-		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(1, 1, 2, 7));
-		sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(2, 2, 2, 7));
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 2, 7));
+		sheet.addMergedRegion(new CellRangeAddress(2, 2, 2, 7));
 
 		for (int i = 0; i < labels.length; i++) {
 			Label label = labels[i];
@@ -79,12 +80,12 @@ public class StockOpnameGenerator {
 			totalPrice += total;
 			totalCount += ob.getCount();
 
-			xssfRow.createCell(3).setCellValue(ob.getName());
+			xssfRow.createCell(3).setCellValue(ob.getName()+"("+ob.getCode()+")");
 			xssfRow.createCell(4).setCellValue(ob.getUnit().getName());
 
 			for (jxl.write.Number labelobat1 : labelobat) {
 				XSSFCell cell = xssfRow.createCell(labelobat1.getColumn());
-				cell.setCellValue(labelobat1.getContents());
+				cell.setCellValue(Double.valueOf(labelobat1.getContents()));
 			}
 			currentRow++;
 			number++;
@@ -93,8 +94,8 @@ public class StockOpnameGenerator {
 		XSSFRow xssfRow = getRow(currentRow);
 
 		xssfRow.createCell(2).setCellValue("Total");
-		xssfRow.createCell(5).setCellValue(totalCount);
-		xssfRow.createCell(7).setCellValue(totalPrice);
+		xssfRow.createCell(5).setCellValue(Double.valueOf(totalCount));
+		xssfRow.createCell(7).setCellValue(Double.valueOf(totalPrice));
 
 		return wb;
 

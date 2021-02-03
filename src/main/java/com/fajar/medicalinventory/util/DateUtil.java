@@ -311,4 +311,19 @@ public class DateUtil {
 
 		return day;
 	}
+
+	public static Date getPrevDateLastDay(Date date) {
+		
+		int month = getCalendarMonth(date);
+		int year = getCalendarYear(date);
+		int prevMonth, prevYear = year;
+		if (month - 1 < 0) {
+			prevMonth = 12;
+			prevYear = year-1;
+		} else {
+			prevMonth = month -1;
+		}
+		int lastDay = getMonthsDay(prevMonth, prevYear);
+		return getDate(prevYear, prevMonth, lastDay);
+	}
 }

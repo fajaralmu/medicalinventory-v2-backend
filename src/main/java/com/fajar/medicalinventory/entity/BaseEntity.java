@@ -57,9 +57,10 @@ public class BaseEntity implements Serializable{
 	@javax.persistence.Transient
 	private List<String> nulledFields = new ArrayList<>();
 	
-	public <T extends BaseEntity> boolean idEquals(T object) {
-		if (null == getId() || null == object.getId()) return false;
-		return getId().equals(object.getId());
+	public <T > boolean idEquals(T object) {
+		Long id = ((BaseEntity) object).getId();
+		if (null == getId() || null == id) return false;
+		return getId().equals(id);
 	}
 	
 	public List<String> getNulledFields() {
