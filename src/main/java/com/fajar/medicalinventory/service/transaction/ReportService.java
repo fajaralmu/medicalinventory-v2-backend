@@ -47,7 +47,7 @@ public class ReportService {
 		String fileName = "LPLPO_"+webRequest.getHealthcenter().getName()+"_"+filter.getYear()+"-"+ filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xls");
 		
-		reportGenerator.printLPLPO(webRequest , httpServletResponse.getOutputStream(), httpRequest);
+		reportGenerator.generateProductRequestSheet(webRequest , httpServletResponse.getOutputStream(), httpRequest);
 	}
 
 }
