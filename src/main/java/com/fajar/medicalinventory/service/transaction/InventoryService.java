@@ -183,18 +183,19 @@ public class InventoryService {
 	}
 
 	private List getDistributedFlow(Session session) {
+		Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
+		criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
+		List productUsedFlows = criteriaUsed.list();
+		return productUsedFlows;
+	}
+
+	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
 		Query query = session.createQuery("select pf from ProductFlow pf left join pf.transaction tx "
 				+ " where tx.type = ? or tx.type = ? ");
 		
 		query.setString(0, TransactionType.TRANS_IN.toString());
 		query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
-		return query.list();
-	}
-
-	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
-		Criteria criteriaSupply = session.createCriteria(ProductFlow.class);
-		criteriaSupply.add(Restrictions.isNull("referenceProductFlow"));
-		List productSupplyFlows = criteriaSupply.list();
+		List productSupplyFlows = query.list();
 		Map<Long, ProductFlow> productFlowMap = new HashMap<>();
 		for (Object productSupplyFlow : productSupplyFlows) {
 			ProductFlow pf = (ProductFlow) productSupplyFlow;
