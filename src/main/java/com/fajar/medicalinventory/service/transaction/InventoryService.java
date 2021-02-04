@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
@@ -141,34 +143,25 @@ public class InventoryService {
 		return stock;
 	}
 	
-	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
-		Map<Long, ProductFlow> productFlowMap = new HashMap<Long, ProductFlow>();
+	public WebResponse adjustStock(HttpServletRequest httpServletRequest) { 
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			
 			tx = session.beginTransaction();
-			Criteria criteriaSupply = session.createCriteria(ProductFlow.class);
-			criteriaSupply.add(Restrictions.isNull("referenceProductFlow"));
-			List productSupplyFlows = criteriaSupply.list();
-			for (Object productSupplyFlow : productSupplyFlows) {
-				ProductFlow pf = (ProductFlow) productSupplyFlow;
-				pf.resetUsedCount();
-				productFlowMap.put(pf.getId(), pf);
-			}
 			
+			Map<Long, ProductFlow> productFlowMap = getSupplyFlowReseted(session); 
 			progressService.sendProgress(10, httpServletRequest);
-			
-			Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
-			criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
-			List productUsedFlows = criteriaSupply.list();
-			
+			 
+			List productUsedFlows = getDistributedFlow(session); 
 			progressService.sendProgress(10, httpServletRequest);
 			
 			for (Object object : productUsedFlows) {
 				ProductFlow pf = (ProductFlow) object;
-				productFlowMap.get(pf.getReferenceProductFlow().getId()).addUsedCount(pf.getCount());
-				
+				Long refId = pf.getReferenceProductFlow().getId();
+				productFlowMap.get(refId ).addUsedCount(pf.getCount());
+				pf.setExpDate();
+				session.merge(pf);
 				progressService.sendProgress(1 , productUsedFlows.size(), 35, httpServletRequest);
 			}
 			for(Long id: productFlowMap.keySet()) {
@@ -187,5 +180,27 @@ public class InventoryService {
 			progressService.sendComplete(httpServletRequest);
 		}
 		return new WebResponse();
+	}
+
+	private List getDistributedFlow(Session session) {
+		Query query = session.createQuery("select pf from ProductFlow pf left join pf.transaction tx "
+				+ " where tx.type = ? or tx.type = ? ");
+		
+		query.setString(0, TransactionType.TRANS_IN.toString());
+		query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
+		return query.list();
+	}
+
+	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
+		Criteria criteriaSupply = session.createCriteria(ProductFlow.class);
+		criteriaSupply.add(Restrictions.isNull("referenceProductFlow"));
+		List productSupplyFlows = criteriaSupply.list();
+		Map<Long, ProductFlow> productFlowMap = new HashMap<>();
+		for (Object productSupplyFlow : productSupplyFlows) {
+			ProductFlow pf = (ProductFlow) productSupplyFlow;
+			pf.resetUsedCount();
+			productFlowMap .put(pf.getId(), pf);
+		}
+		return productFlowMap;
 	}
 }

@@ -119,7 +119,7 @@ public class TransactionService {
 	}
 
 	
-	public WebResponse performTransactionOUT(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public WebResponse performDistribution(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
@@ -138,12 +138,12 @@ public class TransactionService {
 				if (productFlow.getReferenceProductFlow() == null) {
 					throw new ApplicationException("Reference flow does not exist in the request");
 				}
-				productFlow.setProduct(productFlow.getReferenceProductFlow().getProduct());
 				productFlow.setTransaction(transaction);
 				ProductFlow referenceFlow = (ProductFlow)session.get(ProductFlow.class, productFlow.getReferenceProductFlow().getId());
 				if (null == referenceFlow) {
 					throw new ApplicationException("Reference flow does not exist in the DB");
 				}
+				productFlow.setReferenceProductFlow(referenceFlow);				
 				referenceFlow.addUsedCount(productFlow.getCount());
 				
 				DatabaseProcessor.save(referenceFlow, session);

@@ -103,6 +103,8 @@ public class EntityElement implements Serializable {
 		if (formField!= null) {
 			this.fieldType = formField.type();
 			this.editable = formField.editable();
+			setOptionItemName(formField.optionItemName());
+			
 		}else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
 			this.editable = false;

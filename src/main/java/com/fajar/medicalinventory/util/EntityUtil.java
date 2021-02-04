@@ -42,23 +42,17 @@ public class EntityUtil {
 		}
 
 		Dto dto = (Dto) getClassAnnotation(clazz, Dto.class);
-		final boolean ignoreBaseField = dto.ignoreBaseField();
-		final boolean isQuestionare = dto.quistionare();
+		final boolean ignoreBaseField = dto.ignoreBaseField(); 
 
 		EntityProperty entityProperty = EntityProperty.builder().ignoreBaseField(ignoreBaseField)
-				.entityName(clazz.getSimpleName().toLowerCase()).creatable(dto.creatable()).isQuestionare(isQuestionare).build();
+				.entityName(clazz.getSimpleName().toLowerCase())
+				.withProgressWhenUpdated(dto.withProgressWhenUpdated())
+				.creatable(dto.creatable())
+				.build();
 		try {
 
 			List<Field> fieldList = getDeclaredFields(clazz);
-
-			if (isQuestionare) {
-				Map<String, List<Field>> groupedFields = sortListByQuestionareSection(fieldList);
-				fieldList = CollectionUtil.mapOfListToList(groupedFields);
-				Set<String> groupKeys = groupedFields.keySet();
-				String[] keyNames = CollectionUtil.toArrayOfString(groupKeys.toArray());
-
-				entityProperty.setGroupNames(keyNames);
-			}
+ 
 			List<EntityElement> entityElements = new ArrayList<>();
 			List<String> fieldNames = new ArrayList<>();
 			String fieldToShowDetail = "";

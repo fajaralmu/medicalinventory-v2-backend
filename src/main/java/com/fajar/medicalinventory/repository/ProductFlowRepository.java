@@ -15,7 +15,7 @@ import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 
 @Repository
-public interface ProductFlowRepository extends JpaRepository<ProductFlow, Integer> {
+public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> {
 
 	List<ProductFlow> findByTransaction(Transaction transaction);
 

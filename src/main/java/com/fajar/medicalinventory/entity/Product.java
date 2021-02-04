@@ -43,6 +43,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	 */
 	private static final long serialVersionUID = -4398862371443391887L;
 
+	 
 	@Column(unique = true)
 	@FormField
 	private String code;
@@ -53,7 +54,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String description;
 	@ManyToOne
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name")
 	@JoinColumn(name = "unit_id")
 	private Unit unit;
 	@FormField(type = FieldType.FIELD_TYPE_CHECKBOX)
@@ -117,11 +118,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@Getter(value = AccessLevel.NONE)
 	@Setter(value = AccessLevel.NONE)
 	private Integer pemakaian;
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private String keterangan;
+	 
 
 	public double getStokaman() {
 		return stokaman;
@@ -161,15 +158,7 @@ public class Product extends BaseEntity implements MultipleImageModel {
 
 	public void setPemakaian(Integer pemakaian) {
 		this.pemakaian = pemakaian;
-	}
-
-	public String getKeterangan() {
-		return keterangan;
-	}
-
-	public void setKeterangan(String keterangan) {
-		this.keterangan = keterangan;
-	}
+	} 
 
 	public void addCount(int count2) {
 		if (count == null)

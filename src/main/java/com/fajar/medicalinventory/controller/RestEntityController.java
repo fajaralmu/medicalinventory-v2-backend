@@ -68,7 +68,7 @@ public class RestEntityController extends BaseController {
 	@PostMapping(value = "/delete", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WebResponse delete(@RequestBody WebRequest request, HttpServletRequest httpRequest) throws Exception {
 		log.info("delete entity {}", request);
-		return entityService.delete(request);
+		return entityService.delete(request, httpRequest);
 	}
 
 	@PostMapping(value = "/config", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

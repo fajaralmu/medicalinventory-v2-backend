@@ -22,11 +22,11 @@ import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
+import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.repository.CustomRepositoryImpl;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
 import com.fajar.medicalinventory.repository.EntityRepository;
 import com.fajar.medicalinventory.service.LogProxyFactory;
-import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
@@ -47,9 +47,7 @@ public class EntityService {
 	@Autowired
 	private EntityRepository entityRepository; 
 	@Autowired
-	private EntityManagementPageService entityManagementPageService;  
-	@Autowired
-	private SessionValidationService sessionValidationService;
+	private EntityManagementPageService entityManagementPageService;   
 	
 	@PostConstruct
 	public void init() {
@@ -73,11 +71,10 @@ public class EntityService {
 	 */
 	public WebResponse saveEntity(WebRequest request, HttpServletRequest servletRequest, boolean newRecord) {
 
-		try {
+		 
 
 			final String key = request.getEntity().toLowerCase();
 			EntityManagementConfig entityConfig = getEntityManagementConfig(key);
-			
 			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();
 			String fieldName = entityConfig.getFieldName();
 			Object entityValue = null;
@@ -90,50 +87,21 @@ public class EntityService {
 				log.info("newRecord: {}", newRecord);
 				
 				if (entityValue != null) {
-					boolean isUser = newRecord? false: checkIfUser(entityValue, servletRequest);
-					WebResponse saved = updateService.saveEntity((BaseEntity) entityValue, newRecord, servletRequest);
 					 
-					//databaseProcessorNotifier.refresh();
+					WebResponse saved = updateService.saveEntity((BaseEntity) entityValue, newRecord, servletRequest); 
+					 
 					return saved;
 				} else {
 					return WebResponse.failed();
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
-				return WebResponse.failed(e.getMessage());
+				throw new ApplicationException(e.getMessage());
 			}
 
-		} catch (Exception e) {
-			return WebResponse.failed(e.getMessage());
-		} finally {
-
-		}
+		 
 	}
-
-	private boolean checkIfUser(Object entityValue, HttpServletRequest servletRequest) {
-		
-//		User user = SessionUtil.getSessionUser(servletRequest);
-//		if(entityValue instanceof User) {
-//			if(!user.getId().equals(((User) entityValue).getId())){
-//				throw new RuntimeException("Invalid User!");
-//			}
-//			return true;
-//		}
-		return false;
-	}
-
-	private void validateInMemoryEntities(final EntityManagementConfig entityConfig) {
-//		ThreadUtil.run(()->{
-//			if(entityConfig.getEntityClass().equals(Page.class)) {
-//				webConfigService.refreshPages(true);
-//			}else if(entityConfig.getEntityClass().equals(Menu.class)) {
-//				webConfigService.refreshMenus(true);
-//			}
-//		});
-
-	}
-
+ 
 	/**
 	 * get list of entities filtered
 	 * 
@@ -207,24 +175,17 @@ public class EntityService {
 	 * @return
 	 * @throws Exception 
 	 */
-	public WebResponse delete(WebRequest request) throws Exception {
+	public WebResponse delete(WebRequest request, HttpServletRequest httpRequest) throws Exception {
 		DatabaseProcessor filterDatabaseProcessor = customRepository.createDatabaseProcessor();
 		try {
 			Map<String, Object> filter = request.getFilter().getFieldsFilter();
 			Long id = Long.parseLong(filter.get("id").toString());
 			String entityName = request.getEntity().toLowerCase();
-
-			Class<? extends BaseEntity> entityClass = getEntityManagementConfig(entityName).getEntityClass();
-
-			if (null == entityClass || User.class.equals(entityClass)) {
-				throw new Exception("Invalid entity");
-			}
-			boolean result = filterDatabaseProcessor.deleteObjectById(entityClass, id);
-			return WebResponse.builder().code("00").message("deleted :" + result).build();
-
+			EntityManagementConfig entityConfig = getEntityManagementConfig(entityName);
+			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();
+			return updateService.deleteEntity(id, entityConfig.getEntityClass(), httpRequest);
 		} catch (Exception e) {
-
-			throw e;
+			throw new ApplicationException(e.getMessage());
 		} finally {
 			 
 		}

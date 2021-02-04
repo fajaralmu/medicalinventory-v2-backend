@@ -48,7 +48,7 @@ public class RestTransactionController extends BaseController {
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse transactionout(@RequestBody WebRequest request, HttpServletRequest httpRequest) {
 		log.info("transactionout ");
-		return transactionService.performTransactionOUT(request, httpRequest);
+		return transactionService.performDistribution(request, httpRequest);
 	}
 	@PostMapping(value = "/gettransaction/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse gettransactionbycode(@PathVariable String code, HttpServletRequest httpRequest) {

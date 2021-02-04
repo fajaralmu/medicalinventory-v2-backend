@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
+import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.ProductFlow;
 
 public class StockAdjustment {
@@ -17,6 +19,9 @@ public class StockAdjustment {
 	static Session session;
 	static Map<Long, ProductFlow> productFlowMap = new HashMap<Long, ProductFlow>();
 
+	public static void main(String[] args) {
+		recalculateStock();
+	}
 	public static void recalculateStock(){
 
 		session = HibernateSessions.setSession();
@@ -24,9 +29,14 @@ public class StockAdjustment {
 		try {
 
 			tx = session.beginTransaction();
-			Criteria criteriaSupply = session.createCriteria(ProductFlow.class);
-			criteriaSupply.add(Restrictions.isNull("referenceProductFlow"));
-			List productSupplyFlows = criteriaSupply.list();
+			Query query = session.createQuery("select pf from ProductFlow pf left join pf.transaction tx "
+					+ " where tx.type = ? or tx.type = ? ");
+			
+			query.setString(0, TransactionType.TRANS_IN.toString());
+			query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
+			 
+			List productSupplyFlows = query.list();
+			System.out.println("productSupplyFlows: "+productSupplyFlows.size());
 			for (Object productSupplyFlow : productSupplyFlows) {
 				ProductFlow pf = (ProductFlow) productSupplyFlow;
 				pf.resetUsedCount();
@@ -35,20 +45,23 @@ public class StockAdjustment {
 
 			Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
 			criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
-			List productUsedFlows = criteriaSupply.list();
-
+			List productUsedFlows = criteriaUsed.list();
+			 
 			for (Object object : productUsedFlows) {
 				ProductFlow pf = (ProductFlow) object;
 				productFlowMap.get(pf.getReferenceProductFlow().getId()).addUsedCount(pf.getCount());
 
 			}
+			System.out.println("SUPPLY: "+productFlowMap.keySet().size());
 			for (Long id : productFlowMap.keySet()) {
 				session.merge(productFlowMap.get(id));
-
+				System.out.println("update: "+ id);
 			}
 			tx.commit();
 		} catch (Exception e) {
+			e.printStackTrace();
 			if (tx != null) {
+				System.out.println("ROLLING BACK");
 				tx.rollback();
 			}
 		} finally {
@@ -60,7 +73,7 @@ public class StockAdjustment {
 	 * adjust transaction dates
 	 * 
 	 */
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		String id_raw = "5357\r\n" + 
 				"5829";
 		session = HibernateSessions.setSession();

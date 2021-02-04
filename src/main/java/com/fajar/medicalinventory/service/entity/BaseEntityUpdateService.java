@@ -47,9 +47,20 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 		LogProxyFactory.setLoggers(this);
 	}
 
-	public WebResponse saveEntity(T baseEntity, boolean newRecord, HttpServletRequest httoHttpServletRequest) throws Exception {
+	public WebResponse saveEntity(T baseEntity, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
 		log.error("saveEntity Method not implemented");
 		return WebResponse.failed("method not implemented");
+	}
+	
+	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
+		 
+		try {
+			boolean deleted = entityRepository.deleteById(id, _class);
+			return new WebResponse();
+		}catch (Exception e) { 
+			throw e;
+		} finally { 
+		}
 	}
 
 	protected T copyNewElement(T source, boolean newRecord) {

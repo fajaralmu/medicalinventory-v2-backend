@@ -14,10 +14,10 @@ public @interface Dto {
 	FormInputColumn formInputColumn() default FormInputColumn.TWO_COLUMN;
 	boolean ignoreBaseField() default true;
 	boolean editable() default true;
-	String value() default "";
-	boolean quistionare() default false;
+	String value() default ""; 
 	boolean creatable() default true;
 	String updateService() default "commonUpdateService";
 	public boolean commonManagementPage() default true; 
+	public boolean withProgressWhenUpdated() default false; 
 	 
 }

@@ -32,12 +32,13 @@ import lombok.Builder.Default;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 
  * @author fajar
  */
-@Dto(updateService = "productFlowUpdateService", creatable= false)
+@Dto(updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
 @Component
 @Entity
 @Table(name = "product_flow")
@@ -76,6 +77,7 @@ public class ProductFlow extends BaseEntity {
 	@Nullable
 	@ManyToOne
 	@JoinColumn(name = "reference_flow_id")
+	@Setter(value = AccessLevel.NONE)
 	private ProductFlow referenceProductFlow;
 
 	@Column
@@ -117,4 +119,24 @@ public class ProductFlow extends BaseEntity {
 		if (product == null) return false;
 		return product.idEquals(p);
 	} 
+	
+	
+	/**
+	 * make the expDate same as referenceProductFlow.expDate
+	 */
+	public void setExpDate() {
+		if (null == referenceProductFlow) {
+			return;
+		}
+		setExpiredDate(referenceProductFlow.getExpiredDate());
+	}
+
+
+	public void setReferenceProductFlow(ProductFlow referenceFlow) {
+		if (null != referenceFlow && null != referenceFlow.getProduct()) {
+			setProduct(referenceFlow.getProduct());
+		}
+		this.referenceProductFlow = referenceFlow;
+		this.setExpDate();
+	}
 }

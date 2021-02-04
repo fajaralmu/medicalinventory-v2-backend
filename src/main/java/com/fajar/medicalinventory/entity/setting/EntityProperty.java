@@ -14,6 +14,7 @@ import com.fajar.medicalinventory.util.MyJsonUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -46,11 +47,14 @@ public class EntityProperty implements Serializable {
 	private String currencyElementsJson;
 
 	private int formInputColumn;
-	@Builder.Default
+	@Default
 	private boolean editable = true;
+	@Default
 	private boolean creatable = true;
-	@Builder.Default
+	@Default
 	private boolean withDetail = false;
+	@Default
+	private boolean withProgressWhenUpdated = false;
 
 	@Builder.Default
 	private List<String> dateElements = new ArrayList<String>();
