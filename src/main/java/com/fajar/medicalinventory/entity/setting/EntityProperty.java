@@ -48,6 +48,7 @@ public class EntityProperty implements Serializable {
 	private int formInputColumn;
 	@Builder.Default
 	private boolean editable = true;
+	private boolean creatable = true;
 	@Builder.Default
 	private boolean withDetail = false;
 

@@ -49,17 +49,17 @@ public class ProductFlowsData {
 				Long referenceStockId = Long.valueOf(properties[6]);
 				reference.setId(referenceStockId);
 			} 
-			ProductFlow pf = new ProductFlow(
-					Transaction.builder().code(trxCode).build(), 
-					Product.builder().code(productCode).build(), 
-					expDate, count, 0, reference , suitable, price, 
-					generic);
-			pf.setId(id);
-			if (map.get(trxCode) == null) {
-				map.put(trxCode, new ArrayList<ProductFlow>());
-			}
-			map.get(trxCode).add(pf);
-			System.out.println(pf);
+//			ProductFlow pf = new ProductFlow(
+//					Transaction.builder().code(trxCode).build(), 
+//					Product.builder().code(productCode).build(), 
+//					expDate, count, 0, reference , suitable, price, 
+//					generic, );
+//			pf.setId(id);
+//			if (map.get(trxCode) == null) {
+//				map.put(trxCode, new ArrayList<ProductFlow>());
+//			}
+//			map.get(trxCode).add(pf);
+//			System.out.println(pf);
 		}
 	}
 	

@@ -48,6 +48,7 @@ public class EntityElement implements Serializable {
 
 	public final boolean ignoreBaseField;
 	public final boolean isGrouped;
+	public final boolean editable;
 	@JsonIgnore
 	public final Field field;
 
@@ -89,25 +90,7 @@ public class EntityElement implements Serializable {
 	@JsonIgnore
 	public Map<String, List<?>> additionalMap;
 	final FieldType fieldType;
-
-//	public static void main(String[] args) {
-//		String json = "[{\\\"serialVersionUID\\\":\\\"4969863194918869183\\\",\\\"name\\\":\\\"Kebersihan\\\",\\\"description\\\":\\\"1111111\\t\\t\\t\\t\\t\\\",\\\"serialVersionUID\\\":\\\"-8161890497812023383\\\",\\\"id\\\":1,\\\"color\\\":null,\\\"fontColor\\\":null,\\\"createdDate\\\":\\\"2020-05-14 21:06:03.0\\\",\\\"modifiedDate\\\":\\\"2020-05-14 21:06:03.0\\\",\\\"deleted\\\":\\\"false\\\"},{\\\"serialVersionUID\\\":\\\"4969863194918869183\\\",\\\"name\\\":\\\"Mukafaah\\\",\\\"description\\\":\\\"dfdffd\\\",\\\"serialVersionUID\\\":\\\"-8161890497812023383\\\",\\\"id\\\":2,\\\"color\\\":\\\"#000000\\\",\\\"fontColor\\\":\\\"#000000\\\",\\\"createdDate\\\":\\\"2020-05-12 21:16:58.0\\\",\\\"modifiedDate\\\":\\\"2020-05-12 21:16:58.0\\\",\\\"deleted\\\":\\\"false\\\"},{\\\"serialVersionUID\\\":\\\"4969863194918869183\\\",\\\"name\\\":\\\"Alat Tulis\\\",\\\"description\\\":\\\"alat tulis kantor\\t\\t\\t\\t\\t\\t\\\",\\\"serialVersionUID\\\":\\\"-8161890497812023383\\\",\\\"id\\\":3,\\\"color\\\":null,\\\"fontColor\\\":null,\\\"createdDate\\\":\\\"2020-05-12 21:56:36.0\\\",\\\"modifiedDate\\\":\\\"2020-05-12 21:56:36.0\\\",\\\"deleted\\\":\\\"false\\\"}]";
-//		System.out.println(json.replace("\\t", ""));
-//	}
-
-	public EntityElement(Field field, EntityProperty entityProperty) {
-		this.field = field;
-		this.ignoreBaseField = entityProperty.isIgnoreBaseField();
-		this.entityProperty = entityProperty;
-		this.isGrouped = entityProperty.isQuestionare();
-		formField = field.getAnnotation(FormField.class);
-		if (formField!= null) {
-			this.fieldType = formField.type();
-		}else {
-			this.fieldType = FieldType.FIELD_TYPE_TEXT;
-		}
-		init();
-	}
+ 
 
 	public EntityElement(Field field, EntityProperty entityProperty, Map<String, List<?>> additionalMap) {
 		this.field = field;
@@ -115,11 +98,14 @@ public class EntityElement implements Serializable {
 		this.entityProperty = entityProperty;
 		this.additionalMap = additionalMap;
 		this.isGrouped = entityProperty.isQuestionare();
-		formField = field.getAnnotation(FormField.class);
+		this.formField = field.getAnnotation(FormField.class);
+		
 		if (formField!= null) {
 			this.fieldType = formField.type();
+			this.editable = formField.editable();
 		}else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
+			this.editable = false;
 		}
 		init();
 	}

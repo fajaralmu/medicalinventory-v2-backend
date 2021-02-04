@@ -29,6 +29,7 @@ public @interface FormField {
 	public boolean iconImage() default false;
 	
 	public boolean hasPreview() default false;
+	public boolean editable() default true;
 	//LINK = /api/component/{previewLink}/{elementValue}
 	public String previewLink() default "";
 

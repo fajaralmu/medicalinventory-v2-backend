@@ -10,7 +10,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.HealthCenter;
@@ -81,6 +80,7 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
+			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction);
 			return response;
 		} catch (Exception e) {
@@ -154,6 +154,7 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
+			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction);
 			return response;
 		} catch (Exception e) {

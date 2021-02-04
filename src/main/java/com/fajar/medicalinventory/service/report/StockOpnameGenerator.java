@@ -43,15 +43,17 @@ public class StockOpnameGenerator {
 	}
 
 	public XSSFWorkbook generateReport() throws Exception {
-		sheet = wb.createSheet("Stock Opname " + DateUtil.formatDate(date, DATE_PATTERN));
+		
+		String dateString = DateUtil.formatDate(date, DATE_PATTERN);
+		sheet = wb.createSheet("Stock Opname " + dateString);
 		Label labels[] = new Label[8];
 		labels[0] = new Label(2, 3, "No");
 		labels[1] = new Label(3, 3, "Nama");
 		labels[2] = new Label(4, 3, "Satuan");
 		labels[3] = new Label(5, 3, "Sisa Stok");
-		labels[4] = new Label(6, 3, "Harga Satuan");
+		labels[4] = new Label(6, 3, "Harga Satuan per "+dateString);
 		labels[5] = new Label(7, 3, "Harga Total");
-		labels[6] = new Label(2, 1, "STOK OPNAME " + DateUtil.formatDate(date, DATE_PATTERN));
+		labels[6] = new Label(2, 1, "STOK OPNAME " + dateString);
 		labels[7] = new Label(2, 2, location.getName().toUpperCase());
 
 		sheet.addMergedRegion(new CellRangeAddress(1, 1, 2, 7));

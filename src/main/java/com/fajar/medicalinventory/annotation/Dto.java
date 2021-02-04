@@ -16,6 +16,7 @@ public @interface Dto {
 	boolean editable() default true;
 	String value() default "";
 	boolean quistionare() default false;
+	boolean creatable() default true;
 	String updateService() default "commonUpdateService";
 	public boolean commonManagementPage() default true; 
 	 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.JoinColumn;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.Criteria;
@@ -286,6 +287,10 @@ public class CriteriaBuilder {
 		Field field = EntityUtil.getDeclaredField(entityClass, orderBy);
 		if (null == field) {
 			log.info("{} is not {} field", orderBy, entityClass);
+			return null;
+		}
+		if (field.getAnnotation(Transient.class) != null) {
+			log.info("{} is TRANSIENT FIELD", orderBy);
 			return null;
 		}
 		if (field.getAnnotation(JoinColumn.class) != null) {

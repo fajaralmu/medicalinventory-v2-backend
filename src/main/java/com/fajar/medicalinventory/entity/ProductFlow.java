@@ -15,10 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -34,7 +37,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@Dto
+@Dto(updateService = "productFlowUpdateService", creatable= false)
 @Component
 @Entity
 @Table(name = "product_flow")
@@ -49,21 +52,25 @@ public class ProductFlow extends BaseEntity {
 	 */
 	private static final long serialVersionUID = 8839593046741372229L;
 
-	@JsonIgnore
+//	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "transaction_id", nullable = false)
+	@FormField(optionItemName = "code", editable = false) 
 	private Transaction transaction;
 
 	@ManyToOne
 	@JoinColumn(name = "product_id", nullable = false)
+	@FormField(optionItemName = "name", editable = false)
 	private Product product;
 
 	@Column(name="expired_date")
+	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date expiredDate;
 	@Column
+	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int count;
 	@Column(name="used_count", nullable = false)
-	@Getter(value = AccessLevel.NONE)
+	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int usedCount;
 	
 	@Nullable
@@ -73,16 +80,14 @@ public class ProductFlow extends BaseEntity {
 
 	@Column
 	@Default
+	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean suitable = true;
 	@Column
+	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private long price;
 	@Column
-	private boolean generic;
-	
-	public Integer getUsedCount() {
-		 
-		return usedCount;
-	}
+	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
+	private boolean generic;  
 	
 	public void addUsedCount(int count) {
 		 
@@ -93,8 +98,7 @@ public class ProductFlow extends BaseEntity {
 	}
 	
 	
-	public int getStock() {
-	 
+	public int getStock() { 
 		return count - usedCount;
 	}
 
@@ -112,23 +116,5 @@ public class ProductFlow extends BaseEntity {
 	public boolean productsEquals(Product p) {
 		if (product == null) return false;
 		return product.idEquals(p);
-	}
-	
-	// transients //
-
-//	@Transient
-//	private int hargaPerItem;
-//	@Transient
-//	private int hargatotal;
-//	@Transient
-//	private int jumlahobatLama;
-//
-//	// WEB STUFF
-//	@Transient
-//	private String namaobat;
-//	@Transient
-//	private boolean terdaftar;
-//	@Transient
-//	private boolean sudah_diedit;
-
+	} 
 }

@@ -46,7 +46,7 @@ public class EntityUtil {
 		final boolean isQuestionare = dto.quistionare();
 
 		EntityProperty entityProperty = EntityProperty.builder().ignoreBaseField(ignoreBaseField)
-				.entityName(clazz.getSimpleName().toLowerCase()).isQuestionare(isQuestionare).build();
+				.entityName(clazz.getSimpleName().toLowerCase()).creatable(dto.creatable()).isQuestionare(isQuestionare).build();
 		try {
 
 			List<Field> fieldList = getDeclaredFields(clazz);

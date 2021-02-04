@@ -15,7 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -29,6 +28,8 @@ import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.StringUtil;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * @author fajar
  */
+@JsonInclude(value = Include.NON_NULL)
 @Dto(editable = false)
 @Entity
 @Table(name = "transaction")
@@ -152,6 +154,11 @@ public class Transaction extends BaseEntity implements Serializable {
 			}
 		}
 		return count;
+	}
+
+	public void setProductFlowsTransactionNull() {
+		if (null == productFlows) return;
+		productFlows.forEach(p->p.setTransaction(null));
 	}
 	
 	 
