@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.config.security.UserDetailDomain;
 import com.fajar.medicalinventory.entity.User;
-import com.fajar.medicalinventory.util.SessionUtil;
+import com.fajar.medicalinventory.util.HttpRequestUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public class SessionValidationService {
 			return null;
 		}
 		User user = ((UserDetailDomain) getUserPrincipal(request)).getUserDetails();
-		user.setRequestId(SessionUtil.getPageRequestId(request));
+		user.setRequestId(HttpRequestUtil.getPageRequestId(request));
 		return user;
 	}
 	public Object getUserPrincipal(HttpServletRequest request) {

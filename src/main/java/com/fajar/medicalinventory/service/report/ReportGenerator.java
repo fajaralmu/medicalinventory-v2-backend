@@ -1,9 +1,5 @@
 package com.fajar.medicalinventory.service.report;
 
-import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT;
-import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;
-import static com.fajar.medicalinventory.util.DateUtil.MONTH_NAMES;
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,15 +45,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import jxl.Workbook;
-import jxl.format.Alignment;
-import jxl.format.Border;
-import jxl.format.BorderLineStyle;
-import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -343,9 +330,10 @@ public class ReportGenerator {
 
 		Document doc = new Document(PageSize.A4);
 		doc.setMargins(10f, 10f, 10f, 10f);
+		doc.open();
+		
 		String filename = path + "Label-Obat-" + t.getCode() + ".pdf";
 		PdfWriter.getInstance(doc, new FileOutputStream(filename));
-		doc.open();
 		Font fontRincianIdStok = FontFactory.getFont(FontFactory.COURIER, 20f);
 		fontRincianIdStok.setStyle("bold");
 		Font fontUmum = FontFactory.getFont(FontFactory.TIMES, 12f);
@@ -422,15 +410,6 @@ public class ReportGenerator {
 
 	}
 
-	private int sumCountProduct(List<ProductFlow> productFlows, Product product) {
-		int count = 0;
-		for (ProductFlow ao : productFlows) {
-			if (ao.productsEquals(product)) {
-				count += ao.getCount();
-			}
-		}
-		return count;
-	}
 	
 	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest)
 			throws Exception {

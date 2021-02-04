@@ -4,7 +4,6 @@ import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT;
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;
 import static com.fajar.medicalinventory.util.DateUtil.MONTH_NAMES;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import jxl.write.biff.RowsExceededException;
 
 public class ProductRequestSheetGenerator {
 	private WritableWorkbook wb;
