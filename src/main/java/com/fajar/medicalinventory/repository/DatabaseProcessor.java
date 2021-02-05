@@ -64,8 +64,10 @@ public class DatabaseProcessor {
 
 	public <T extends BaseEntity> List<T> filterAndSortv2(Class<T> _class, Filter filter) {
 		log.info("filterAndSortv2 : {}", _class);
+		checkSession();
+		Transaction tx = hibernateSession.beginTransaction();
 		try {
-			checkSession();
+			
 			CriteriaBuilder criteriaBuilder = getCriteriaBuilder(_class, filter);
 			Criteria criteria = criteriaBuilder.createCriteria();
 			List<T> resultList = criteria.list();
@@ -73,12 +75,16 @@ public class DatabaseProcessor {
 			if (null == resultList) {
 				resultList = new ArrayList<>();
 			}
+			tx.commit();
 
 			log.info("resultList length: {}", resultList.size());
 			return resultList;
 		} catch (Exception e) {
 			log.error("Error filter and sort v2: {}", e);
 			e.printStackTrace();
+			if (null != tx) {
+				tx.rollback();
+			}
 		} finally {
 			refresh();
 		}

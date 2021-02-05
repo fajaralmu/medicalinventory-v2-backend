@@ -138,11 +138,13 @@ public class TransactionService {
 				if (productFlow.getReferenceProductFlow() == null) {
 					throw new ApplicationException("Reference flow does not exist in the request");
 				}
-				productFlow.setTransaction(transaction);
-				ProductFlow referenceFlow = (ProductFlow)session.get(ProductFlow.class, productFlow.getReferenceProductFlow().getId());
+				
+				ProductFlow referenceFlow = getReferenceFlow(session, productFlow);
 				if (null == referenceFlow) {
 					throw new ApplicationException("Reference flow does not exist in the DB");
 				}
+				
+				productFlow.setTransaction(transaction);
 				productFlow.setReferenceProductFlow(referenceFlow);				
 				referenceFlow.addUsedCount(productFlow.getCount());
 				
@@ -162,10 +164,15 @@ public class TransactionService {
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
-			throw e;
+			throw new ApplicationException(e.getMessage());
 		} finally {
 			session.close();
 		}
+	}
+
+	private ProductFlow getReferenceFlow(Session session, ProductFlow productFlow) {
+		Object record = session.get(ProductFlow.class, productFlow.getReferenceProductFlow().getId());
+		return (ProductFlow) record;
 	}
 
 	

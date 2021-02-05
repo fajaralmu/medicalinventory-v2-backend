@@ -4,12 +4,16 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.exception.ApplicationException;
+import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.service.transaction.InventoryService;
 
@@ -23,6 +27,9 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
 	private InventoryService inventoryService;
+	@Autowired
+	private SessionFactory sessionFactory;
+	
 	@Override
 	public WebResponse saveEntity(ProductFlow object, boolean newRecord, HttpServletRequest httpServletRequest)
 			throws Exception {
@@ -42,5 +49,29 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 		WebResponse response = new WebResponse();
 		response.setEntity(saved);
 		return response ;
+	}
+	
+	@Override
+	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
+		Session session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		try {
+			ProductFlow existing = (ProductFlow) session.get(ProductFlow.class, id);
+			if (existing == null) {
+				throw new DataNotFoundException("Record not found");
+			}
+			session.delete(existing);
+			tx.commit();
+			inventoryService.adjustStock(httpServletRequest);
+			return new WebResponse();
+		} catch (Exception e) {
+			
+			if (tx != null)
+				tx.rollback();
+			throw new ApplicationException(e.getMessage());
+		} finally {
+			session.close();
+		}
+		 
 	}
 }

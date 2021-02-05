@@ -65,10 +65,16 @@ public class CriteriaBuilder {
 		if (multiKey) {
 			Field foreignField = EntityUtil.getDeclaredField(entityClass, keyName.split(",")[0]);
 			field = EntityUtil.getDeclaredField(foreignField.getType(), keyName.split(",")[1]);
+			
+			if (field.getAnnotation(Transient.class)!=null) return null;
+			
 			String alias = getAlias(foreignField.getName()) + "." + QueryUtil.getColumnName(field);
 			return Restrictions.sqlRestriction(alias + "='" + fieldValue + "'");
 		} else {
 			field = EntityUtil.getDeclaredField(entityClass, keyName);
+			
+			if (field.getAnnotation(Transient.class)!=null) return null;
+			
 			KeyValue joinColumnResult = QueryUtil.checkIfJoinColumn(keyName, field, true);
 			
 			if (null != joinColumnResult) {
@@ -193,7 +199,10 @@ public class CriteriaBuilder {
 					setCurrentAlias(currentKey.split(",")[0]);
 				}
 
-				criteria.add(restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey)));
+				Criterion eq = restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey));
+				if (null != eq) {
+					criteria.add(eq );
+				}
 				continue;
 			}
 
@@ -229,16 +238,25 @@ public class CriteriaBuilder {
 			if (null != joinColumnResult) {
 				if (joinColumnResult.isValid()) {
 
-					criteria.add(restrictionLike(fieldName + "." + joinColumnResult.getValue(), field.getType(),
-							fieldsFilter.get(rawKey)));
+					Criterion like = restrictionLike(fieldName + "." + joinColumnResult.getValue(), field.getType(),
+							fieldsFilter.get(rawKey));
+					if (null != like ) {
+					criteria.add(like );
+					}
 				} else {
 					continue;
 				}
 			} else {
 				if (itemExacts) {
-					criteria.add(restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey)));
+					Criterion eq = restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey));
+					if (null != eq) {
+						criteria.add(eq );
+					}
 				} else {
-					criteria.add(restrictionLike(entityName + "." + currentKey, entityClass, fieldsFilter.get(rawKey)));
+					Criterion like = (restrictionLike(entityName + "." + currentKey, entityClass, fieldsFilter.get(rawKey)));
+					if (null != like ) {
+						criteria.add(like );
+					}
 				}
 			}
 
@@ -309,6 +327,8 @@ public class CriteriaBuilder {
 			extractedFieldName = fieldName.split("\\.")[1];
 		}
 		Field field = EntityUtil.getDeclaredField(_class, extractedFieldName);
+		if (field.getAnnotation(Transient.class)!=null) return null;
+		
 		boolean stringTypeField = field.getType().equals(String.class);
 		Object validatedValue = validateFieldValue(field, value);
 

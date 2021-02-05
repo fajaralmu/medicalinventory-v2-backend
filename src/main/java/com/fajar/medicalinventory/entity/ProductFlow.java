@@ -15,7 +15,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,6 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.exception.ApplicationException;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -91,6 +89,11 @@ public class ProductFlow extends BaseEntity {
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean generic;  
 	
+	@Transient
+	@FormField(editable = false)
+	@Getter(AccessLevel.NONE)
+	private Long stockId;
+	
 	public void addUsedCount(int count) {
 		 
 		if (getStock() - count < 0) {
@@ -138,5 +141,13 @@ public class ProductFlow extends BaseEntity {
 		}
 		this.referenceProductFlow = referenceFlow;
 		this.setExpDate();
+	}
+
+
+	public Long getStockId() {
+		if (getReferenceProductFlow()!=null) {
+			return getReferenceProductFlow().getId();
+		}
+		return null;
 	}
 }
