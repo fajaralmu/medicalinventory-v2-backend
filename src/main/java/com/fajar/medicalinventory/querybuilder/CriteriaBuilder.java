@@ -56,6 +56,12 @@ public class CriteriaBuilder {
 		log.info("=======CriteriaBuilder Field Filters: {}", fieldsFilter);
 	}
 
+	/**
+	 * 
+	 * @param keyName raw path name
+	 * @param fieldValue
+	 * @return
+	 */
 	private Criterion restrictionEquals( String keyName, Object fieldValue) {
 		System.out.println("Rest EQ: "+entityClass+" key: "+keyName);
 		String entityName = entityClass.getSimpleName();
@@ -77,7 +83,7 @@ public class CriteriaBuilder {
 			
 			if (field==null||field.getAnnotation(Transient.class)!=null) return null;
 			
-			KeyValue joinColumnResult = QueryUtil.checkIfJoinColumn(keyName, field, true);
+			KeyValue joinColumnResult = QueryUtil.checkIfJoinColumn(keyName,field, field, true);
 			
 			if (null != joinColumnResult) {
 				// process join column
@@ -210,15 +216,16 @@ public class CriteriaBuilder {
 				continue;
 			}
 
-			boolean multiKey = rawKey.contains(",");
+			boolean multiKey = rawKey.contains(".");
 
 			Field field;
+			Field fieldRelativeToEntityClass;
 			if (multiKey) {
 				
-				Field hisField = EntityUtil.getDeclaredField(entityClass, rawKey.split(",")[0]);
-				field = EntityUtil.getDeclaredField(hisField.getType(), rawKey.split(",")[1]);
+				 fieldRelativeToEntityClass = EntityUtil.getDeclaredField(entityClass, rawKey.split("\\.")[0]);
+				field = EntityUtil.getDeclaredField(fieldRelativeToEntityClass.getType(), rawKey.split("\\.")[1]);
 			} else {
-				field = QueryUtil.getFieldByName(currentKey, entityDeclaredFields);
+				field = fieldRelativeToEntityClass = QueryUtil.getFieldByName(currentKey, entityDeclaredFields);
 			}
 
 			if (field == null) {
@@ -227,7 +234,7 @@ public class CriteriaBuilder {
 			}
 
 			String fieldName = field.getName();
-			KeyValue<String, String> joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, field, false);
+			KeyValue<String, String> joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, fieldRelativeToEntityClass,field, false);
 			System.out.println("joinColumnResult: "+joinColumnResult);
 			
 			//TODO: process exact with join column
@@ -236,7 +243,7 @@ public class CriteriaBuilder {
 					Class<?> _class = field.getType();
 					if (joinColumnResult.isMultiKey()) {
 						fieldName = joinColumnResult.getKey();
-						_class = field.getDeclaringClass();
+						_class = fieldRelativeToEntityClass.getType();
 					}
 					if (itemExacts) {
 						Criterion eq = restrictionEquals( fieldName+ "." + joinColumnResult.getValue(), fieldsFilter.get(rawKey));

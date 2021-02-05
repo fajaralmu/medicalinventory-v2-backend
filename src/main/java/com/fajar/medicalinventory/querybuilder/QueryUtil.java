@@ -172,75 +172,75 @@ public class QueryUtil {
 
 		return stringBuilder.toString();
 	}
-
-	public static String createWhereClause(Class<?> entityClass, Map<String, Object> filter,  
-		 final	boolean allItemExactSearch ) {
-
-		String tableName 						= getTableName(entityClass);
-		List<QueryFilterItem> sqlFilters 		= new ArrayList<QueryFilterItem>();
-		List<Field> entityDeclaredFields 		= EntityUtil.getDeclaredFields(entityClass);
-
-		log.info("=======FILTER: {}", filter);
-		
-		filter.put(TABLE_NAME, tableName);
-
-		for (final String rawKey : filter.keySet()) {
-			log.info("................." + rawKey + ":" + filter.get(rawKey));
-			
-			if (filter.get(rawKey) == null)
-				continue;
-
-			String currentKey = rawKey;
-			boolean itemExacts = allItemExactSearch; 
-			String filterTableName = tableName; 
-			String finalNameAfterExactChecking = currentItemExact(rawKey);
-			
-			if(null != finalNameAfterExactChecking) {
-				currentKey = finalNameAfterExactChecking;
-				itemExacts = true;
-			}
-			
-			log.info("Raw key: {} Now KEY: {}", rawKey, currentKey); 
-			
-			QueryFilterItem queryItem = new QueryFilterItem();
-			queryItem.setExacts(itemExacts);
-
-			// check if date
-			QueryFilterItem dateFilterSql = getDateFilter(rawKey, currentKey, entityDeclaredFields, filter);
-
-			if(null != dateFilterSql) {
-				sqlFilters.add(dateFilterSql);
-				continue;
-			}
-			
-			Field field = getFieldByName(currentKey, entityDeclaredFields);
-
-			if (field == null) {
-				log.warn("Field Not Found :" + currentKey + " !");
-				continue; 
-			}
-			
-			String filterColumnName = getColumnName(field); 
-			KeyValue<String, String> joinColumnResult = checkIfJoinColumn(currentKey, field, false);
-			
-			if(null != joinColumnResult) {
-				if(joinColumnResult.isValid()) {
-					filterTableName = joinColumnResult.getKey().toString();
-					filterColumnName = joinColumnResult.getValue().toString();
-				} else {
-					continue;
-				}
-			}
-			
-			queryItem.setTableName(filterTableName);
-			queryItem.setColumnName(filterColumnName);
-			queryItem.setValue(filter.get(rawKey));
-			sqlFilters.add(queryItem ); 
-		} 
-		 
-		return completeWhereClause(sqlFilters);
-		 
-	}
+//
+//	public static String createWhereClause(Class<?> entityClass, Map<String, Object> filter,  
+//		 final	boolean allItemExactSearch ) {
+//
+//		String tableName 						= getTableName(entityClass);
+//		List<QueryFilterItem> sqlFilters 		= new ArrayList<QueryFilterItem>();
+//		List<Field> entityDeclaredFields 		= EntityUtil.getDeclaredFields(entityClass);
+//
+//		log.info("=======FILTER: {}", filter);
+//		
+//		filter.put(TABLE_NAME, tableName);
+//
+//		for (final String rawKey : filter.keySet()) {
+//			log.info("................." + rawKey + ":" + filter.get(rawKey));
+//			
+//			if (filter.get(rawKey) == null)
+//				continue;
+//
+//			String currentKey = rawKey;
+//			boolean itemExacts = allItemExactSearch; 
+//			String filterTableName = tableName; 
+//			String finalNameAfterExactChecking = currentItemExact(rawKey);
+//			
+//			if(null != finalNameAfterExactChecking) {
+//				currentKey = finalNameAfterExactChecking;
+//				itemExacts = true;
+//			}
+//			
+//			log.info("Raw key: {} Now KEY: {}", rawKey, currentKey); 
+//			
+//			QueryFilterItem queryItem = new QueryFilterItem();
+//			queryItem.setExacts(itemExacts);
+//
+//			// check if date
+//			QueryFilterItem dateFilterSql = getDateFilter(rawKey, currentKey, entityDeclaredFields, filter);
+//
+//			if(null != dateFilterSql) {
+//				sqlFilters.add(dateFilterSql);
+//				continue;
+//			}
+//			
+//			Field field = getFieldByName(currentKey, entityDeclaredFields);
+//
+//			if (field == null) {
+//				log.warn("Field Not Found :" + currentKey + " !");
+//				continue; 
+//			}
+//			
+//			String filterColumnName = getColumnName(field); 
+//			KeyValue<String, String> joinColumnResult = checkIfJoinColumn(currentKey, field, false);
+//			
+//			if(null != joinColumnResult) {
+//				if(joinColumnResult.isValid()) {
+//					filterTableName = joinColumnResult.getKey().toString();
+//					filterColumnName = joinColumnResult.getValue().toString();
+//				} else {
+//					continue;
+//				}
+//			}
+//			
+//			queryItem.setTableName(filterTableName);
+//			queryItem.setColumnName(filterColumnName);
+//			queryItem.setValue(filter.get(rawKey));
+//			sqlFilters.add(queryItem ); 
+//		} 
+//		 
+//		return completeWhereClause(sqlFilters);
+//		 
+//	}
 	
 	/**
 	 * return keyValue of tableName and columnName of the referenced entity
@@ -249,7 +249,7 @@ public class QueryUtil {
 	 * @param actualColumnName
 	 * @return
 	 */
-	public static KeyValue<String, String> checkIfJoinColumn(String currentKey, Field field, boolean actualColumnName) {
+	public static KeyValue<String, String> checkIfJoinColumn(String currentKey, Field relativeToEntityClass, Field field, boolean actualColumnName) {
 		 
 		String multiKeyColumnName = getMultiKeyColumnName(currentKey);
 		KeyValue<String, String> keyValue = new KeyValue<>();
@@ -265,7 +265,7 @@ public class QueryUtil {
 
 				if (isMultiKey) {
 					referenceFieldName = multiKeyColumnName;
-					joinTableName = getTableName(field.getDeclaringClass()); 
+					joinTableName = getTableName(relativeToEntityClass.getType()); 
 					keyValue.setMultiKey(isMultiKey);
 				}else {
 					referenceFieldName = getOptionItemName(field);
@@ -301,7 +301,7 @@ public class QueryUtil {
 	}
 
 	private static String getMultiKeyColumnName(String currentKey) {
-		String[] multiKey 	= currentKey.split(",");
+		String[] multiKey 	= currentKey.split("\\.");
 		boolean isMultiKey 	= multiKey.length == 2;
 		if (isMultiKey) {
 			log.info("Multi Key: {}", currentKey);

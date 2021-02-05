@@ -43,9 +43,10 @@ public class CriteriaTester {
 		 
 		Map<String, Object> fieldsFilter = new HashMap<String, Object>();
 		fieldsFilter.put("referenceProductFlow", "6013");
-		fieldsFilter.put("product,id", "1");
+		fieldsFilter.put("product.id", "1");
+		fieldsFilter.put("product", "1");
 		fieldsFilter.put("count", "0");
-		Filter filter = Filter.builder().exacts(true). fieldsFilter(fieldsFilter ).build();
+		Filter filter = Filter.builder().exacts(false). fieldsFilter(fieldsFilter ).build();
 		CriteriaBuilder cb = new CriteriaBuilder(testSession, ProductFlow.class,  filter );
 		Criteria criteria = cb.createCriteria();
 	try {

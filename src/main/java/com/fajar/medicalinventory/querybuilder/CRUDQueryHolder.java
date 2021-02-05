@@ -25,9 +25,9 @@ public class CRUDQueryHolder extends QueryHolder {
 		joinSql = QueryUtil.createLeftJoinQueryFullObject(entityClass);
 
 		if (this.withFilteredField) {
-			whereClauseSql = QueryUtil.createWhereClause(entityClass, filter.getFieldsFilter(),
-//					contains, 
-					exacts);
+//			whereClauseSql = QueryUtil.createWhereClause(entityClass, filter.getFieldsFilter(),
+////					contains, 
+//					exacts);
 		}
 
 	}
