@@ -55,6 +55,11 @@ public class RestTransactionController extends BaseController {
 		log.info("gettransactionbycode {}", code);
 		return transactionService.getTransactionByCode(code);
 	}
+	@PostMapping(value = "/deleterecord/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
+	public WebResponse deletetransactionrecord(@PathVariable String code, HttpServletRequest httpRequest) {
+		log.info("deletetransactionrecord {}", code);
+		return transactionService.deleteRecordByCode(code);
+	}
 
 	 
 }

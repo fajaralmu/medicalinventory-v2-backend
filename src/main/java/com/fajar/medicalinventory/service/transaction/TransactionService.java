@@ -175,5 +175,27 @@ public class TransactionService {
 		return (ProductFlow) record;
 	}
 
+	public WebResponse deleteRecordByCode(String code) {
+		Session session = sessionFactory.openSession();
+		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
+		try {
+			Transaction record = transactionRepository.findByCode(code);
+			if (null == record) {
+				throw new Exception("Record not found");
+			}
+			session.delete(record);
+			hibernateTransaction.commit();
+			return new WebResponse();
+		}catch (Exception e) {
+
+			if (null != hibernateTransaction) {
+				hibernateTransaction.rollback();
+			}
+			throw new ApplicationException(e.getMessage());
+		} finally {
+			session.close();
+		}
+	}
+
 	
 }

@@ -71,8 +71,6 @@ public class EntityService {
 	 */
 	public WebResponse saveEntity(WebRequest request, HttpServletRequest servletRequest, boolean newRecord) {
 
-		 
-
 			final String key = request.getEntity().toLowerCase();
 			EntityManagementConfig entityConfig = getEntityManagementConfig(key);
 			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();

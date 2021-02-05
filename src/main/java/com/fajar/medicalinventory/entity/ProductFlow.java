@@ -76,6 +76,7 @@ public class ProductFlow extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "reference_flow_id")
 	@Setter(value = AccessLevel.NONE)
+	@FormField(optionItemName = "id", editable = false) 
 	private ProductFlow referenceProductFlow;
 
 	@Column
@@ -88,11 +89,7 @@ public class ProductFlow extends BaseEntity {
 	@Column
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean generic;  
-	
-	@Transient
-	@FormField(editable = false)
-	@Getter(AccessLevel.NONE)
-	private Long stockId;
+	 
 	
 	public void addUsedCount(int count) {
 		 
@@ -139,15 +136,10 @@ public class ProductFlow extends BaseEntity {
 		if (null != referenceFlow && null != referenceFlow.getProduct()) {
 			setProduct(referenceFlow.getProduct());
 		}
+		this.setGeneric(referenceFlow.isGeneric());
 		this.referenceProductFlow = referenceFlow;
 		this.setExpDate();
 	}
 
-
-	public Long getStockId() {
-		if (getReferenceProductFlow()!=null) {
-			return getReferenceProductFlow().getId();
-		}
-		return null;
-	}
+ 
 }

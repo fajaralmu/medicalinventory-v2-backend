@@ -3,7 +3,9 @@ package com.fajar.medicalinventory.externalapp;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.Entity;
@@ -14,8 +16,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.ProductFlow;
+import com.fajar.medicalinventory.querybuilder.CriteriaBuilder;
 import com.fajar.medicalinventory.util.EntityUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,18 +34,29 @@ public class CriteriaTester {
 	static ObjectMapper mapper = new ObjectMapper();
 	static List<Class<?>> managedEntities = new ArrayList<>();
 
-	public static void main2(String[] args) throws Exception {
+	public static void main (String[] args) throws Exception {
 
 		setSession();
 
 		// String filterJSON =
 		// "{\"entity\":\"product\",\"filter\":{\"exacts\":false,\"limit\":10,\"page\":0,\"fieldsFilter\":{\"withStock\":false,\"withSupplier\":false,\"withCategories\":false,\"category,id[EXACTS]\":\"4\",\"name\":\"\"},\"orderBy\":null,\"orderType\":null}}";
-		String filterJSON = "{\"entity\":\"product\",\"filter\":{\"limit\":5,\"page\":9,\"orderBy\":null,\"orderType\":null,\"fieldsFilter\":{}}}";
-		WebRequest request = mapper.readValue(filterJSON, WebRequest.class);
-//		CriteriaBuilder cb = new CriteriaBuilder(testSession, Product.class, request.getFilter());
-//		Criteria criteria = cb.createRowCountCriteria();
-//
-//		criteria.list();
+		 
+		Map<String, Object> fieldsFilter = new HashMap<String, Object>();
+		fieldsFilter.put("referenceProductFlow", "6013");
+		fieldsFilter.put("product,id", "1");
+		fieldsFilter.put("count", "0");
+		Filter filter = Filter.builder().exacts(true). fieldsFilter(fieldsFilter ).build();
+		CriteriaBuilder cb = new CriteriaBuilder(testSession, ProductFlow.class,  filter );
+		Criteria criteria = cb.createCriteria();
+	try {
+			List list = criteria.list();
+			list.forEach(System.out::println);
+	}catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+	}	
+		testSession.close();
+		System.exit(0);
 
 	}
 
@@ -89,12 +105,7 @@ public class CriteriaTester {
 		return false;
 	}
 
-	public static void main(String[] args) throws Exception {
-		setSession();
-		  
-		System.exit(0);
-	}
-
+	 
 	static void insertRecords() throws Exception {
 		List<Class<?>> entities = getDependentEntities(getDependentEntities(managedEntities));
 		Transaction tx = testSession.beginTransaction();
@@ -155,16 +166,7 @@ public class CriteriaTester {
 
 	static void setSession() {
 
-		org.hibernate.cfg.Configuration configuration = new org.hibernate.cfg.Configuration();
-		configuration.setProperties(additionalPropertiesPostgres());
-
-		managedEntities = getManagedEntities();
-		for (Class class1 : managedEntities) {
-			configuration.addAnnotatedClass(class1);
-		}
-
-		SessionFactory factory = configuration./* setInterceptor(new HibernateInterceptor()). */buildSessionFactory();
-		testSession = factory.openSession();
+		testSession = HibernateSessions.setSession();
 	}
 
 	static List<Class<?>> getManagedEntities() {

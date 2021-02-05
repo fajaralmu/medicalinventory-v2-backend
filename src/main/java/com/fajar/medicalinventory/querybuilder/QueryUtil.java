@@ -221,7 +221,7 @@ public class QueryUtil {
 			}
 			
 			String filterColumnName = getColumnName(field); 
-			KeyValue joinColumnResult = checkIfJoinColumn(currentKey, field, false);
+			KeyValue<String, String> joinColumnResult = checkIfJoinColumn(currentKey, field, false);
 			
 			if(null != joinColumnResult) {
 				if(joinColumnResult.isValid()) {
@@ -237,7 +237,7 @@ public class QueryUtil {
 			queryItem.setValue(filter.get(rawKey));
 			sqlFilters.add(queryItem ); 
 		} 
- 
+		 
 		return completeWhereClause(sqlFilters);
 		 
 	}
@@ -249,10 +249,10 @@ public class QueryUtil {
 	 * @param actualColumnName
 	 * @return
 	 */
-	public static KeyValue checkIfJoinColumn(String currentKey, Field field, boolean actualColumnName) {
-		
+	public static KeyValue<String, String> checkIfJoinColumn(String currentKey, Field field, boolean actualColumnName) {
+		 
 		String multiKeyColumnName = getMultiKeyColumnName(currentKey);
-		KeyValue keyValue = new KeyValue();
+		KeyValue<String, String> keyValue = new KeyValue<>();
 		boolean isMultiKey 	= null != multiKeyColumnName; 
 		boolean validColumn = false;
 		
@@ -265,6 +265,8 @@ public class QueryUtil {
 
 				if (isMultiKey) {
 					referenceFieldName = multiKeyColumnName;
+					joinTableName = getTableName(field.getDeclaringClass()); 
+					keyValue.setMultiKey(isMultiKey);
 				}else {
 					referenceFieldName = getOptionItemName(field);
 				}
@@ -275,7 +277,7 @@ public class QueryUtil {
 				if (fieldColumnName == null || fieldColumnName.equals("")) {
 					validColumn = false;
 				}else {
-				  
+					 
 					keyValue.setKey(joinTableName);
 					keyValue.setValue(fieldColumnName);
 					validColumn = true;
@@ -293,6 +295,7 @@ public class QueryUtil {
 		} 
 		
 		keyValue.setValid(validColumn);
+		 
 		log.info("keyValue: {}", keyValue);
 		return keyValue;
 	}

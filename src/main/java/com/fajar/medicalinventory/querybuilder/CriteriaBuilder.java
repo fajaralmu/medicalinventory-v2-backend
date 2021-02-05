@@ -56,15 +56,17 @@ public class CriteriaBuilder {
 		log.info("=======CriteriaBuilder Field Filters: {}", fieldsFilter);
 	}
 
-	private Criterion restrictionEquals(Class<?> entityClass, String keyName, Object fieldValue) {
+	private Criterion restrictionEquals( String keyName, Object fieldValue) {
+		System.out.println("Rest EQ: "+entityClass+" key: "+keyName);
 		String entityName = entityClass.getSimpleName();
 		String columnName;
-		boolean multiKey = keyName.contains(",");
+		boolean multiKey = keyName.contains(".");
 		Field field;
-
+		 
 		if (multiKey) {
-			Field foreignField = EntityUtil.getDeclaredField(entityClass, keyName.split(",")[0]);
-			field = EntityUtil.getDeclaredField(foreignField.getType(), keyName.split(",")[1]);
+			System.out.println("multiKey: "+multiKey+" "+keyName);
+			Field foreignField = EntityUtil.getDeclaredField(entityClass, keyName.split("\\.")[0]);
+			field = EntityUtil.getDeclaredField(foreignField.getType(), keyName.split("\\.")[1]);
 			
 			if (field.getAnnotation(Transient.class)!=null) return null;
 			
@@ -73,7 +75,7 @@ public class CriteriaBuilder {
 		} else {
 			field = EntityUtil.getDeclaredField(entityClass, keyName);
 			
-			if (field.getAnnotation(Transient.class)!=null) return null;
+			if (field==null||field.getAnnotation(Transient.class)!=null) return null;
 			
 			KeyValue joinColumnResult = QueryUtil.checkIfJoinColumn(keyName, field, true);
 			
@@ -107,10 +109,14 @@ public class CriteriaBuilder {
 		}
 
 		Class<?> fieldType = field.getType();
+		
 		if (EntityUtil.isNumericField(field)) {
-			if (fieldType.equals(Long.class)) {
-				long value = Long.parseLong(fieldValue.toString());
-
+			if (fieldType.equals(Long.class) || fieldType.equals(long.class)) {
+				long value = Long.valueOf(fieldValue.toString());
+				return value;
+			}
+			if (fieldType.equals(Integer.class) || fieldType.equals(int.class)) {
+				long value = Integer.valueOf(fieldValue.toString());
 				return value;
 			}
 		}
@@ -122,6 +128,7 @@ public class CriteriaBuilder {
 	 * @param aliasName must match fieldName of entityClass
 	 */
 	private void setCurrentAlias(String aliasName) {
+		 
 		if (null == aliasName || aliases.get(aliasName) != null)
 			return;
 
@@ -145,11 +152,15 @@ public class CriteriaBuilder {
 		}
 	}
 
-	private String getAlias(String aliasName) {
-		if (THIS.equals(aliasName)) {
+	private String getAlias(final String aliasName) {
+		if (THIS.equals(aliasName) || aliasName.toLowerCase().equals(entityClass.getSimpleName().toLowerCase())) {
 			return "this_";
 		}
-		return aliasName.toLowerCase() + aliases.get(aliasName) + "_";
+		String tableName = aliasName;
+		if (aliasName.length() > 10) {
+			tableName = aliasName.substring(0, 10);
+		}
+		return tableName.toLowerCase() + aliases.get(aliasName) + "_";
 	}
 
 	private void setJoinColumnAliases() {
@@ -186,25 +197,7 @@ public class CriteriaBuilder {
 				continue;
 
 			String currentKey = rawKey;
-			boolean itemExacts = allItemExactSearch;
-			String finalNameAfterExactChecking = currentItemExact(rawKey);
-
-			if (null != finalNameAfterExactChecking) {
-
-				currentKey = finalNameAfterExactChecking;
-				itemExacts = true;
-				boolean multiKey = currentKey.contains(",");
-
-				if (multiKey) {
-					setCurrentAlias(currentKey.split(",")[0]);
-				}
-
-				Criterion eq = restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey));
-				if (null != eq) {
-					criteria.add(eq );
-				}
-				continue;
-			}
+			final boolean itemExacts = allItemExactSearch;
 
 			log.info("Raw key: {} Now KEY: {}", rawKey, currentKey);
 
@@ -213,7 +206,7 @@ public class CriteriaBuilder {
 
 			if (null != dateFilterSql) {
 				log.info(" {} is date ", rawKey);
-				criteria.add(dateFilterSql);
+				addCriteria(dateFilterSql);
 				continue;
 			}
 
@@ -221,6 +214,7 @@ public class CriteriaBuilder {
 
 			Field field;
 			if (multiKey) {
+				
 				Field hisField = EntityUtil.getDeclaredField(entityClass, rawKey.split(",")[0]);
 				field = EntityUtil.getDeclaredField(hisField.getType(), rawKey.split(",")[1]);
 			} else {
@@ -233,30 +227,35 @@ public class CriteriaBuilder {
 			}
 
 			String fieldName = field.getName();
-			KeyValue joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, field, false);
-
+			KeyValue<String, String> joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, field, false);
+			System.out.println("joinColumnResult: "+joinColumnResult);
+			
+			//TODO: process exact with join column
 			if (null != joinColumnResult) {
 				if (joinColumnResult.isValid()) {
-
-					Criterion like = restrictionLike(fieldName + "." + joinColumnResult.getValue(), field.getType(),
-							fieldsFilter.get(rawKey));
-					if (null != like ) {
-					criteria.add(like );
+					Class<?> _class = field.getType();
+					if (joinColumnResult.isMultiKey()) {
+						fieldName = joinColumnResult.getKey();
+						_class = field.getDeclaringClass();
+					}
+					if (itemExacts) {
+						Criterion eq = restrictionEquals( fieldName+ "." + joinColumnResult.getValue(), fieldsFilter.get(rawKey));
+						addCriteria(eq);
+					} else {
+						Criterion like = restrictionLike( fieldName+ "." + joinColumnResult.getValue(), _class,
+								fieldsFilter.get(rawKey));
+						addCriteria(like);
 					}
 				} else {
 					continue;
 				}
 			} else {
 				if (itemExacts) {
-					Criterion eq = restrictionEquals(entityClass, currentKey, fieldsFilter.get(rawKey));
-					if (null != eq) {
-						criteria.add(eq );
-					}
+					Criterion eq = restrictionEquals(currentKey, fieldsFilter.get(rawKey));
+					addCriteria(eq); 
 				} else {
 					Criterion like = (restrictionLike(entityName + "." + currentKey, entityClass, fieldsFilter.get(rawKey)));
-					if (null != like ) {
-						criteria.add(like );
-					}
+					addCriteria(like);
 				}
 			}
 
@@ -265,17 +264,16 @@ public class CriteriaBuilder {
 		if (onlyRowCount) {
 			return criteria;
 		}
-
-		try {
-//			setCurrentAlias(THIS);
-			addOrderOffsetLimit(filter);
-		} catch (Exception e) {
-			log.error("Error adding order/offset/limit");
-			e.printStackTrace();
-		}
-
+		
+		addOrderOffsetLimit(filter);  
 		return criteria;
 
+	}
+	
+	private void addCriteria(Criterion c) {
+		if (null != c ) {
+			criteria.add(c );
+		}
 	}
 
 	private void addOrderOffsetLimit(Filter filter) {
@@ -326,15 +324,17 @@ public class CriteriaBuilder {
 		if (fieldName.contains(".") && fieldName.split("\\.").length == 2) {
 			extractedFieldName = fieldName.split("\\.")[1];
 		}
+		System.out.println("fieldName: "+fieldName);
 		Field field = EntityUtil.getDeclaredField(_class, extractedFieldName);
-		if (field.getAnnotation(Transient.class)!=null) return null;
+		System.out.println("_class: "+_class);
+		
+		if (field==null || field.getAnnotation(Transient.class)!=null) return null;
 		
 		boolean stringTypeField = field.getType().equals(String.class);
-		Object validatedValue = validateFieldValue(field, value);
-
+		Object validatedValue = validateFieldValue(field, value); 
 		if (!stringTypeField) {
 
-			return nonStringLikeExp(field, _class, validatedValue);
+			return nonStringLikeExp(fieldName,  _class, validatedValue);
 		}
 
 		Criterion likeExp = Restrictions.ilike(fieldName, String.valueOf(validatedValue), MatchMode.ANYWHERE);
@@ -343,16 +343,20 @@ public class CriteriaBuilder {
 
 	}
 
-	private Criterion nonStringLikeExp(Field field, Class<?> _class, Object value) {
-
-		String columnName = field.getName();// QueryUtil.getColumnName(field);
-		String tableName = _class.getName();// QueryUtil.getTableName(_class); NOW USING ALIAS
-
-		boolean isJoinColumn = field.getAnnotation(JoinColumn.class) != null;
-		String alias = isJoinColumn ? getAlias(field.getName()) : getAlias(THIS);
+	private Criterion nonStringLikeExp(String fieldName, Class<?> _class,Object value) {
+		String extractedFieldName = fieldName;
+		String tableName = THIS;
+		if (fieldName.contains(".") && fieldName.split("\\.").length == 2) {
+			tableName = getAlias(fieldName.split("\\.")[0]);
+			extractedFieldName = fieldName.split("\\.")[1];
+			System.out.println("tableName: "+tableName);
+		}
+		System.out.println("fieldName: "+fieldName);
+		Field field = EntityUtil.getDeclaredField(_class, extractedFieldName);
 		
+		if (field.getAnnotation(Transient.class)!=null) return null;
 		//TODO: change to Like if using mysql
-		Criterion sqlRestriction = Restrictions.sqlRestriction(alias + "." + columnName + "::varchar(255) ILIKE '%" + value + "%'");
+		Criterion sqlRestriction = Restrictions.sqlRestriction(tableName+"."+extractedFieldName + "::varchar(255) ILIKE '%" + value + "%'");
 
 		return sqlRestriction;
 	}
@@ -396,13 +400,6 @@ public class CriteriaBuilder {
 		return null;
 	}
 
-	private String currentItemExact(String rawKey) {
-		if (rawKey.endsWith("[EXACTS]")) {
-			String finalKey = rawKey.split("\\[EXACTS\\]")[0];
-			log.info("{} exact search", finalKey);
-			return finalKey;
-		}
-		return null;
-	}
+	 
 
 }
