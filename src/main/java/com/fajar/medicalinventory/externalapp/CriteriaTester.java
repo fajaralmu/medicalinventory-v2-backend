@@ -42,10 +42,11 @@ public class CriteriaTester {
 		// "{\"entity\":\"product\",\"filter\":{\"exacts\":false,\"limit\":10,\"page\":0,\"fieldsFilter\":{\"withStock\":false,\"withSupplier\":false,\"withCategories\":false,\"category,id[EXACTS]\":\"4\",\"name\":\"\"},\"orderBy\":null,\"orderType\":null}}";
 		 
 		Map<String, Object> fieldsFilter = new HashMap<String, Object>();
-		fieldsFilter.put("referenceProductFlow", "6013");
-		fieldsFilter.put("product.id", "1");
-		fieldsFilter.put("product", "1");
-		fieldsFilter.put("count", "0");
+//		fieldsFilter.put("referenceProductFlow", "6013");
+//		fieldsFilter.put("product.id", "1");
+//		fieldsFilter.put("product", "1");
+		fieldsFilter.put("expiredDate-year", "2020");
+//		fieldsFilter.put("count", "0");
 		Filter filter = Filter.builder().exacts(false). fieldsFilter(fieldsFilter ).build();
 		CriteriaBuilder cb = new CriteriaBuilder(testSession, ProductFlow.class,  filter );
 		Criteria criteria = cb.createCriteria();

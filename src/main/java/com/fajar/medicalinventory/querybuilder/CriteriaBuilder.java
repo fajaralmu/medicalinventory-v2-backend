@@ -1,5 +1,8 @@
 package com.fajar.medicalinventory.querybuilder;
 
+import static com.fajar.medicalinventory.querybuilder.QueryUtil.getFieldByName;
+import static com.fajar.medicalinventory.util.EntityUtil.getDeclaredField;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -191,24 +194,19 @@ public class CriteriaBuilder {
 	private Criteria createCriteria(boolean onlyRowCount) {
 
 		String entityName = entityClass.getSimpleName();
-
 		setCurrentAlias(THIS);
 
 		for (final String rawKey : fieldsFilter.keySet()) {
 			setCurrentAlias(THIS);
 
 			log.info("##" + rawKey + ":" + fieldsFilter.get(rawKey));
-
 			if (fieldsFilter.get(rawKey) == null)
 				continue;
 
-			String currentKey = rawKey;
-			final boolean itemExacts = allItemExactSearch;
-
+			String currentKey = rawKey; 
 			log.info("Raw key: {} Now KEY: {}", rawKey, currentKey);
-
 			// check if date
-			Criterion dateFilterSql = getDateFilter(rawKey, currentKey, entityDeclaredFields, fieldsFilter);
+			Criterion dateFilterSql = getDateFilter(rawKey, currentKey);
 
 			if (null != dateFilterSql) {
 				log.info(" {} is date ", rawKey);
@@ -216,16 +214,13 @@ public class CriteriaBuilder {
 				continue;
 			}
 
-			boolean multiKey = rawKey.contains(".");
-
-			Field field;
-			Field fieldRelativeToEntityClass;
+			final boolean multiKey = rawKey.contains(".");
+			final Field field, fieldRelativeToEntityClass;
 			if (multiKey) {
-				
-				 fieldRelativeToEntityClass = EntityUtil.getDeclaredField(entityClass, rawKey.split("\\.")[0]);
-				field = EntityUtil.getDeclaredField(fieldRelativeToEntityClass.getType(), rawKey.split("\\.")[1]);
+				fieldRelativeToEntityClass = getDeclaredField(entityClass, rawKey.split("\\.")[0]);
+				field = getDeclaredField(fieldRelativeToEntityClass.getType(), rawKey.split("\\.")[1]);
 			} else {
-				field = fieldRelativeToEntityClass = QueryUtil.getFieldByName(currentKey, entityDeclaredFields);
+				field = fieldRelativeToEntityClass = getFieldByName(currentKey, entityDeclaredFields);
 			}
 
 			if (field == null) {
@@ -245,7 +240,7 @@ public class CriteriaBuilder {
 						fieldName = joinColumnResult.getKey();
 						_class = fieldRelativeToEntityClass.getType();
 					}
-					if (itemExacts) {
+					if (allItemExactSearch) {
 						Criterion eq = restrictionEquals( fieldName+ "." + joinColumnResult.getValue(), fieldsFilter.get(rawKey));
 						addCriteria(eq);
 					} else {
@@ -257,7 +252,7 @@ public class CriteriaBuilder {
 					continue;
 				}
 			} else {
-				if (itemExacts) {
+				if (allItemExactSearch) {
 					Criterion eq = restrictionEquals(currentKey, fieldsFilter.get(rawKey));
 					addCriteria(eq); 
 				} else {
@@ -368,8 +363,7 @@ public class CriteriaBuilder {
 		return sqlRestriction;
 	}
 
-	private Criterion getDateFilter(String rawKey, String key, List<Field> entityDeclaredFields,
-			Map<String, Object> filter) {
+	private Criterion getDateFilter(String rawKey, String key ) {
 		boolean dayFilter = rawKey.endsWith(QueryUtil.DAY_SUFFIX);
 		boolean monthFilter = rawKey.endsWith(QueryUtil.MONTH_SUFFIX);
 		boolean yearFilter = rawKey.endsWith(QueryUtil.YEAR_SUFFIX);
@@ -392,14 +386,17 @@ public class CriteriaBuilder {
 				mode = QueryUtil.FILTER_DATE_YEAR;
 
 			}
-			Field field = EntityUtil.getObjectFromListByFieldName("name", fieldName, entityDeclaredFields);
-			Object value = filter.get(key);
+			Field field = getDeclaredField(entityClass, fieldName);
+			if (null ==field ) {
+				return null;
+			}
+			Object value = fieldsFilter.get(key);
 			String columnName = QueryUtil.getColumnName(field);
 			log.info("mode: {}. value: {}", mode, value);
 //			TODO: mysql
 //			Criterion restriction = Restrictions.sqlRestriction(mode + "(" + columnName + ")=" + value);
 //			TODO: postgres
-			Criterion restriction = Restrictions.sqlRestriction("date_part('"+mode+"', " + columnName + ")=" + value);
+			Criterion restriction = Restrictions.sqlRestriction("date_part('"+mode+"', " + getAlias(entityClass.getSimpleName())+"."+ columnName + ")=" + value);
 
 			return restriction;
 		}
