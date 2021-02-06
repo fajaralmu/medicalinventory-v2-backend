@@ -17,14 +17,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
+import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.fajar.medicalinventory.service.config.WebConfigService;
 import com.fajar.medicalinventory.service.entity.BaseEntityUpdateService;
 import com.fajar.medicalinventory.util.CollectionUtil;
-import com.fajar.medicalinventory.util.EntityUtil;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -73,14 +74,20 @@ public class EntityRepository {
 		List<Type> persistenceClasses = webConfigService.getEntityClassess();
 		log.info(">>>> persistenceClasses count: {}", persistenceClasses.size());
 		for (Type type : persistenceClasses) {
+			log.info("checking : {}", type);
 			try {
 				Class<? extends BaseEntity> entityClass = (Class<? extends BaseEntity>) type;
-				Dto dtoInfo = EntityUtil.getClassAnnotation(entityClass, Dto.class);
-				if (null == dtoInfo) {
+				CustomEntity customEntity =  entityClass.getAnnotation(CustomEntity.class);
+				if (null == customEntity) {
+					log.info(" SKIP {}, cause = customEntity is null", type);
 					continue;
 				}
-//				Class<? extends BaseEntityUpdateService> updateServiceClass = dtoInfo.updateService();
-				String beanName = dtoInfo.updateService();
+				Class<? extends BaseModel> modelClass = customEntity.value();
+				if (null == modelClass.getAnnotation(Dto.class)) {
+					log.info(" SKIP {}, cause = {}'s Dto is null", type, modelClass);
+					continue;
+				}
+				String beanName = modelClass.getAnnotation(Dto.class).updateService();
 //				String beanName = StringUtil.lowerCaseFirstChar(updateServiceClass.getSimpleName());
 
 				BaseEntityUpdateService updateServiceBean = (BaseEntityUpdateService) applicationContext
@@ -88,8 +95,8 @@ public class EntityRepository {
 				EntityUpdateInterceptor updateInterceptor = ((BaseEntity) entityClass.newInstance())
 						.modelUpdateInterceptor();
 
-//				log.info("Registering entity config: {}, updateServiceBean: {}", entityClass.getSimpleName(),
-//						updateServiceBean);
+				log.info("Registering entity config: {}, updateServiceBean: {}", entityClass.getSimpleName(),
+						updateServiceBean);
 
 				putConfig(entityClass, updateServiceBean, updateInterceptor);
 			} catch (Exception e) {
@@ -98,7 +105,7 @@ public class EntityRepository {
 			}
 
 		}
-		log.info("///////////// END PUT ENTITY CONFIGS //////////////");
+		log.info("///////////// END PUT ENTITY CONFIGS: {} //////////////", entityConfiguration.size());
 	}
 
 	/**

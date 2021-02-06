@@ -315,7 +315,6 @@ public class CriteriaBuilder {
 			FormField formField = field.getAnnotation(FormField.class);
 			String foreginFieldName = formField.optionItemName();
 			Field foreignField = EntityUtil.getDeclaredField(field.getType(), foreginFieldName);
-//			return getAlias(orderBy) + "." +QueryUtil.getColumnName(foreignField);
 			return orderBy+"."+foreginFieldName;
 		}
 		return orderBy;

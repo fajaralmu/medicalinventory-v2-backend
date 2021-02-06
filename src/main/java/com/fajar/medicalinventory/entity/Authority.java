@@ -5,8 +5,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.constants.AuthorityType;
+import com.fajar.medicalinventory.dto.model.AuthorityModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+@CustomEntity(AuthorityModel.class)
 @Entity
 @Table(name = "authority")
 @Data
@@ -21,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Dto
-public class Authority extends BaseEntity {
+public class Authority extends BaseEntity<AuthorityModel> {
 	/**
 	 * 
 	 */

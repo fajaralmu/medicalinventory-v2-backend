@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Dto
 @Data
 @Builder
 @AllArgsConstructor

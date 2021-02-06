@@ -52,7 +52,7 @@ public class ProductRequestSheetGenerator {
 			throws Exception {
 
 		this.filter = webRequest.getFilter();
-		this.location = webRequest.getHealthcenter();
+		this.location = webRequest.getHealthcenter().toEntity();
 		this.products = products;
 		this.mappedProductIdAndStartingStock = mappedProductIdAndStartingStock;
 		this.transactionOneMonth = transactionOneMonth;

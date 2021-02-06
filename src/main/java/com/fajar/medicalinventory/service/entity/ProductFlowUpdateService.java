@@ -31,7 +31,7 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 	private SessionFactory sessionFactory;
 	
 	@Override
-	public WebResponse saveEntity(ProductFlow object, boolean newRecord, HttpServletRequest httpServletRequest)
+	public ProductFlow saveEntity(ProductFlow object, boolean newRecord, HttpServletRequest httpServletRequest)
 			throws Exception {
 		log.info("Save product flow");
 		Optional<ProductFlow> existingObjectOpt = productFlowRepository.findById(object.getId());
@@ -46,9 +46,7 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 		
 		ProductFlow saved = entityRepository.save(existingObject);
 		inventoryService.adjustStock(httpServletRequest);
-		WebResponse response = new WebResponse();
-		response.setEntity(saved);
-		return response ;
+		return saved;
 	}
 	
 	@Override

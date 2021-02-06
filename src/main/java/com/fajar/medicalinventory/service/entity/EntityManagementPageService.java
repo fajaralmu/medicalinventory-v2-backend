@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
@@ -25,8 +26,10 @@ import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.entity.Unit;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
+import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.repository.EntityRepository;
 import com.fajar.medicalinventory.util.CollectionUtil;
+import com.fajar.medicalinventory.util.EntityPropertyBuilder;
 import com.fajar.medicalinventory.util.EntityUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +50,7 @@ public class EntityManagementPageService {
 		}
 
 		HashMap<String, List<?>> additionalListObject = getFixedListObjects(entityConfig.getEntityClass());
-		EntityProperty entityProperty = EntityUtil.createEntityProperty(entityConfig.getEntityClass(),
+		EntityProperty entityProperty = EntityPropertyBuilder.createEntityProperty(entityConfig.getModelClass(),
 				additionalListObject);
 		model = constructCommonModel(request, entityProperty, model, entityConfig.getEntityClass().getSimpleName(),
 				"management"); 
@@ -73,7 +76,10 @@ public class EntityManagementPageService {
 				}
 				log.info("(populating fixed list values) findALL FOR type: {}", type);
 				List<? extends BaseEntity> list = entityRepository.findAll(type);
-				listObject.put(field.getName(), CollectionUtil.convertList(list));
+				
+				
+				listObject.put(field.getName(), BaseModel.toModels(list));
+//				listObject.put(field.getName(), CollectionUtil.convertList(list));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -97,7 +103,12 @@ public class EntityManagementPageService {
 		return WebResponse.builder().generalList(result).build();
 	}
 	  void addConfig(List<Object> result, Class<?> _class, String iconClassName) {
-		  result.add(entityRepository.getConfig(_class.getSimpleName().toLowerCase()).setIconClassName(iconClassName));
+		  try {
+			  result.add(entityRepository.getConfig(_class.getSimpleName().toLowerCase()).setIconClassName(iconClassName));
+		  }catch (Exception e) {
+			  log.error("Error getting config for : {}",_class );
+			  e.printStackTrace();
+		}
 	}
 
 }

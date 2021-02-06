@@ -14,7 +14,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.CustomEntity;
+import com.fajar.medicalinventory.dto.model.UserModel;
 import com.fajar.medicalinventory.entity.setting.SingleImageModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -24,14 +25,14 @@ import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Dto
+@CustomEntity(UserModel.class)
 @Entity
 @Table(name = "users")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User extends BaseEntity implements SingleImageModel {
+public class User extends BaseEntity<UserModel> implements SingleImageModel {
 
 	/**
 	 * 
@@ -75,7 +76,6 @@ public class User extends BaseEntity implements SingleImageModel {
 	public String getImage() {
 		return this.profileImage;
 	}
-
 	 
 
 }

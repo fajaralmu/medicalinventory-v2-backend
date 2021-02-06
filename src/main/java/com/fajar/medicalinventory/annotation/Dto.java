@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.fajar.medicalinventory.constants.FormInputColumn;
+import com.fajar.medicalinventory.entity.BaseEntity;
 
 @Retention(RetentionPolicy.RUNTIME)  
 @Target(ElementType.TYPE)  
@@ -19,5 +20,6 @@ public @interface Dto {
 	String updateService() default "commonUpdateService";
 	public boolean commonManagementPage() default true; 
 	public boolean withProgressWhenUpdated() default false; 
+	Class<? extends BaseEntity> entityClass() default BaseEntity.class;
 	 
 }

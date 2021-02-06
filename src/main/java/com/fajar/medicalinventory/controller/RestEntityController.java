@@ -19,7 +19,7 @@ import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.entity.EntityManagementPageService;
-import com.fajar.medicalinventory.service.entity.EntityService;
+import com.fajar.medicalinventory.service.entity.MasterDataService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RestEntityController extends BaseController {
 
 	@Autowired
-	private EntityService entityService;
+	private MasterDataService entityService;
 	@Autowired
 	private EntityManagementPageService entityManagementPageService;
 

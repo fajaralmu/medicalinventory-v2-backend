@@ -77,7 +77,7 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 			User user = principal.getUserDetails();
 			response.getWriter().write(objectMapper.writeValueAsString(WebResponse.builder()
 //					.token(jwt)
-					.user(user ).build()));
+					.user(user.toModel() ).build()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

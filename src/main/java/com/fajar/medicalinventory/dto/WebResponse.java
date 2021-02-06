@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fajar.medicalinventory.annotation.Dto;
-import com.fajar.medicalinventory.entity.ApplicationProfile;
-import com.fajar.medicalinventory.entity.BaseEntity;
-import com.fajar.medicalinventory.entity.HealthCenter;
-import com.fajar.medicalinventory.entity.Transaction;
-import com.fajar.medicalinventory.entity.User;
+import com.fajar.medicalinventory.dto.model.ApplicationProfileModel;
+import com.fajar.medicalinventory.dto.model.BaseModel;
+import com.fajar.medicalinventory.dto.model.HealthCenterModel;
+import com.fajar.medicalinventory.dto.model.TransactionModel;
+import com.fajar.medicalinventory.dto.model.UserModel;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +23,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Dto
 @Data
 @Builder
 @AllArgsConstructor
@@ -38,27 +36,27 @@ public class WebResponse implements Serializable {
 	private static final long serialVersionUID = -8345271799535134609L;
 	@Builder.Default
 	private Date date = new Date();
-	private User user;
+	private UserModel user;
 	@Builder.Default
 	private String code = "00";
 	@Builder.Default
 	private String message = "success";
 	@Builder.Default
 	@Setter(value = AccessLevel.NONE)
-	private List<BaseEntity> entities = new ArrayList<>();
+	private List<BaseModel> entities = new ArrayList<>();
 	
 	private List<?> generalList;
 	
-	private BaseEntity entity; 
+	private BaseModel entity; 
 	private Filter filter;
 	private Integer totalData;  
 	private EntityProperty entityProperty;
 	
 	private Long maxValue;
 	private Integer quantity;
-	private ApplicationProfile applicationProfile;
-	private HealthCenter masterHealthCenter;
-	private Transaction transaction;
+	private ApplicationProfileModel applicationProfile;
+	private HealthCenterModel masterHealthCenter;
+	private TransactionModel transaction;
 
 	private Double percentage;
 	private Integer[] transactionYears;
@@ -68,7 +66,7 @@ public class WebResponse implements Serializable {
 	private Boolean loggedIn;
  
 	@JsonIgnore
-	private Class<? extends BaseEntity> entityClass; 
+	private Class<? extends BaseModel> entityClass; 
 	
 	public WebResponse(String code, String message) {
 		this.code = code;
@@ -76,7 +74,7 @@ public class WebResponse implements Serializable {
 		this.date = new Date();
 	}
 
-	public <T extends BaseEntity> void setEntities(List<T > entities) {
+	public <T extends BaseModel> void setEntities(List<T > entities) {
 		this.entities = CollectionUtil.convertList(entities);
 	}
 	

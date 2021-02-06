@@ -23,6 +23,7 @@ import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -69,13 +70,13 @@ public class InventoryService {
 					product.getId());
 
 		}
-		response.setEntities(availableProductFlows);
+		response.setEntities(BaseModel.toModels(availableProductFlows));
 		return response;
 	}
 	
 	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 
-		HealthCenter healthCenter = webRequest.getHealthcenter();
+		HealthCenter healthCenter = webRequest.getHealthcenter().toEntity();
 		boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(healthCenter);
 
 		int page = webRequest.getFilter().getPage();

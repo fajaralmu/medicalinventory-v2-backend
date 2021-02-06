@@ -76,11 +76,11 @@ public class DefaultApplicationProfileService {
 		log.info("Update application profile");
 		
 		final ApplicationProfile actualAppProfile = getApplicationProfile();
-		final ApplicationProfile applicationProfile = webRequest.getProfile();
+		final ApplicationProfile applicationProfile = webRequest.getProfile().toEntity();
 		updateApplicationProfileData(actualAppProfile, applicationProfile, httpServletRequest);
 		
 		WebResponse response = new WebResponse();
-		response.setApplicationProfile(actualAppProfile);
+		response.setApplicationProfile(actualAppProfile.toModel());
 		return response;
 	}
 	private void updateApplicationProfileData(ApplicationProfile actualAppProfile,

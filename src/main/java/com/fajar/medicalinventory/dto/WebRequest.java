@@ -3,12 +3,20 @@ package com.fajar.medicalinventory.dto;
 import java.io.Serializable;
 import java.util.List;
 
-import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.dto.model.ApplicationProfileModel;
+import com.fajar.medicalinventory.dto.model.BaseModel;
+import com.fajar.medicalinventory.dto.model.ConfigurationModel;
+import com.fajar.medicalinventory.dto.model.CustomerModel;
+import com.fajar.medicalinventory.dto.model.HealthCenterModel;
+import com.fajar.medicalinventory.dto.model.ProductFlowModel;
+import com.fajar.medicalinventory.dto.model.ProductModel;
+import com.fajar.medicalinventory.dto.model.SupplierModel;
+import com.fajar.medicalinventory.dto.model.TransactionModel;
+import com.fajar.medicalinventory.dto.model.UnitModel;
+import com.fajar.medicalinventory.dto.model.UserModel;
 import com.fajar.medicalinventory.entity.ApplicationProfile;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.Configuration;
-import com.fajar.medicalinventory.entity.Customer;
-import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Supplier;
@@ -21,7 +29,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Dto
 @Data
 @Builder
 @AllArgsConstructor
@@ -41,12 +48,12 @@ public class WebRequest implements Serializable {
 
 	private String entity;
 	
-	private Customer customer;
-	private HealthCenter healthcenter;
-	private Product product;
-	private Supplier supplier;
-	private Unit unit;
-	private ProductFlow productflow;
+	private CustomerModel customer;
+	private HealthCenterModel healthcenter;
+	private ProductModel product;
+	private SupplierModel supplier;
+	private UnitModel unit;
+	private ProductFlowModel productflow;
 
 	/**
 	 * ==========end entity============
@@ -54,12 +61,12 @@ public class WebRequest implements Serializable {
 
 	private Filter filter; 
 	
-	private User user; 
-	private ApplicationProfile profile; 
-	private Configuration inventoryConfiguration;
-	private BaseEntity entityObject; 
-	private Transaction transaction;
-	private List<BaseEntity> orderedEntities; 
+	private UserModel user; 
+	private ApplicationProfileModel profile; 
+	private ConfigurationModel inventoryConfiguration;
+	private BaseModel entityObject; 
+	private TransactionModel transaction;
+	private List<BaseModel > orderedEntities; 
 	
 	private boolean regularTransaction; 
 	

@@ -3,19 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fajar.medicalinventory.entity;
+package com.fajar.medicalinventory.dto.model;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import com.fajar.medicalinventory.annotation.CustomEntity;
+import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
-import com.fajar.medicalinventory.dto.model.HealthCenterModel;
+import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -27,32 +20,23 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@CustomEntity(HealthCenterModel.class)
-@Entity
-@Table(name = "health_center")
+@Dto(entityClass = HealthCenter.class)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HealthCenter extends BaseEntity<HealthCenterModel> implements Serializable {
+public class HealthCenterModel extends BaseModel<HealthCenter>{
 	/**
 	 * 
 	 */
-	
 	private static final long serialVersionUID = 2688885440038052615L;
-	
-	@Column(unique = true)
 	@FormField
 	private String code;
-	@Column(unique = true)
 	@FormField
 	private String name;
-	@Column
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String address;
 
-	@Transient
 	@JsonIgnore
-	private Integer monthlyProductCount;
-
+	private Integer monthlyProductCount; 
 }

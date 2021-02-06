@@ -24,6 +24,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import com.fajar.medicalinventory.annotation.AdditionalQuestionField;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityElement;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
@@ -33,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EntityUtil {
 
-	public static EntityProperty createEntityProperty(Class<?> clazz, HashMap<String, List<?>> additionalObjectList)
+	public static EntityProperty createEntityProperty(Class<? extends BaseModel> clazz, HashMap<String, List<?>> additionalObjectList)
 			throws Exception {
 		if (clazz == null || getClassAnnotation(clazz, Dto.class) == null) {
 			return null;
@@ -145,35 +146,7 @@ public class EntityUtil {
 		return result;
 	}
 
-	private static Map<String, List<Field>> sortListByQuestionareSection(List<Field> fieldList) {
-		Map<String, List<Field>> temp = MapUtil.singleMap(AdditionalQuestionField.DEFAULT_GROUP_NAME,
-				new ArrayList<>());
-
-		String key = AdditionalQuestionField.DEFAULT_GROUP_NAME;
-		for (Field field : fieldList) {
-			FormField formField = field.getAnnotation(FormField.class);
-			boolean isIDField = isIdField(field);
-
-			if (null == formField) {
-				continue;
-			}
-			AdditionalQuestionField additionalQuestionField = field.getAnnotation(AdditionalQuestionField.class);
-			if (null == additionalQuestionField || isIDField) {
-				key = "OTHER";
-				log.debug("{} has no additionalQuestionareField", field.getName());
-			} else {
-				key = additionalQuestionField.value();
-			}
-			if (temp.get(key) == null) {
-				temp.put(key, new ArrayList<>());
-			}
-			temp.get(key).add(field);
-			log.debug("{}: {}", key, field.getName());
-		}
-		log.debug("QUestionare Map: {}", temp);
-		return (temp);
-
-	}
+ 
 
 	public static <T extends Annotation> T getClassAnnotation(Class<?> entityClass, Class<T> annotation) {
 		try {
@@ -240,7 +213,7 @@ public class EntityUtil {
 
 		loop1: for (Field field : baseField) {
 
-			Object column = getFieldAnnotation(field, Column.class);
+			Object column =  field.getAnnotation(Column.class);
 			if (onlyColumnField && null == column)
 				column = getFieldAnnotation(field, JoinColumn.class);
 
@@ -255,7 +228,7 @@ public class EntityUtil {
 			Field[] parentFields = clazz.getSuperclass().getDeclaredFields();
 
 			loop2: for (Field field : parentFields) {
-				Object column = getFieldAnnotation(field, Column.class);
+				Object column = field.getAnnotation(Column.class);
 				if (onlyColumnField && null == column)
 					column = getFieldAnnotation(field, JoinColumn.class);
 

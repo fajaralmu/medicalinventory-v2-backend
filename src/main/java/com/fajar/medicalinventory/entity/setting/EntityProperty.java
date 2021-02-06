@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fajar.medicalinventory.annotation.AdditionalQuestionField;
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.util.MyJsonUtil;
 
 import lombok.AccessLevel;
@@ -23,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Dto
 @Slf4j
 public class EntityProperty implements Serializable {
@@ -69,6 +69,12 @@ public class EntityProperty implements Serializable {
 
 	private boolean ignoreBaseField;
 	private boolean isQuestionare;
+	
+	final Class<? extends BaseModel> modelClass;
+	
+	public EntityProperty(Class<? extends BaseModel> modelClass) {
+		this.modelClass = modelClass;
+	}
 
 	public void setElementJsonList() {
 

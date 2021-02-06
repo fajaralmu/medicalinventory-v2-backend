@@ -11,32 +11,30 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.dto.model.ProductModel;
 import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 
  * @author fajar
  */
-@Dto
+@CustomEntity(ProductModel.class)
 @Entity
 @Table(name = "product")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product extends BaseEntity implements MultipleImageModel {
+public class Product extends BaseEntity<ProductModel> implements MultipleImageModel {
 
 	/**
 	 * 
@@ -91,74 +89,6 @@ public class Product extends BaseEntity implements MultipleImageModel {
 	@Transient
 	@JsonIgnore
 	private Integer price;
-
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private double stokaman;
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private double nextorder;
-
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private Integer kumulatifpakai;
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private String kelas;
-	@Transient
-	@JsonIgnore
-	@Getter(value = AccessLevel.NONE)
-	@Setter(value = AccessLevel.NONE)
-	private Integer pemakaian;
-	 
-
-	public double getStokaman() {
-		return stokaman;
-	}
-
-	public void setStokaman(double stokaman) {
-		this.stokaman = stokaman;
-	}
-
-	public double getNextorder() {
-		return nextorder;
-	}
-
-	public void setNextorder(double nextorder) {
-		this.nextorder = nextorder;
-	}
-
-	public Integer getKumulatifpakai() {
-		return kumulatifpakai;
-	}
-
-	public void setKumulatifpakai(Integer kumulatifpakai) {
-		this.kumulatifpakai = kumulatifpakai;
-	}
-
-	public String getKelas() {
-		return kelas;
-	}
-
-	public void setKelas(String kelas) {
-		this.kelas = kelas;
-	}
-
-	public Integer getPemakaian() {
-		return pemakaian;
-	}
-
-	public void setPemakaian(Integer pemakaian) {
-		this.pemakaian = pemakaian;
-	} 
 
 	public void addCount(int count2) {
 		if (count == null)

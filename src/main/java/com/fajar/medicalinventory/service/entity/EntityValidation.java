@@ -2,13 +2,10 @@ package com.fajar.medicalinventory.service.entity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.annotation.StoreValueTo;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.repository.EntityRepository;
 import com.fajar.medicalinventory.util.CollectionUtil;
@@ -27,69 +24,6 @@ public class EntityValidation {
 //			validateDefaultValue(entities.get(i), entityRepository);
 //		}
 //	}
-
-	public static <T extends BaseEntity> List<T> validateDefaultValues(List<T> objects,
-			EntityRepository entityRepository) {
-		Map<Field, List<Long>> relatedObjectIdContainer = new HashMap<>();
-		Map<Field, List<BaseEntity>> relatedObjectContainer = new HashMap<>();
-
-		for (int i = 0; i < objects.size(); i++) {
-			final T object = objects.get(i);
-			final T validatedObject = validateDefaultValue(object, relatedObjectIdContainer);
-			objects.set(i, validatedObject);
-		}
-
-		fillRequiredEntityValue(relatedObjectIdContainer, relatedObjectContainer,entityRepository); 
-		
-
-		log.info("relatedObjectIdContainer.keySet().size(); {}", relatedObjectIdContainer.keySet().size());
-		log.info("relatedObjectContainer.keySet().size(); {}", relatedObjectContainer.keySet().size());
-
-		for (int i = 0; i < objects.size(); i++) {
-			final T object = objects.get(i);
-			if (null == entityRepository)
-				continue;
-			try {
-				loopp: for (Field collectionTypeField : relatedObjectContainer.keySet()) {
-					List<BaseEntity> entityValues = relatedObjectContainer.get(collectionTypeField);
-
-					String storeToFieldName = EntityUtil.getFieldAnnotation(collectionTypeField, StoreValueTo.class)
-							.value();
-					Field storeToField = EntityUtil.getDeclaredField(object.getClass(), storeToFieldName);
-					Object idValues = storeToField.get(object);
-
-					if (null == idValues || null == entityValues)
-						continue loopp;
-					
-					if ("" != idValues.toString()) {
-						String[] rawIdentities = idValues.toString().split("~");
-
-						List<Long> idList = CollectionUtil.arrayToList(toLongArray(rawIdentities));
-						if (null == idList) {
-							continue loopp;
-						}
-						List<BaseEntity> thisFieldValue = new ArrayList<>();
-						entityValues.forEach(v -> {
-							for (int j = 0; j < idList.size(); j++) {
-								if (v.getId().equals(idList.get(j))) {
-									thisFieldValue.add(v);
-								}
-							} 
-						});
-						collectionTypeField.set(object, thisFieldValue);
-					}
-
-				}
-				objects.set(i, object);
-			} catch (Exception e) {
-				 
-				e.printStackTrace();
-			}
-
-		}
-
-		return objects;
-	}
 
 	private static void fillRequiredEntityValue(Map<Field, List<Long>> relatedObjectIdContainer,
 			Map<Field, List<BaseEntity>> relatedObjectContainer, EntityRepository entityRepository) {
@@ -164,25 +98,25 @@ public class EntityValidation {
 					}
 					field.set(baseEntity, newValue);
 
-				} else if (formField != null && formField.multipleSelect()) {
-					String storeToFieldName = EntityUtil.getFieldAnnotation(field, StoreValueTo.class).value();
-					Field storeToField = EntityUtil.getDeclaredField(baseEntity.getClass(), storeToFieldName);
-
-					Object idValues = storeToField.get(baseEntity);
-
-					if (null == idValues)
-						continue;
-					if ("" != idValues.toString()) {
-						String[] rawIdentities = idValues.toString().split("~");
-
-						List<Long> idList = CollectionUtil.arrayToList(toLongArray(rawIdentities));
-						if (relatedObjectIdContainer.get(field) == null) {
-							relatedObjectIdContainer.put(field, new ArrayList<>());
-						}
-						relatedObjectIdContainer.get(field).addAll(idList);
-						log.info("relatedObjectIdContainer.get(field).addAll(idList); {}", idList);
-
-					}
+//				} else if (formField != null && formField.multipleSelect()) {
+//					String storeToFieldName = EntityUtil.getFieldAnnotation(field, StoreValueTo.class).value();
+//					Field storeToField = EntityUtil.getDeclaredField(baseEntity.getClass(), storeToFieldName);
+//
+//					Object idValues = storeToField.get(baseEntity);
+//
+//					if (null == idValues)
+//						continue;
+//					if ("" != idValues.toString()) {
+//						String[] rawIdentities = idValues.toString().split("~");
+//
+//						List<Long> idList = CollectionUtil.arrayToList(toLongArray(rawIdentities));
+//						if (relatedObjectIdContainer.get(field) == null) {
+//							relatedObjectIdContainer.put(field, new ArrayList<>());
+//						}
+//						relatedObjectIdContainer.get(field).addAll(idList);
+//						log.info("relatedObjectIdContainer.get(field).addAll(idList); {}", idList);
+//
+//					}
 
 				}
 			} catch (Exception e) {

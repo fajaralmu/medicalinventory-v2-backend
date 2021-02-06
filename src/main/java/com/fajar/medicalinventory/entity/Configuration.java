@@ -4,20 +4,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.CustomEntity;
+import com.fajar.medicalinventory.dto.model.ConfigurationModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-@Dto
+
+@CustomEntity(ConfigurationModel.class)
 @Entity
 @Table(name = "appplication_configuration")
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Configuration extends BaseEntity {
+public class Configuration extends BaseEntity<ConfigurationModel> {
 
 	/**
 	 * 

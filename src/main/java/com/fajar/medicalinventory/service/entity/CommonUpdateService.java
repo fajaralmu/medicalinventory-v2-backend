@@ -2,15 +2,10 @@ package com.fajar.medicalinventory.service.entity;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
-import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
-import com.fajar.medicalinventory.entity.setting.SingleImageModel;
-import com.fajar.medicalinventory.service.resources.ImageUploadService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +15,7 @@ public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
 
 	
 	@Override
-	public WebResponse saveEntity(BaseEntity entity, boolean newRecord, HttpServletRequest httpServletRequest) {
+	public BaseEntity saveEntity(BaseEntity entity, boolean newRecord, HttpServletRequest httpServletRequest) {
 		log.info("saving entity: {}", entity.getClass());
 		entity = copyNewElement(entity, newRecord);
 		
@@ -28,8 +23,7 @@ public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
 		
 		interceptPreUpdate(entity);
 		BaseEntity newEntity = entityRepository.save(entity);
-
-		return WebResponse.builder().entity(newEntity).build();
+		return newEntity;
 	}
 
 	/**

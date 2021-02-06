@@ -51,11 +51,11 @@ public class InventoryConfigurationService {
 
 	public WebResponse updateConfig(HttpServletRequest httpRequest, WebRequest webRequest) {
 		Configuration configuration = checkConfig();
-		Configuration payload = webRequest.getInventoryConfiguration();
+		Configuration payload = webRequest.getInventoryConfiguration().toEntity();
 		configuration.setCycleTime(payload.getCycleTime());
 		configuration.setLeadTime(payload.getLeadTime());
 		configuration.setExpiredWarningDays(payload.getExpiredWarningDays());
 		Configuration saved = entityRepository.save(configuration);
-		return WebResponse.builder().entity(saved).build();
+		return WebResponse.builder().entity(saved.toModel()).build();
 	}
 }

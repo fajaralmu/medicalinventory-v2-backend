@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
@@ -52,7 +53,7 @@ public class TransactionService {
 		transaction.setProductFlows(productFlows);
 		
 		WebResponse response = new WebResponse();
-		response.setTransaction(transaction);
+		response.setTransaction(transaction.toModel());
 		return response ;
 	}
 
@@ -61,7 +62,7 @@ public class TransactionService {
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buildTransactionINObject(webRequest, httpServletRequest);
+			Transaction transaction = buildTransactionSupply(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getSupplier()) {
@@ -81,7 +82,7 @@ public class TransactionService {
 			
 			WebResponse response = new WebResponse();
 			transaction.setProductFlowsTransactionNull();
-			response.setTransaction(transaction);
+			response.setTransaction(transaction.toModel());
 			return response;
 		} catch (Exception e) {
 
@@ -94,18 +95,18 @@ public class TransactionService {
 		}
 	}
 
-	private Transaction buildTransactionINObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	private Transaction buildTransactionSupply(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		HealthCenter masterHealthCenter = defaultHealthCenterMasterService.getMasterHealthCenter();
-		Transaction transaction = webRequest.getTransaction();
+		Transaction transaction = webRequest.getTransaction().toEntity();
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
 		transaction.setTypeAndCode();
 		transaction.setHealthCenterLocation(masterHealthCenter);
 		return transaction;
 	}
 	
-	private Transaction buildTransactionOUTObject(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	private Transaction buidTransactionDistribution(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		
-		Transaction transaction = webRequest.getTransaction();
+		Transaction transaction = webRequest.getTransaction().toEntity();
 		 
 		Optional<HealthCenter> locationOptional = healthCenterRepository.findById(transaction.getHealthCenterLocation().getId());
 		if (locationOptional.isPresent() == false) {
@@ -124,7 +125,7 @@ public class TransactionService {
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buildTransactionOUTObject(webRequest, httpServletRequest);
+			Transaction transaction = buidTransactionDistribution(webRequest, httpServletRequest);
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getCustomer() && transaction.getHealthCenterDestination() == null) {
@@ -157,7 +158,7 @@ public class TransactionService {
 			
 			WebResponse response = new WebResponse();
 			transaction.setProductFlowsTransactionNull();
-			response.setTransaction(transaction);
+			response.setTransaction(transaction.toModel());
 			return response;
 		} catch (Exception e) {
 

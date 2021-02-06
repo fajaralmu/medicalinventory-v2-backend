@@ -413,7 +413,7 @@ public class ReportGenerator {
 	
 	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest)
 			throws Exception {
-		HealthCenter location = webRequest.getHealthcenter();
+		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Filter filter = webRequest.getFilter();
 		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
 
@@ -455,7 +455,7 @@ public class ReportGenerator {
 
 	public XSSFWorkbook getStockOpnameReport(WebRequest webRequest, HttpServletRequest httpServletRequest)
 			throws Exception {
-		HealthCenter location = webRequest.getHealthcenter();
+		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Date d = DateUtil.getDate(webRequest.getFilter());
 		List<Product> listObat = (List<Product>) productRepository.findAll();
 		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(d);

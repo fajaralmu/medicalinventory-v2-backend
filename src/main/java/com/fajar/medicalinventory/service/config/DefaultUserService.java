@@ -105,12 +105,12 @@ public class DefaultUserService {
 		log.info("Update profile");
 		
 		final User loggedUser = sessionValidationService.getLoggedUser(httpServletRequest);
-		final User user = webRequest.getUser();
+		final User user = webRequest.getUser().toEntity();
 		 
 		updateUserData(loggedUser, user, httpServletRequest);
 		
 		WebResponse response = new WebResponse();
-		response.setUser(loggedUser);
+		response.setUser(loggedUser.toModel());
 		return response;
 	}
 

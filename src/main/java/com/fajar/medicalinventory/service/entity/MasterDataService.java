@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
@@ -38,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class EntityService {
+public class MasterDataService {
 
 	public static final String ORIGINAL_PREFFIX = "{ORIGINAL>>";
 
@@ -51,10 +52,7 @@ public class EntityService {
 	
 	@PostConstruct
 	public void init() {
-		LogProxyFactory.setLoggers(this);
-//		filterDatabaseProcessor = customRepository.createDatabaseProcessor();
-//		databaseProcessorNotifier.register(filterDatabaseProcessor);
-//		filterDatabaseProcessor.setId(this.getClass().getSimpleName());
+		LogProxyFactory.setLoggers(this); 
 	}
 
 	private EntityManagementConfig getEntityManagementConfig(String key) {
@@ -75,20 +73,20 @@ public class EntityService {
 			EntityManagementConfig entityConfig = getEntityManagementConfig(key);
 			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();
 			String fieldName = entityConfig.getFieldName();
-			Object entityValue = null;
+			BaseModel entityValue = null;
 
 			try {
 				Field entityField = EntityUtil.getDeclaredField(WebRequest.class, fieldName);
-				entityValue = entityField.get(request);
+				entityValue = (BaseModel) entityField.get(request);
 
 				log.info("save {}", entityField.getName());
 				log.info("newRecord: {}", newRecord);
 				
 				if (entityValue != null) {
 					 
-					WebResponse saved = updateService.saveEntity((BaseEntity) entityValue, newRecord, servletRequest); 
+					BaseEntity savedEntity = updateService.saveEntity(entityValue.toEntity(), newRecord, servletRequest); 
 					 
-					return saved;
+					return WebResponse.builder().entity(savedEntity.toModel()).build();
 				} else {
 					return WebResponse.failed();
 				}
@@ -123,26 +121,18 @@ public class EntityService {
 			String entityName = request.getEntity().toLowerCase();
 			EntityManagementConfig config = getEntityManagementConfig(entityName);
 			log.info("entityName: {}, config: {}", entityName, config);
+			if (null == config) {
+				throw new Exception("Invalid entity:"+entityName);
+			}
 			entityClass = config.getEntityClass();
-
-			if (null == entityClass) {
-				throw new Exception("Invalid entity");
-			}
-			EntityResult entityResult;
-			if (false && User.class.equals(entityClass)) {
-//				User user = SessionUtil.getSessionUser(httpRequest); 
-//				entityResult = EntityResult.builder().count(1).entities(CollectionUtil.listOf(user)).build();
-			} else {
-
-				entityResult = filterEntities(filter, entityClass);
-			}
+			EntityResult entityResult = filterEntities(filter, entityClass);
 			return WebResponse.builder()
-					.entities(EntityValidation.validateDefaultValues(entityResult.entities, entityRepository))
-					.totalData(entityResult.count).filter(request.getFilter()).entityClass(entityClass).build();
+					.entities(BaseModel.toModels(entityResult.entities))
+					.totalData(entityResult.count).filter(request.getFilter()).build();
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			return WebResponse.failed(ex.getMessage());
+			throw new ApplicationException(ex);
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -15,10 +16,13 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.Type;
+import org.springframework.beans.BeanUtils;
 
 import com.fajar.medicalinventory.annotation.BaseField;
+import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.fajar.medicalinventory.util.EntityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Dto
 @Slf4j
 @MappedSuperclass
-public class BaseEntity implements Serializable{
+public class BaseEntity<M extends BaseModel> implements Serializable{
 
 	/**
 	 * 
@@ -142,5 +146,62 @@ public class BaseEntity implements Serializable{
 			idList.add(object.getId());
 		}
 		return idList ;
+	}
+	
+	public M toModel() {
+		try {
+			M instance = getEntityNewInstance();
+			return copy(instance);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	protected M getEntityNewInstance() throws Exception {
+		CustomEntity customEntity = getClass().getAnnotation(CustomEntity.class);
+		Objects.requireNonNull(customEntity);
+		Class<? extends BaseModel> entityClass = customEntity.value();
+		M instance = (M) entityClass.newInstance();
+		return instance;
+	}
+	
+	List<Field> getObjectModelField() {
+		List<Field> fields = EntityUtil.getDeclaredFields(getClass());
+		List<Field> filtered = new ArrayList<>();
+		for (Field field : fields) {
+			if (field.getType().getSuperclass() == null) continue;
+			if (field.getType().getSuperclass().equals(BaseEntity.class)) {
+				filtered.add(field);
+			}
+		}
+		
+		return filtered;
+	}
+	
+	void setObjectModel(M e) throws  Exception {
+		Class<? extends BaseModel> entityClass = e.getClass();
+		Objects.requireNonNull(e);
+		List<Field> fields = getObjectModelField();
+		for (Field field : fields) {
+			Object value = field.get(this);
+			if (null == value || false == (value instanceof BaseEntity)) continue;
+			String name = field.getName();
+			Field entityField = EntityUtil.getDeclaredField(entityClass, name);
+			if (null == entityField) continue;
+			
+			BaseModel finalValue = ((BaseEntity) value).toModel();
+			entityField.set(e, finalValue);
+		}
+	}
+	
+	protected M copy(M e) {
+		try {
+			setObjectModel(e);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		BeanUtils.copyProperties(this, e);
+		return e;
 	}
 }

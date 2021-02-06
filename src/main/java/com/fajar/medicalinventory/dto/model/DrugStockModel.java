@@ -3,9 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fajar.medicalinventory.entity;
+package com.fajar.medicalinventory.dto.model;
 
 import java.io.Serializable;
+
+import com.fajar.medicalinventory.entity.Product;
+import com.fajar.medicalinventory.entity.ProductFlow;
+import com.fajar.medicalinventory.entity.Transaction;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DrugStock implements Serializable {
+public class DrugStockModel implements Serializable {
 
 	/**
 	 * 

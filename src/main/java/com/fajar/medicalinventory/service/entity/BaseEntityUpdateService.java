@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.service.entity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.annotation.StoreValueTo;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.User;
@@ -24,7 +22,6 @@ import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.resources.FileService;
 import com.fajar.medicalinventory.service.resources.ImageUploadService;
-import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +44,11 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 		LogProxyFactory.setLoggers(this);
 	}
 
-	public WebResponse saveEntity(T baseEntity, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
+	public T saveEntity(T baseEntity, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
 		log.error("saveEntity Method not implemented");
-		return WebResponse.failed("method not implemented");
+		return null;
 	}
-	
+
 	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
 		 
 		try {
@@ -159,24 +156,24 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 //							field.set(object, imageName);
 //						}
 						break;
-					case FIELD_TYPE_FIXED_LIST:
-						
-						if (formfield.multipleSelect()) {
-							String storeToFieldName = field.getAnnotation(StoreValueTo.class).value(); 
-							
-							Field idField = CollectionUtil.getIDFieldOfUnderlyingListType(field);
-							Field storeToField = EntityUtil.getDeclaredField(object.getClass(), storeToFieldName);
-							
-							Object[] valueAsArray = ((Collection) fieldValue).toArray(); 
-							CharSequence[] actualFieldValue = new String[valueAsArray.length];
-							
-							for (int j = 0; j < valueAsArray.length; j++) {
-								actualFieldValue[j] = String.valueOf(idField.get(valueAsArray[j]));
-							}
-							
-							storeToField.set(object, String.join("~", actualFieldValue));
-						}
-						break;
+//					case FIELD_TYPE_FIXED_LIST:
+//						
+//						if (formfield.multipleSelect()) {
+//							String storeToFieldName = field.getAnnotation(StoreValueTo.class).value(); 
+//							
+//							Field idField = CollectionUtil.getIDFieldOfUnderlyingListType(field);
+//							Field storeToField = EntityUtil.getDeclaredField(object.getClass(), storeToFieldName);
+//							
+//							Object[] valueAsArray = ((Collection) fieldValue).toArray(); 
+//							CharSequence[] actualFieldValue = new String[valueAsArray.length];
+//							
+//							for (int j = 0; j < valueAsArray.length; j++) {
+//								actualFieldValue[j] = String.valueOf(idField.get(valueAsArray[j]));
+//							}
+//							
+//							storeToField.set(object, String.join("~", actualFieldValue));
+//						}
+//						break;
 					default:
 						break;
 					}

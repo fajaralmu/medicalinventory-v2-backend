@@ -3,16 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fajar.medicalinventory.entity;
+package com.fajar.medicalinventory.dto.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
-import com.fajar.medicalinventory.annotation.CustomEntity;
+import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
-import com.fajar.medicalinventory.dto.model.SupplierModel;
+import com.fajar.medicalinventory.entity.Supplier;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,32 +20,26 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@CustomEntity(SupplierModel.class)
-@Entity
-@Table(name="supplier")
+@Dto(entityClass = Supplier.class)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 
-public class Supplier extends BaseEntity<SupplierModel>{
+public class SupplierModel extends BaseModel<Supplier>{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6919147802315112851L;
 	 
-	@Column(unique = true)
 	@FormField
-    private String code;
-	@Column 
+    private String code; 
 	@FormField
     private String name;
-	@Column
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
     private String address;
-	@Column 
 	@FormField
-    private String contact;
+    private String contact; 
 
   
 }

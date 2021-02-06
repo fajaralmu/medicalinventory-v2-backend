@@ -15,6 +15,7 @@ import com.fajar.medicalinventory.annotation.BaseField;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
@@ -44,8 +45,7 @@ public class EntityElement implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6768302238247458766L;
-
+	private static final long serialVersionUID = -6768302238247458766L; 
 	public final boolean ignoreBaseField;
 	public final boolean isGrouped;
 	public final boolean editable;
@@ -68,7 +68,7 @@ public class EntityElement implements Serializable {
 	private String[] defaultValues;
 
 	private List<Object> plainListValues;
-	private List<BaseEntity> options;
+	private List<? extends BaseModel> options;
 
 	private boolean identity;
 	private boolean required;
@@ -116,15 +116,43 @@ public class EntityElement implements Serializable {
 		
 		baseField = field.getAnnotation(BaseField.class);
 
-		idField = field.getAnnotation(Id.class) != null;
-		skipBaseField = !idField && (baseField != null && ignoreBaseField);
-
-		identity = idField;
-		hasJoinColumn = field.getAnnotation(JoinColumn.class) != null;
+		checkIfIdField();
+		skipBaseField = !isIdField() && (baseField != null && ignoreBaseField);
+		checkIfJoinColumn();
 		
 
 		checkIfGroupedInput();
 	}
+	
+	private void checkIfJoinColumn() {
+		Field entityField = getEntityField();
+		if (null == entityField) return;
+		
+		JoinColumn joinColumn = entityField.getAnnotation(JoinColumn.class);
+		setHasJoinColumn(joinColumn!=null);
+	}
+	
+	private Field getEntityField() {
+		String name = field.getName();
+		Class<? extends BaseModel> modelClass = entityProperty.getModelClass();
+		Dto dto = modelClass.getAnnotation(Dto.class);
+		if (null == dto) return null;
+		
+		Class<? extends BaseEntity> entityClass = dto.entityClass();
+		Field entityField = EntityUtil.getDeclaredField(entityClass, name);
+		return entityField;
+	}
+
+	private void checkIfIdField() {
+		
+		Field entityField = getEntityField();
+		if (null == entityField) return;
+		
+		Id id = entityField.getAnnotation(Id.class);
+		setIdField(id!=null);
+		setIdentity(id!=null);
+	}
+	 
 	
 	public String getFieldTypeConstants() {
 		try {
@@ -323,7 +351,7 @@ public class EntityElement implements Serializable {
 
 		if (fieldType.equals(FieldType.FIELD_TYPE_FIXED_LIST) && additionalMap != null) {
 
-			List<BaseEntity> referenceEntityList = (List<BaseEntity>) additionalMap.get(field.getName());
+			List<? extends BaseModel> referenceEntityList = (List<? extends BaseModel>) additionalMap.get(field.getName());
 			if (null == referenceEntityList || referenceEntityList.size() == 0) {
 				throw new RuntimeException(
 						"Invalid object list provided for key: " + field.getName() + " in EntityElement.AdditionalMap");
