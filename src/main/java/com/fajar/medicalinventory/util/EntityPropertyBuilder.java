@@ -66,6 +66,6 @@ public class EntityPropertyBuilder {
 	
 	public static void main(String[] args) throws Exception {
 		EntityProperty prop = createEntityProperty(ProductModel.class, null);
-		
+		System.out.println(prop.getElements());
 	}
 }

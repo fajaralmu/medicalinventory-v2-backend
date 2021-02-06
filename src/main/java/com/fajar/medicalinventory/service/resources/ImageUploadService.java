@@ -33,7 +33,7 @@ public class ImageUploadService {
 	 * @param singleImageModel
 	 * @return
 	 */
-	public String uploadImage(SingleImageModel singleImageModel) {
+	public String uploadImage(SingleImageModel singleImageModel, HttpServletRequest httpServletRequest) {
 
 		String image = singleImageModel.getImage();
 		if (image != null && image.startsWith("data:image")) {
@@ -42,7 +42,7 @@ public class ImageUploadService {
 				removeOldImage(singleImageModel);
 			}
 			try {
-				String savedFileName = fileService.writeImage(singleImageModel.getClass().getSimpleName(), image);
+				String savedFileName = fileService.writeImage(singleImageModel.getClass().getSimpleName(), image, httpServletRequest);
 				singleImageModel.setImage(savedFileName);
 				return savedFileName;
 			} catch (IOException e) {
@@ -131,7 +131,7 @@ public class ImageUploadService {
 			String imageName = null;
 			if (isBase64Image(rawImage)) {
 				try {
-					imageName = fileService.writeImage(multipleImageModel.getClass().getSimpleName(), rawImage);
+					imageName = fileService.writeImage(multipleImageModel.getClass().getSimpleName(), rawImage, httpServletRequest);
 					log.info("saved base64 image {}", imageName);
 				} catch (IOException e) {
 					e.printStackTrace();

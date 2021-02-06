@@ -134,7 +134,7 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 							break; 
 						} 
 						if (object instanceof SingleImageModel) {
-							imageUploadService.uploadImage((SingleImageModel) object);
+							imageUploadService.uploadImage((SingleImageModel) object, httpServletRequest);
 						}
 						if (object instanceof MultipleImageModel) {
 							log.info("{} is multiple image model", object.getClass());

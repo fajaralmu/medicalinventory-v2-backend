@@ -12,6 +12,7 @@ import javax.persistence.MappedSuperclass;
 import org.springframework.beans.BeanUtils;
 
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.EntityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,6 +32,7 @@ public abstract class BaseModel<E extends BaseEntity> implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = -64034238773261408L;
+	@FormField(labelName = "Record Id")
 	private Long id;
 	 
 	private Date createdDate;

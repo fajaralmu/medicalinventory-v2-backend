@@ -55,7 +55,7 @@ public class EntityElement implements Serializable {
 	private String id;
 	private String type;
 	private String className;
-	private String lableName;
+	private String labelName;
 	private String jsonList;
 	private String optionItemName;
 	private String optionValueName;
@@ -214,7 +214,7 @@ public class EntityElement implements Serializable {
 			return false;
 		}
 
-		String lableName = formField.lableName().equals("") ? field.getName() : formField.lableName();
+		String labelName = formField.labelName().equals("") ? field.getName() : formField.labelName();
 		FieldType determinedFieldType = determineFieldType();
 
 		try {
@@ -227,7 +227,7 @@ public class EntityElement implements Serializable {
 			}
 
 			checkDetailField(); 
-			setLableName(StringUtil.extractCamelCase(lableName));
+			setLabelName(StringUtil.extractCamelCase(labelName));
 			setType(determinedFieldType.value);
 			
 			setId(field.getName());

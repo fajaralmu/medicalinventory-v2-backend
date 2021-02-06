@@ -127,7 +127,7 @@ public class DefaultUserService {
 		
 		if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) {
 			loggedUser.setProfileImage(user.getProfileImage());
-			imageUploadService.uploadImage(loggedUser);
+			imageUploadService.uploadImage(loggedUser, httpServletRequest);
 		}
 		entityRepository.save(loggedUser);
 	}

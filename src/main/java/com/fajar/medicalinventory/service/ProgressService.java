@@ -98,7 +98,7 @@ public class ProgressService {
 	}
 
 	private void sendProgress(double progress, String requestId) {
-		// comment log.info("Send Progress: {} to {}", progress, requestId);
+//		log.info("Send Progress: {} to {}", progress, requestId);
 		try {
 			realtimeService.sendProgress(progress, requestId);
 		} catch (Exception e) {
@@ -109,6 +109,7 @@ public class ProgressService {
 	public void sendProgress(double progress, double maxProgress, double percent, boolean newProgress,
 			HttpServletRequest httpServletRequest) {
 		if (null == httpServletRequest) {
+//			log.info("WILL SEND PROGRESS BUT httpServletRequest is null");
 			return;
 		}
 		String requestId = getRequestId(httpServletRequest);

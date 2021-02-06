@@ -30,7 +30,6 @@ import com.fajar.medicalinventory.service.config.WebConfigService;
 import com.fajar.medicalinventory.util.IconWriter;
 import com.fajar.medicalinventory.util.StringUtil;
 import com.fajar.medicalinventory.util.ThreadUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,11 +89,7 @@ public class FileService {
 
 		return iconName;
 
-	}
-
-	public synchronized String writeImage(String code, String data) throws IOException {
-		return writeImage(code, data, null);
-	}
+	} 
 
 	public synchronized String writeImage(String code, String data, HttpServletRequest httpServletRequest)
 			throws IOException {
@@ -131,7 +126,7 @@ public class FileService {
 			List<AttachmentInfo> attachments = AttachmentInfo.extractAttachmentInfos(data, imageFileName, imageType);
 			for (int i = 0; i < attachments.size(); i++) {
 				String response = uploadViaAPIv2(attachments.get(i));
-				System.out.println("response: " + i + " => " + response);
+//				System.out.println("response: " + i + " => " + response);
 				progressService.sendProgress(1, attachments.size(), 80, httpServletRequest);
 			}
 			progressService.sendComplete(httpServletRequest);

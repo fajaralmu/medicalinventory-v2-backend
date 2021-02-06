@@ -20,7 +20,6 @@ import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
-import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.entity.setting.EntityManagementConfig;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.exception.ApplicationException;
