@@ -130,15 +130,18 @@ public class EntityElement implements Serializable {
 		JoinColumn joinColumn = entityField.getAnnotation(JoinColumn.class);
 		setHasJoinColumn(joinColumn!=null);
 	}
-	
-	private Field getEntityField() {
-		String name = field.getName();
+	private Class<? extends BaseEntity> getEntityClass(){ 
 		Class<? extends BaseModel> modelClass = entityProperty.getModelClass();
 		Dto dto = modelClass.getAnnotation(Dto.class);
 		if (null == dto) return null;
 		
 		Class<? extends BaseEntity> entityClass = dto.entityClass();
-		Field entityField = EntityUtil.getDeclaredField(entityClass, name);
+		return entityClass;
+	}
+	private Field getEntityField() {
+		
+		Class<? extends BaseEntity> entityClass = getEntityClass();
+		Field entityField = EntityUtil.getDeclaredField(entityClass, field.getName());
 		return entityField;
 	}
 
@@ -217,7 +220,6 @@ public class EntityElement implements Serializable {
 		try {
 
 			checkFieldType(determinedFieldType);
-			boolean hasJoinColumn = field.getAnnotation(JoinColumn.class) != null;
 			boolean collectionOfBaseEntity = CollectionUtil.isCollectionOfBaseEntity(field);
 
 			if (hasJoinColumn || collectionOfBaseEntity) {
@@ -261,44 +263,44 @@ public class EntityElement implements Serializable {
 
 	private void checkFieldType(FieldType fieldType) throws Exception {
 
-//		switch (fieldType) {
-//		case FIELD_TYPE_IMAGE:
-//			processImageType();
-//			break;
-//		case FIELD_TYPE_CURRENCY:
-//			processCurrencyType();
-//			break;
-//		case FIELD_TYPE_DATE:
-//			processDateType();
-//			break;
-//		case FIELD_TYPE_PLAIN_LIST:
-//			processPlainListType();
-//			break;
-//		case FIELD_TYPE_FIXED_LIST:
-//			if(formField.multipleSelect()) {
-//				processMultipleSelectElements();
-//			}
-//			break;
-//		default:
-//			break;
-//
-//		}
-//
-//	}
-//	
-//	private void processMultipleSelectElements() {
+		switch (fieldType) {
+		case FIELD_TYPE_IMAGE:
+			processImageType();
+			break;
+		case FIELD_TYPE_CURRENCY:
+			processCurrencyType();
+			break;
+		case FIELD_TYPE_DATE:
+			processDateType();
+			break;
+		case FIELD_TYPE_PLAIN_LIST:
+			processPlainListType();
+			break;
+		case FIELD_TYPE_FIXED_LIST:
+			if(formField.multipleSelect()) {
+				processMultipleSelectElements();
+			}
+			break;
+		default:
+			break;
+
+		}
+
+	}
+	
+	private void processMultipleSelectElements() {
 //		entityProperty.getMultipleSelectElements().add(field.getName());
-//	}
-//
-//	private void processCurrencyType() {
+	}
+
+	private void processCurrencyType() {
 //		entityProperty.getCurrencyElements().add(field.getName());
-//	}
-//
-//	private void processImageType() {
+	}
+
+	private void processImageType() {
 //		entityProperty.getImageElements().add(field.getName());
-//	}
-//
-//	private void processDateType() {
+	}
+
+	private void processDateType() {
 //		entityProperty.getDateElements().add(field.getName());
 	}
 
@@ -340,10 +342,9 @@ public class EntityElement implements Serializable {
 
 	private void processJoinColumn(FieldType fieldType) throws Exception {
 		log.info("field {} of {} is join column, type: {}", field.getName(), field.getDeclaringClass(), fieldType);
-
-		Class<?> referenceEntityClass = field.getType();
+ 
 		Field referenceEntityIdField = EntityUtil.getIdFieldOfAnObject(getEntityField());
-
+		System.out.println(fieldType+" referenceEntityIdField: "+referenceEntityIdField);
 		if (referenceEntityIdField == null) {
 			throw new Exception("ID Field Not Found");
 		}
@@ -367,7 +368,7 @@ public class EntityElement implements Serializable {
 //			setEntityReferenceClass(referenceEntityClass.getSimpleName());
 		}
 		
-		setEntityReferenceClass(referenceEntityClass.getSimpleName());
+		setEntityReferenceClass(getEntityField().getType().getSimpleName());
 		setOptionValueName(referenceEntityIdField.getName());
 		setMultipleSelect(formField.multipleSelect());
 		setOptionItemName(formField.optionItemName());

@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.summary.Product;
+
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.dto.model.BaseModel;
+import com.fajar.medicalinventory.dto.model.ProductModel;
 import com.fajar.medicalinventory.entity.setting.EntityElement;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 
@@ -59,5 +62,10 @@ public class EntityPropertyBuilder {
 			throw e;
 		}
 
+	}
+	
+	public static void main(String[] args) throws Exception {
+		EntityProperty prop = createEntityProperty(ProductModel.class, null);
+		
 	}
 }
