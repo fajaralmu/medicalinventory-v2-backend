@@ -48,6 +48,9 @@ public class Customer extends BaseEntity implements Serializable{
 	@Column(unique = true)
 	@FormField
 	private String code;
+	@Column(name="family_code")
+	@FormField(required = true)
+	private String familyCode;
 	@Column
 	@FormField
 	private String name;
@@ -61,11 +64,12 @@ public class Customer extends BaseEntity implements Serializable{
 	@Column(name="date_of_birth")
 	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date birthDate;
-	 
-	@ManyToOne
-	@JoinColumn(name = "health_center_id")
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
-	private HealthCenter healthCenter;
+//	 
+//	@ManyToOne
+//	@JoinColumn(name = "health_center_id")
+//	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+//	private HealthCenter healthCenter;
 	   
+	
  
 }

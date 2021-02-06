@@ -311,101 +311,15 @@ public class QueryUtil {
 		else {
 			return null;
 		}
-	}
-
-	private static String completeWhereClause(List<QueryFilterItem> sqlFilters) {
-		String whereClause = "";
-
-		if (sqlFilters.size() > 0) {
-			whereClause = generateQueryFilterString( sqlFilters);
-		} else {
-			return "";
-		} 
-
-		String result = SQL_KEYWORD_WHERE.concat(whereClause); 
-		return result;
-	}
-
-	private static String currentItemExact(String rawKey) { 
-		if (rawKey.endsWith("[EXACTS]")) { 
-			String finalKey = rawKey.split("\\[EXACTS\\]")[0];
-			log.info("{} exact search",finalKey);
-			return finalKey;
-		}
-		return null;
-	}
+	} 
 
 	private static String getOptionItemName(Field field) {
 		FormField formField 	= field.getAnnotation(FormField.class);
 		String referenceFieldName = formField.optionItemName();
 		return referenceFieldName;
 	}
-
-	public static String generateQueryFilterString(List<QueryFilterItem> queryFilterItems) {
-		List<String> listOfSqlFilter = new ArrayList<String>();
-		for (int i = 0; i < queryFilterItems.size(); i++) {
-			String sqlString = queryFilterItems.get(i).generateSqlString();
-			
-			listOfSqlFilter.add(sqlString); 
-		}
-		return String.join(SQL_KEYWORD_AND, listOfSqlFilter);
-	}
-
-	/**
-	 * generate date filter sql
-	 * @param rawKey
-	 * @param key
-	 * @param fields
-	 * @param filter
-	 * @return
-	 */
-	private static QueryFilterItem getDateFilter(String rawKey, String key, List<Field > fields, Map filter) {
-		boolean dayFilter 	= rawKey.endsWith(DAY_SUFFIX);
-		boolean monthFilter = rawKey.endsWith(MONTH_SUFFIX);
-		boolean yearFilter 	= rawKey.endsWith(YEAR_SUFFIX);
-		
-
-		if (dayFilter || monthFilter || yearFilter) {
-
-			String fieldName	= key;
-			String mode 		= FILTER_DATE_DAY; 
-			
-			if (dayFilter) {
-				fieldName 	= key.replace(DAY_SUFFIX, "");
-				mode 		= FILTER_DATE_DAY;
-
-			} else if (monthFilter) {
-				fieldName 	= key.replace(MONTH_SUFFIX, "");
-				mode 		= FILTER_DATE_MON1TH;
-
-			} else if (yearFilter) {
-				fieldName	= key.replace(YEAR_SUFFIX, "");
-				mode 		= FILTER_DATE_YEAR;
-
-			}
-
-			Field field = getFieldByName(fieldName, fields);
-
-			if (field == null) {
-				log.warn("FIELD NOT FOUND: " + fieldName + " !");
-				return null;
-
-			}
-
-			String columnName = getColumnName(field);
-			String tableName = filter.get(TABLE_NAME).toString(); 
-			
-			QueryFilterItem queryItem = new QueryFilterItem();
-			queryItem.setTableName(tableName);
-			queryItem.setColumnName(columnName);
-			queryItem.setDateMode(mode);
-			queryItem.setValue( filter.get(key).toString());
-			queryItem.setExacts(true); 
-			
-			return queryItem;
-		}
-		return null;
-	} 
+ 
+ 
   
 	public static String orderSQL(Class<?> entityClass, String orderType, String orderBy) {
 
@@ -460,24 +374,7 @@ public class QueryUtil {
 		}
 		return entityClass.getSimpleName().toLowerCase();
 	}
-	
 	 
-	/**
-	 * generate sql Select * From and sql Select Count (*)
-	 * @param filter
-	 * @param entityClass
-	 * @return
-	 */
-	public static CRUDQueryHolder generateSqlByFilter(Filter filter, Class<? extends BaseEntity> entityClass ) {
-
-		log.info("CRITERIA-FILTER: {}", filter);
-		log.info("entity class: {}", entityClass);
- 
-		CRUDQueryHolder queryHolder = new CRUDQueryHolder(entityClass, filter);
-		queryHolder.buildSqlSelectAndSingleResult();
-		
-		return queryHolder ;
-	}
 
 	static String doubleQuoteMysql(Object str) {
 		return StringUtil.doubleQuoteMysql(str.toString());

@@ -60,7 +60,7 @@ public class Transaction extends BaseEntity implements Serializable {
 	@Column(unique = true)
 	@FormField
 	private String code;
-	@Column
+	@Column(name="transaction_date")
 	@FormField(type = FieldType.FIELD_TYPE_DATE)
 	@Default
 	private Date transactionDate = new Date();

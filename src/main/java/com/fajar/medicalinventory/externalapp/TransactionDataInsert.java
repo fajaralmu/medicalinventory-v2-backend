@@ -76,8 +76,8 @@ public class TransactionDataInsert {
 			List result = getObjectByCode(Customer.class, customerCode);
 			System.out.println("Customer result: " + result.size());
 			if (result.size() == 0) {
-				Customer customer = new Customer(customerCode, "CUSTOMER " + c, "Address", Gender.MALE,
-						DateUtil.getDate(1990, 3, 15), null);
+				Customer customer = new Customer(customerCode, "TEST", "CUSTOMER " + c, "Address", Gender.MALE,
+						DateUtil.getDate(1990, 3, 15));
 				c++;
 				session.save(customer);
 			} else {
