@@ -115,6 +115,7 @@ public class MyJsonUtil {
 	}
 
 	public static String listToJson(List list) {
+		if (null == list) return "[]";
 		String json = "[";
 
 		for (int i = 0; i < list.size(); i++) {

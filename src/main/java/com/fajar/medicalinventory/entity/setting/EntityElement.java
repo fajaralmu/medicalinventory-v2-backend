@@ -119,8 +119,7 @@ public class EntityElement implements Serializable {
 		checkIfIdField();
 		skipBaseField = !isIdField() && (baseField != null && ignoreBaseField);
 		checkIfJoinColumn();
-		
-
+		setEntityReferenceClass(getEntityField().getType().getSimpleName());
 		checkIfGroupedInput();
 	}
 	
@@ -262,45 +261,45 @@ public class EntityElement implements Serializable {
 
 	private void checkFieldType(FieldType fieldType) throws Exception {
 
-		switch (fieldType) {
-		case FIELD_TYPE_IMAGE:
-			processImageType();
-			break;
-		case FIELD_TYPE_CURRENCY:
-			processCurrencyType();
-			break;
-		case FIELD_TYPE_DATE:
-			processDateType();
-			break;
-		case FIELD_TYPE_PLAIN_LIST:
-			processPlainListType();
-			break;
-		case FIELD_TYPE_FIXED_LIST:
-			if(formField.multipleSelect()) {
-				processMultipleSelectElements();
-			}
-			break;
-		default:
-			break;
-
-		}
-
-	}
-	
-	private void processMultipleSelectElements() {
-		entityProperty.getMultipleSelectElements().add(field.getName());
-	}
-
-	private void processCurrencyType() {
-		entityProperty.getCurrencyElements().add(field.getName());
-	}
-
-	private void processImageType() {
-		entityProperty.getImageElements().add(field.getName());
-	}
-
-	private void processDateType() {
-		entityProperty.getDateElements().add(field.getName());
+//		switch (fieldType) {
+//		case FIELD_TYPE_IMAGE:
+//			processImageType();
+//			break;
+//		case FIELD_TYPE_CURRENCY:
+//			processCurrencyType();
+//			break;
+//		case FIELD_TYPE_DATE:
+//			processDateType();
+//			break;
+//		case FIELD_TYPE_PLAIN_LIST:
+//			processPlainListType();
+//			break;
+//		case FIELD_TYPE_FIXED_LIST:
+//			if(formField.multipleSelect()) {
+//				processMultipleSelectElements();
+//			}
+//			break;
+//		default:
+//			break;
+//
+//		}
+//
+//	}
+//	
+//	private void processMultipleSelectElements() {
+//		entityProperty.getMultipleSelectElements().add(field.getName());
+//	}
+//
+//	private void processCurrencyType() {
+//		entityProperty.getCurrencyElements().add(field.getName());
+//	}
+//
+//	private void processImageType() {
+//		entityProperty.getImageElements().add(field.getName());
+//	}
+//
+//	private void processDateType() {
+//		entityProperty.getDateElements().add(field.getName());
 	}
 
 	private void processPlainListType() throws Exception {
@@ -343,7 +342,7 @@ public class EntityElement implements Serializable {
 		log.info("field {} of {} is join column, type: {}", field.getName(), field.getDeclaringClass(), fieldType);
 
 		Class<?> referenceEntityClass = field.getType();
-		Field referenceEntityIdField = EntityUtil.getIdFieldOfAnObject(field);
+		Field referenceEntityIdField = EntityUtil.getIdFieldOfAnObject(getEntityField());
 
 		if (referenceEntityIdField == null) {
 			throw new Exception("ID Field Not Found");

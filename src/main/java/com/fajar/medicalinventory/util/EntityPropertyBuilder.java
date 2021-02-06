@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.dto.model.BaseModel;
-import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityElement;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 
@@ -20,17 +19,7 @@ public class EntityPropertyBuilder {
 		if (clazz == null ||EntityUtil. getClassAnnotation(clazz, Dto.class) == null) {
 			return null;
 		}
-
-		Dto dto =  clazz.getAnnotation(Dto.class);
-		Class<? extends BaseEntity> entityClass = dto.entityClass();
-		final boolean ignoreBaseField = dto.ignoreBaseField(); 
-
-		EntityProperty entityProperty = EntityProperty.builder().ignoreBaseField(ignoreBaseField)
-				.modelClass(clazz)
-				.entityName(entityClass.getSimpleName().toLowerCase())
-				.withProgressWhenUpdated(dto.withProgressWhenUpdated())
-				.creatable(dto.creatable())
-				.build();
+		EntityProperty entityProperty = new EntityProperty(clazz);
 		try {
 
 			List<Field> fieldList = EntityUtil.getDeclaredFields(clazz);
@@ -53,17 +42,13 @@ public class EntityPropertyBuilder {
 				fieldNames.add(entityElement.getId());
 				entityElements.add(entityElement);
 			}
-
-			entityProperty
-					.setAlias(dto.value().isEmpty() ? StringUtil.extractCamelCase(clazz.getSimpleName()) : dto.value());
-			entityProperty.setEditable(dto.editable());
+			
 			entityProperty.setElementJsonList();
 			entityProperty.setElements(entityElements);
 			entityProperty.setDetailFieldName(fieldToShowDetail);
-			entityProperty.setDateElementsJson(MyJsonUtil.listToJson(entityProperty.getDateElements()));
+//			entityProperty.setDateElementsJson(MyJsonUtil.listToJson(entityProperty.getDateElements()));
 			entityProperty.setFieldNames(MyJsonUtil.listToJson(fieldNames));
 			entityProperty.setFieldNameList(fieldNames);
-			entityProperty.setFormInputColumn(dto.formInputColumn().value);
 			entityProperty.determineIdField();
 
 			log.info("============ENTITY PROPERTY: {} ", entityProperty);
