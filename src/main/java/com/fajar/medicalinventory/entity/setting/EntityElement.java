@@ -119,7 +119,9 @@ public class EntityElement implements Serializable {
 		checkIfIdField();
 		skipBaseField = !isIdField() && (baseField != null && ignoreBaseField);
 		checkIfJoinColumn();
-		setEntityReferenceClass(getEntityField().getType().getSimpleName());
+		if (getEntityField()!=null) {
+			setEntityReferenceClass(getEntityField().getType().getSimpleName());
+		}
 		checkIfGroupedInput();
 	}
 	

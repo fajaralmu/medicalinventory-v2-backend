@@ -22,6 +22,7 @@ import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.dto.model.ProductFlowModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -139,6 +140,12 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		this.setGeneric(referenceFlow.isGeneric());
 		this.referenceProductFlow = referenceFlow;
 		this.setExpDate();
+	}
+	
+	@JsonIgnore
+	public Long getTransactionId() {
+		if (null == transaction) return null;
+		return transaction.getId();
 	}
 
  

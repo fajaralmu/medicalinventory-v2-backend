@@ -195,13 +195,13 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 		}
 	}
 	
-	protected M copy(M e) {
+	protected M copy(M e, String...ignoredProperties) {
 		try {
 			setObjectModel(e);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		BeanUtils.copyProperties(this, e);
+		BeanUtils.copyProperties(this, e, ignoredProperties);
 		return e;
 	}
 }

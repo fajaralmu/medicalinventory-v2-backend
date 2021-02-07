@@ -48,6 +48,10 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 		log.error("saveEntity Method not implemented");
 		return null;
 	}
+	
+	public void postFilter(List<T> objects) {
+		
+	}
 
 	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
 		 

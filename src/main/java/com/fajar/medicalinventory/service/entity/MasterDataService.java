@@ -118,13 +118,15 @@ public class MasterDataService {
 		try {
 
 			String entityName = request.getEntity().toLowerCase();
-			EntityManagementConfig config = getEntityManagementConfig(entityName);
-			log.info("entityName: {}, config: {}", entityName, config);
-			if (null == config) {
+			EntityManagementConfig entityConfig = getEntityManagementConfig(entityName);
+			log.info("entityName: {}, config: {}", entityName, entityConfig);
+			if (null == entityConfig) {
 				throw new Exception("Invalid entity:"+entityName);
 			}
-			entityClass = config.getEntityClass();
+			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();
+			entityClass = entityConfig.getEntityClass();
 			EntityResult entityResult = filterEntities(filter, entityClass);
+			updateService.postFilter(entityResult.getEntities());
 			return WebResponse.builder()
 					.entities(BaseModel.toModels(entityResult.entities))
 					.totalData(entityResult.count).filter(request.getFilter()).build();

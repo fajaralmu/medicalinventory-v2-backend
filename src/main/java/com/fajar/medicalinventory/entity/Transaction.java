@@ -161,7 +161,14 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 		if (null == productFlows) return;
 		productFlows.forEach(p->p.setTransaction(null));
 	}
-	
+	@Override
+	public TransactionModel toModel() {
+		TransactionModel model = new TransactionModel();
+		productFlows.forEach(p-> {
+			model.addProductFlow(p.toModel());
+		});
+		return copy(model, "productFlows");
+	}
 	 
 
 }

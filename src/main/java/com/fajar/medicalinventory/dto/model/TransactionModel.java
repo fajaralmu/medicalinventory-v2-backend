@@ -13,14 +13,17 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@Dto(editable = false, entityClass=Transaction.class)
+@Dto(editable = false, entityClass=Transaction.class, updateService = "transactionUpdateService")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,6 +51,9 @@ public class TransactionModel extends BaseModel<Transaction>{
 	private Date transactionDate = new Date();
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String description;
+	@FormField(editable = false)
+	@Getter(value=AccessLevel.NONE)
+	private int productCount;
 
 	@FormField
 	private TransactionType type;
@@ -77,11 +83,17 @@ public class TransactionModel extends BaseModel<Transaction>{
 		});
 		return copy(entity);
 	}
+	public void addProductFlow(ProductFlowModel productFlow) {
+		productFlows.add(productFlow);
+	}
 	
-	public static void main(String[] args) {
-		TransactionModel model = new TransactionModel();
-		model.setHealthCenterDestination(HealthCenterModel.builder().name("HELLO").build());
-		System.out.println(model.toEntity());
+	public int getProductCount() {
+		if (null == productFlows) return 0;
+		int count = 0;
+		for (ProductFlowModel productFlow : productFlows) {
+			count+=productFlow.getCount();
+		}
+		return count;
 	}
 	 
 
