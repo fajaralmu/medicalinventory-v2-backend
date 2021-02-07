@@ -1,12 +1,14 @@
 package com.fajar.medicalinventory.repository;
  
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import com.fajar.medicalinventory.entity.Product;
@@ -55,6 +57,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	List<Object[]> getMappedPriceAndProductIdsAt(Date date);
 	
 	
+	Product findTop1ByCode(String code);
+	
+	/**
+	 *  ========================== product count ========================= 
+	 */
+	
 	@Query("select count(p) from Product p")
 	BigInteger countAll();
 	@Query(nativeQuery = true, value="select count(c) from (select distinct(p.id) from "
@@ -69,6 +77,38 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			" where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
 			+ " and tx.health_center_destination_id = ?1 and (pf.count- pf.used_count) > 0)  c")
 	BigInteger countNotEmptyProductInSpecifiedWareHouse(Long location);
-	Product findTop1ByCode(String code);
+	
+	
+	default BigInteger countNontEmptyProduct(boolean ignoreEmptyValue, boolean isMasterHealthCenter, 
+			@Nullable Integer expiredDaysWithin, Long locationId) {
+		BigInteger totalData;
+		if (ignoreEmptyValue) {
+			if (isMasterHealthCenter) {
+				 
+				totalData = countNotEmptyProductInMasterWareHouse();
+			} else { 
+				totalData = countNotEmptyProductInSpecifiedWareHouse(locationId);
+			}
+		} else { 
+			totalData = countAll();
+		}
+		return totalData;
+	}
+	
+	default List<Product> getAvailableProducts(boolean ignoreEmptyValue, boolean isMasterHealthCenter, 
+			@Nullable Integer expiredDaysWithin, Long locationId, Pageable pageable) {
+		
+		List<Product> products = new ArrayList<Product>();
+		if (ignoreEmptyValue) {
+			if (isMasterHealthCenter) {
+				products = findNotEmptyProductInMasterWarehouse(pageable);
+			} else {
+				products = findNotEmptyProductInSpecifiedWarehouse(locationId, pageable);
+			}
+		} else {
+			products = findByOrderByName(pageable);
+		}
+		return products ;
+	}
 	
 }

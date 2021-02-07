@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
@@ -32,7 +33,9 @@ import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
+import com.fajar.medicalinventory.service.config.DefaultApplicationProfileService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
+import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
 
 @Service
 public class InventoryService {
@@ -45,6 +48,8 @@ public class InventoryService {
 	private HealthCenterRepository healthCenterRepository;
 	@Autowired
 	private DefaultHealthCenterMasterService healthCenterMasterService;
+	@Autowired
+	private InventoryConfigurationService inventoryConfigurationService;
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
@@ -73,32 +78,20 @@ public class InventoryService {
 		response.setEntities(BaseModel.toModels(availableProductFlows));
 		return response;
 	}
-	
+
 	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 
-		HealthCenter healthCenter = webRequest.getHealthcenter().toEntity();
-		boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(healthCenter);
-
-		int page = webRequest.getFilter().getPage();
-		int size = webRequest.getFilter().getLimit();
-		final PageRequest pageReuqest = PageRequest.of(page, size);
-		boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-		final BigInteger totalData;
-		final List<Product> products;
-		if (ignoreEmptyValue) {
-			if (isMasterHealthCenter) {
-				products = productRepository.findNotEmptyProductInMasterWarehouse(pageReuqest);
-				totalData = productRepository.countNotEmptyProductInMasterWareHouse();
-			} else {
-				products = productRepository.findNotEmptyProductInSpecifiedWarehouse(healthCenter.getId(), pageReuqest);
-				totalData = productRepository.countNotEmptyProductInSpecifiedWareHouse(healthCenter.getId());
-			}
-		} else {
-			products = productRepository.findByOrderByName(pageReuqest);
-			totalData = productRepository.countAll();
-		}
-		 
-		 
+		final HealthCenter healthCenter = webRequest.getHealthcenter().toEntity();
+		final boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(healthCenter);
+		
+		final Filter filter = webRequest.getFilter();
+		final PageRequest pageReuqest = PageRequest.of(filter.getPage(), filter.getLimit());
+		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
+		final BigInteger totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, 1,
+				healthCenter.getId());
+		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, 1,
+				healthCenter.getId(), pageReuqest);
+		
 		progressService.sendProgress(20, httpServletRequest);
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>();
@@ -121,6 +114,7 @@ public class InventoryService {
 
 		WebResponse response = new WebResponse();
 
+		response.setConfiguration(inventoryConfigurationService.getTempConfiguration().toModel());
 		response.setTotalData(totalData.intValue());
 		response.setGeneralList(productStocks);
 		return response;
@@ -143,32 +137,32 @@ public class InventoryService {
 				- (totalUsed == null ? 0 : totalUsed.intValue());
 		return stock;
 	}
-	
-	public WebResponse adjustStock(HttpServletRequest httpServletRequest) { 
+
+	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
-			
+
 			tx = session.beginTransaction();
-			
-			Map<Long, ProductFlow> productFlowMap = getSupplyFlowReseted(session); 
+
+			Map<Long, ProductFlow> productFlowMap = getSupplyFlowReseted(session);
 			progressService.sendProgress(10, httpServletRequest);
-			 
-			List productUsedFlows = getDistributedFlow(session); 
+
+			List productUsedFlows = getDistributedFlow(session);
 			progressService.sendProgress(10, httpServletRequest);
-			
+
 			for (Object object : productUsedFlows) {
 				ProductFlow pf = (ProductFlow) object;
 				Long refId = pf.getReferenceProductFlow().getId();
-				productFlowMap.get(refId ).addUsedCount(pf.getCount());
+				productFlowMap.get(refId).addUsedCount(pf.getCount());
 				pf.setExpDate();
 				session.merge(pf);
-				progressService.sendProgress(1 , productUsedFlows.size(), 35, httpServletRequest);
+				progressService.sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
 			}
-			for(Long id: productFlowMap.keySet()) {
+			for (Long id : productFlowMap.keySet()) {
 				session.merge(productFlowMap.get(id));
-				
-				progressService.sendProgress(1 , productFlowMap.keySet().size(), 35, httpServletRequest);
+
+				progressService.sendProgress(1, productFlowMap.keySet().size(), 35, httpServletRequest);
 			}
 			tx.commit();
 			progressService.sendProgress(10, httpServletRequest);
@@ -191,9 +185,9 @@ public class InventoryService {
 	}
 
 	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
-		Query query = session.createQuery("select pf from ProductFlow pf left join pf.transaction tx "
-				+ " where tx.type = ? or tx.type = ? ");
-		
+		Query query = session.createQuery(
+				"select pf from ProductFlow pf left join pf.transaction tx " + " where tx.type = ? or tx.type = ? ");
+
 		query.setString(0, TransactionType.TRANS_IN.toString());
 		query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
 		List productSupplyFlows = query.list();
@@ -201,7 +195,7 @@ public class InventoryService {
 		for (Object productSupplyFlow : productSupplyFlows) {
 			ProductFlow pf = (ProductFlow) productSupplyFlow;
 			pf.resetUsedCount();
-			productFlowMap .put(pf.getId(), pf);
+			productFlowMap.put(pf.getId(), pf);
 		}
 		return productFlowMap;
 	}

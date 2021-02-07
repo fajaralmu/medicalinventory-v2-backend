@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.service.transaction;
+package com.fajar.medicalinventory.service.config;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.ConfigurationModel;
 import com.fajar.medicalinventory.entity.Configuration;
 import com.fajar.medicalinventory.repository.ConfigurationRepository;
 import com.fajar.medicalinventory.repository.EntityRepository;
-import com.fajar.medicalinventory.service.config.BindedValues;
 
 @Service
 public class InventoryConfigurationService {
@@ -23,9 +23,20 @@ public class InventoryConfigurationService {
 	@Autowired
 	private EntityRepository entityRepository;
 	
+	private Configuration tempConfiguration;
+	
+	public Configuration getTempConfiguration() {
+		return tempConfiguration;
+	}
+
+	public void setTempConfiguration(Configuration tempConfiguration) {
+		this.tempConfiguration = tempConfiguration;
+	}
+
 	@PostConstruct
 	public void init() {
-		checkConfig();
+		Configuration config = checkConfig();
+		setTempConfiguration(config);
 	}
 
 	private Configuration checkConfig() {
@@ -56,6 +67,11 @@ public class InventoryConfigurationService {
 		configuration.setLeadTime(payload.getLeadTime());
 		configuration.setExpiredWarningDays(payload.getExpiredWarningDays());
 		Configuration saved = entityRepository.save(configuration);
+		
+		setTempConfiguration(saved);
+		
 		return WebResponse.builder().entity(saved.toModel()).build();
 	}
+
+	 
 }

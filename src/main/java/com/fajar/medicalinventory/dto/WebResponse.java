@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fajar.medicalinventory.dto.model.ApplicationProfileModel;
 import com.fajar.medicalinventory.dto.model.BaseModel;
+import com.fajar.medicalinventory.dto.model.ConfigurationModel;
 import com.fajar.medicalinventory.dto.model.HealthCenterModel;
 import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.dto.model.UserModel;
@@ -57,6 +58,7 @@ public class WebResponse implements Serializable {
 	private ApplicationProfileModel applicationProfile;
 	private HealthCenterModel masterHealthCenter;
 	private TransactionModel transaction;
+	private ConfigurationModel configuration;
 
 	private Double percentage;
 	private Integer[] transactionYears;

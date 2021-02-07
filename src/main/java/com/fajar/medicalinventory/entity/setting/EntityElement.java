@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Builder.Default;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
@@ -71,15 +72,13 @@ public class EntityElement implements Serializable {
 	private List<? extends BaseModel> options;
 
 	private boolean identity;
-	private boolean required;
-	private boolean idField;
-	private boolean skipBaseField;
+	private boolean required; 
 	private boolean hasJoinColumn;
-	private boolean multiple;
-	private boolean showDetail;
-	private boolean detailField;
-	private boolean multipleSelect;
+	private boolean multiple; 
+	private boolean detailField; 
 	private boolean hasPreview;
+	@Default
+	private boolean filterable = true;
 
 	@JsonIgnore
 	public EntityProperty entityProperty; 
@@ -104,6 +103,7 @@ public class EntityElement implements Serializable {
 			this.fieldType = formField.type();
 			this.editable = formField.editable();
 			setOptionItemName(formField.optionItemName());
+			setFilterable(formField.filterable());
 			
 		}else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
@@ -117,7 +117,7 @@ public class EntityElement implements Serializable {
 		baseField = field.getAnnotation(BaseField.class);
 
 		checkIfIdField();
-		skipBaseField = !isIdField() && (baseField != null && ignoreBaseField);
+		 
 		checkIfJoinColumn();
 		if (getEntityField()!=null) {
 			setEntityReferenceClass(getEntityField().getType().getSimpleName());
@@ -152,8 +152,7 @@ public class EntityElement implements Serializable {
 		Field entityField = getEntityField();
 		if (null == entityField) return;
 		
-		Id id = entityField.getAnnotation(Id.class);
-		setIdField(id!=null);
+		Id id = entityField.getAnnotation(Id.class); 
 		setIdentity(id!=null);
 	}
 	 
@@ -211,7 +210,7 @@ public class EntityElement implements Serializable {
 
 	private boolean doBuild() throws Exception {
 
-		boolean formFieldIsNullOrSkip = (formField == null || skipBaseField);
+		boolean formFieldIsNullOrSkip = (formField == null );
 		if (formFieldIsNullOrSkip) {
 			return false;
 		}
@@ -232,12 +231,10 @@ public class EntityElement implements Serializable {
 			setLabelName(StringUtil.extractCamelCase(labelName));
 			setType(determinedFieldType.value);
 			
-			setId(field.getName());
-			setIdentity(idField);
+			setId(field.getName()); 
 			setRequiredProp(formField );
 			setMultiple(formField.multipleImage());
-			setClassName(field.getType().getCanonicalName());
-			setShowDetail(formField.showDetail());
+			setClassName(field.getType().getCanonicalName()); 
 			
 
 			setHasPreview(formField.hasPreview());
@@ -334,7 +331,7 @@ public class EntityElement implements Serializable {
 		} else if (field.getType().equals(Date.class) && field.getAnnotation(JsonFormat.class) == null) {
 			fieldType = FieldType.FIELD_TYPE_DATE;
 
-		} else if (idField) {
+		} else if (identity) {
 			fieldType = FieldType.FIELD_TYPE_HIDDEN;
 		} else {
 			fieldType = formField.type();
@@ -372,7 +369,7 @@ public class EntityElement implements Serializable {
 		
 		setEntityReferenceClass(getEntityField().getType().getSimpleName());
 		setOptionValueName(referenceEntityIdField.getName());
-		setMultipleSelect(formField.multipleSelect());
+//		setMultipleSelect(formField.multipleSelect());
 		setOptionItemName(formField.optionItemName());
 	}
 

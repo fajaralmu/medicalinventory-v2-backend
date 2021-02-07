@@ -51,7 +51,7 @@ public class TransactionModel extends BaseModel<Transaction>{
 	private Date transactionDate = new Date();
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String description;
-	@FormField(editable = false)
+	@FormField(editable = false, filterable = false)
 	@Getter(value=AccessLevel.NONE)
 	private int productCount;
 

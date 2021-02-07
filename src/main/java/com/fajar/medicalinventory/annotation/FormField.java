@@ -30,6 +30,7 @@ public @interface FormField {
 	
 	public boolean hasPreview() default false;
 	public boolean editable() default true;
+	public boolean filterable() default true;
 	//LINK = /api/component/{previewLink}/{elementValue}
 	public String previewLink() default "";
 

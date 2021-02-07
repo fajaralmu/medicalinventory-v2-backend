@@ -108,7 +108,7 @@ public class EntityProperty implements Serializable {
 			return;
 		}
 		for (EntityElement entityElement : elements) {
-			if (entityElement.isIdField() && getIdField() == null) {
+			if (entityElement.isIdentity() && getIdField() == null) {
 				setIdField(entityElement.getId());
 			}
 		}

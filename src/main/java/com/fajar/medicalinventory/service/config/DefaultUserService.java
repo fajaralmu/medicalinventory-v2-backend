@@ -1,6 +1,5 @@
 package com.fajar.medicalinventory.service.config;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -18,7 +17,6 @@ import com.fajar.medicalinventory.repository.AuthorityRepository;
 import com.fajar.medicalinventory.repository.EntityRepository;
 import com.fajar.medicalinventory.repository.UserRepository;
 import com.fajar.medicalinventory.service.SessionValidationService;
-import com.fajar.medicalinventory.service.resources.FileService;
 import com.fajar.medicalinventory.service.resources.ImageUploadService;
 
 import lombok.extern.slf4j.Slf4j;
