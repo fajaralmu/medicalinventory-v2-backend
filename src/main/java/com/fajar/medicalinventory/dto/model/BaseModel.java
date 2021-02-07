@@ -89,13 +89,13 @@ public abstract class BaseModel<E extends BaseEntity> implements Serializable{
 		}
 	}
 	
-	protected E copy(E e) {
+	protected E copy(E e, String...ignoredProperties) {
 		try {
 			setObjectModel(e);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		BeanUtils.copyProperties(this, e);
+		BeanUtils.copyProperties(this, e, ignoredProperties);
 		return e;
 	}
 

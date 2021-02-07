@@ -81,7 +81,7 @@ public class TransactionModel extends BaseModel<Transaction>{
 		productFlows.forEach(p-> {
 			entity.addProductFlow(p.toEntity());
 		});
-		return copy(entity);
+		return copy(entity, "productFlows");
 	}
 	public void addProductFlow(ProductFlowModel productFlow) {
 		productFlows.add(productFlow);

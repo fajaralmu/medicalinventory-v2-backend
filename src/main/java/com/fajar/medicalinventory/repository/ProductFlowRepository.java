@@ -102,6 +102,9 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 	public BigInteger getTotalUsedProductToCustomer(Long productId, Date date, Long locationId);
 	
 	
+	/**
+	 * TOTAL Items At Branch Warehouse
+	 */
 	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
 			+ " left join pf.transaction tx "
 			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
@@ -110,10 +113,67 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 	public BigInteger getTotalItemsAtBranchWarehouse(Long locationId);
 	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
 			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
+			+ " and tx.healthCenterDestination.id = ?1 "
+			+ " and (pf.count-pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2  ")
+	public BigInteger getTotalItemsAtBranchWarehouseAndExpDateBefore(Long locationId, Date expBefore);
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
+			+ " and tx.healthCenterDestination.id = ?1 "
+			+ " and (pf.count-pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2 " 
+			+ " and pf.expiredDate > ?3 ")
+	public BigInteger getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(Long locationId, Date expBefore, Date expAfter);
+	default BigInteger getTotalItemsAtBranchWarehouse(long locationId, Integer expDaysWithin) {
+		if (null != expDaysWithin) {
+			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
+			if (expDaysWithin > 0) {
+				Date tomorrow = DateUtil.plusDay(new Date(), 1 );
+				return getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(locationId, expiredDateWithin, tomorrow);
+			}
+			
+			return getTotalItemsAtBranchWarehouseAndExpDateBefore(locationId, expiredDateWithin);
+		}
+		return getTotalItemsAtBranchWarehouse(locationId);
+	}
+	
+	
+	/**
+	 * TOTAL Items At Main Warehouse
+	 */
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
 			+ " where tx.type = 'TRANS_IN' "
 //			+ " and tx.healthCenterDestination.id = ?1 "
 			+ " and (pf.count-pf.usedCount) > 0")
 	public BigInteger getTotalItemsAtMasterWarehouse();
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_IN' "
+			+ " and pf.expiredDate < ?1" 
+			+ " and (pf.count-pf.usedCount) > 0")
+	public BigInteger getTotalItemsAtMasterWarehouseAndExpDateBefore(Date expiredDateWithin );
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_IN' "
+			+ " and pf.expiredDate < ?1"
+			+ " and pf.expiredDate > ?2"
+			+ " and (pf.count-pf.usedCount) > 0")
+	public BigInteger getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter(Date before, Date after);
+	default BigInteger getTotalItemsAtMasterWarehouse(Integer expDaysWithin) {
+		if (null != expDaysWithin) {
+			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
+			if ( expDaysWithin > 0) {
+				Date tomorrow = DateUtil.plusDay(new Date(), 1 );
+				return getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter( expiredDateWithin,tomorrow);
+			}
+			return getTotalItemsAtMasterWarehouseAndExpDateBefore(expiredDateWithin);
+			
+		}
+		return getTotalItemsAtMasterWarehouse();
+	}
 
 
 }

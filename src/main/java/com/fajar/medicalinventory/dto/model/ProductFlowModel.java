@@ -83,7 +83,9 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 		if (null != referenceFlow && null != referenceFlow.getProduct()) {
 			setProduct(referenceFlow.getProduct());
 		}
-		this.setGeneric(referenceFlow.isGeneric());
+		if (referenceFlow != null) {
+			this.setGeneric(referenceFlow.isGeneric());
+		}
 		this.referenceProductFlow = referenceFlow;
 		this.setExpDate();
 	} 

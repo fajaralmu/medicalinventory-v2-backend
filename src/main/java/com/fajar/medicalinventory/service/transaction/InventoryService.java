@@ -21,11 +21,14 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.Filter;
+import com.fajar.medicalinventory.dto.InventoryData;
+import com.fajar.medicalinventory.dto.ProductInventory;
 import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.dto.model.ConfigurationModel;
+import com.fajar.medicalinventory.entity.Configuration;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -34,7 +37,6 @@ import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
-import com.fajar.medicalinventory.service.config.DefaultApplicationProfileService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
 
@@ -84,29 +86,30 @@ public class InventoryService {
 
 		final HealthCenter location = webRequest.getHealthcenter().toEntity();
 		final boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(location);
-		
+
 		final Filter filter = webRequest.getFilter();
 		final PageRequest pageReuqest = PageRequest.of(filter.getPage(), filter.getLimit());
 		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-		final Integer expDateWithin = filter.isFilterExpDate()?filter.getDay():null;
+		final Integer expDateWithin = filter.isFilterExpDate() ? filter.getDay() : null;
 		final BigInteger totalData;
 		final BigInteger totalItems;
 		if (ignoreEmptyValue) {
-			totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin ,
-				location.getId());
+			totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin,
+					location.getId());
 		} else {
 			totalData = productRepository.countAll();
 		}
-		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, expDateWithin,
-				location.getId(), pageReuqest);
-		
+		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter,
+				expDateWithin, location.getId(), pageReuqest);
+		progressService.sendProgress(10, httpServletRequest);
+
 		if (isMasterHealthCenter) {
-			totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse();
+			totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(expDateWithin);
 		} else {
-			totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId());
+			totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(), expDateWithin);
 		}
-		
-		progressService.sendProgress(20, httpServletRequest);
+
+		progressService.sendProgress(10, httpServletRequest);
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>();
 		for (int i = 0; i < products.size(); i++) {
@@ -114,7 +117,8 @@ public class InventoryService {
 			List<ProductFlow> productFlows;
 
 			if (isMasterHealthCenter) {
-				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId(), expDateWithin);
+				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId(),
+						expDateWithin);
 
 			} else {
 				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(location.getId(),
@@ -129,7 +133,7 @@ public class InventoryService {
 		WebResponse response = new WebResponse();
 
 		ConfigurationModel configModel = inventoryConfigurationService.getTempConfiguration().toModel();
-		response.setConfiguration(configModel );
+		response.setConfiguration(configModel);
 		response.setTotalData(totalData.intValue());
 		response.setGeneralList(productStocks);
 		response.setTotalItems(totalItems.intValue());
@@ -193,6 +197,49 @@ public class InventoryService {
 		return new WebResponse();
 	}
 
+	private List<ProductInventory> getExpiringProductsData(List<HealthCenter> locations, Integer remainingDays,
+			HttpServletRequest httpServletRequest) {
+
+		List<ProductInventory> inventories = new ArrayList<>();
+		for (HealthCenter location : locations) {
+			BigInteger totalItems;
+			if (healthCenterMasterService.isMasterHealthCenter(location)) {
+				totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(remainingDays);
+			} else {
+				totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(), remainingDays);
+			}
+
+			ProductInventory inventory = new ProductInventory();
+			inventory.setLocation(location.toModel());
+
+			inventory.setTotalItems(totalItems == null ? 0 : totalItems.intValue());
+			inventories.add(inventory);
+			progressService.sendProgress(1, locations.size(), 30, httpServletRequest);
+		}
+		return inventories;
+	}
+
+	public WebResponse getInventoriesData(HttpServletRequest httpServletRequest) {
+		Configuration config = inventoryConfigurationService.getTempConfiguration();
+		int warningDays = config.getExpiredWarningDays();
+		
+		List<HealthCenter> locations = healthCenterRepository.findAll();
+		progressService.sendProgress(10, httpServletRequest);
+		List<ProductInventory> willExpiredList = getExpiringProductsData(locations, warningDays, httpServletRequest);
+		List<ProductInventory> expiredList = getExpiringProductsData(locations, 0, httpServletRequest);
+		List<ProductInventory> totalList = getExpiringProductsData(locations, null, httpServletRequest);
+		
+		
+		InventoryData inventoryData = new InventoryData();
+		inventoryData.setInventories(ProductInventory.combine(totalList, willExpiredList, expiredList));
+		inventoryData.calculateSummary();
+		
+		WebResponse response = new WebResponse();
+		response.setConfiguration(config.toModel());
+		response.setInventoryData(inventoryData );
+		return response ;
+	}
+	
 	private List getDistributedFlow(Session session) {
 		Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
 		criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
