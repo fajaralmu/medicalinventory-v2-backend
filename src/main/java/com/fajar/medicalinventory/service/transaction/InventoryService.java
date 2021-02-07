@@ -89,8 +89,13 @@ public class InventoryService {
 		final PageRequest pageReuqest = PageRequest.of(filter.getPage(), filter.getLimit());
 		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
 		final Integer expDateWithin = filter.isFilterExpDate()?filter.getDay():null;
-		final BigInteger totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin ,
+		final BigInteger totalData;
+		if (ignoreEmptyValue) {
+			totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin ,
 				location.getId());
+		} else {
+			totalData = productRepository.countAll();
+		}
 		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, expDateWithin,
 				location.getId(), pageReuqest);
 		
