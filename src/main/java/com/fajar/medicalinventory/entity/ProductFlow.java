@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.model.ProductFlowModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -130,6 +131,7 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 			return;
 		}
 		setExpiredDate(referenceProductFlow.getExpiredDate());
+		setGeneric(referenceProductFlow.isGeneric());
 	}
 
 
@@ -146,6 +148,10 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	public Long getTransactionId() {
 		if (null == transaction) return null;
 		return transaction.getId();
+	}
+	@JsonIgnore
+	public boolean isDistributed  () {
+		return null == referenceProductFlow;
 	}
 
  

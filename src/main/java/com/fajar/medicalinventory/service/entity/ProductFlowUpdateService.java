@@ -40,9 +40,13 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 		}
 		ProductFlow existingObject = existingObjectOpt.get();
 		existingObject.setCount(object.getCount());
-		existingObject.setExpiredDate(object.getExpiredDate());
-		existingObject.setGeneric(object.isGeneric());
+		
 		existingObject.setSuitable(object.isSuitable());
+		
+		if (false == existingObject.isDistributed ()) {
+			existingObject.setExpiredDate(object.getExpiredDate());
+			existingObject.setGeneric(object.isGeneric());
+		}
 		
 		ProductFlow saved = entityRepository.save(existingObject);
 		inventoryService.adjustStock(httpServletRequest);
