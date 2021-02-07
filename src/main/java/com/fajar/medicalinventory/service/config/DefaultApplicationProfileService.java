@@ -124,6 +124,14 @@ public class DefaultApplicationProfileService {
 				e.printStackTrace();
 			}
 		}
+		if (notEmpty(appProfile.getIconUrl()) && appProfile.getIconUrl().startsWith("data:image")) {
+			try {
+				String iconUrl = fileService.writeImage(ApplicationProfile.class.getSimpleName(), appProfile.getIconUrl(), httpServletRequest);
+				actualAppProfile.setIconUrl(iconUrl );
+			} catch ( Exception e) {
+				e.printStackTrace();
+			}
+		}
 //		if (notEmpty(appProfile.getName())) {
 //			actualAppProfile.setName(appProfile.getName());
 //		}
