@@ -149,9 +149,13 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		if (null == transaction) return null;
 		return transaction.getId();
 	}
+	/**
+	 * distributed to customer/to branch warehouse
+	 * @return
+	 */
 	@JsonIgnore
 	public boolean isDistributed  () {
-		return null == referenceProductFlow;
+		return null != referenceProductFlow;
 	}
 
  
