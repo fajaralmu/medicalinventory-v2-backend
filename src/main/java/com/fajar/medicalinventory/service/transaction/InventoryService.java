@@ -25,6 +25,7 @@ import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.dto.model.BaseModel;
+import com.fajar.medicalinventory.dto.model.ConfigurationModel;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -81,16 +82,17 @@ public class InventoryService {
 
 	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 
-		final HealthCenter healthCenter = webRequest.getHealthcenter().toEntity();
-		final boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(healthCenter);
+		final HealthCenter location = webRequest.getHealthcenter().toEntity();
+		final boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(location);
 		
 		final Filter filter = webRequest.getFilter();
 		final PageRequest pageReuqest = PageRequest.of(filter.getPage(), filter.getLimit());
 		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-		final BigInteger totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, 1,
-				healthCenter.getId());
-		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, 1,
-				healthCenter.getId(), pageReuqest);
+		final Integer expDateWithin = filter.isFilterExpDate()?filter.getDay():null;
+		final BigInteger totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin ,
+				location.getId());
+		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, expDateWithin,
+				location.getId(), pageReuqest);
 		
 		progressService.sendProgress(20, httpServletRequest);
 
@@ -100,11 +102,11 @@ public class InventoryService {
 			List<ProductFlow> productFlows;
 
 			if (isMasterHealthCenter) {
-				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId());
+				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId(), expDateWithin);
 
 			} else {
-				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
-						product.getId());
+				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(location.getId(),
+						product.getId(), expDateWithin);
 
 			}
 			ProductStock productStock = new ProductStock(product, productFlows);
@@ -114,7 +116,8 @@ public class InventoryService {
 
 		WebResponse response = new WebResponse();
 
-		response.setConfiguration(inventoryConfigurationService.getTempConfiguration().toModel());
+		ConfigurationModel configModel = inventoryConfigurationService.getTempConfiguration().toModel();
+		response.setConfiguration(configModel );
 		response.setTotalData(totalData.intValue());
 		response.setGeneralList(productStocks);
 		return response;

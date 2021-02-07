@@ -51,6 +51,7 @@ public class Filter implements Serializable {
 	private Integer yearTo; 
 	
 	private boolean ignoreEmptyValue;
+	private boolean filterExpDate;
 	
 	@JsonIgnore
 	private int maxValue;

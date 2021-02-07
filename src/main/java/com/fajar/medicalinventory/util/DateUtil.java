@@ -326,4 +326,10 @@ public class DateUtil {
 		int lastDay = getMonthsDay(prevMonth, prevYear);
 		return getDate(prevYear, prevMonth, lastDay);
 	}
+
+	public static Date plusDay(Date date, Integer expiredDaysWithin) {
+		Calendar cal = cal(date);
+		cal.add(Calendar.DAY_OF_MONTH, expiredDaysWithin);
+		return cal.getTime();
+	}
 }
