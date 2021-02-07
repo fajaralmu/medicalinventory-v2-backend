@@ -90,6 +90,7 @@ public class InventoryService {
 		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
 		final Integer expDateWithin = filter.isFilterExpDate()?filter.getDay():null;
 		final BigInteger totalData;
+		final BigInteger totalItems;
 		if (ignoreEmptyValue) {
 			totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin ,
 				location.getId());
@@ -98,6 +99,12 @@ public class InventoryService {
 		}
 		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter, expDateWithin,
 				location.getId(), pageReuqest);
+		
+		if (isMasterHealthCenter) {
+			totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse();
+		} else {
+			totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId());
+		}
 		
 		progressService.sendProgress(20, httpServletRequest);
 
@@ -125,6 +132,7 @@ public class InventoryService {
 		response.setConfiguration(configModel );
 		response.setTotalData(totalData.intValue());
 		response.setGeneralList(productStocks);
+		response.setTotalItems(totalItems.intValue());
 		return response;
 	}
 

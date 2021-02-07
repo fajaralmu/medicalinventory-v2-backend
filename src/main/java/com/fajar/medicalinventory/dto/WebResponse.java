@@ -50,7 +50,11 @@ public class WebResponse implements Serializable {
 	
 	private BaseModel entity; 
 	private Filter filter;
-	private Integer totalData;  
+	/**
+	 * total record
+	 */
+	private Integer totalData;
+	private Integer totalItems;
 	private EntityProperty entityProperty;
 	
 	private Long maxValue;

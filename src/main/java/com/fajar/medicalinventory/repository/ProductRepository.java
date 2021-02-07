@@ -147,7 +147,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 		
 		if (ignoreEmptyValue) {
 			boolean withExpDateFilter = expiredDaysWithin!=null;
-			Date expiredDateWithin = DateUtil.plusDay(new Date(), expiredDaysWithin+1);
+			Date expiredDateWithin = withExpDateFilter? DateUtil.plusDay(new Date(), expiredDaysWithin+1):null;
 			if (isMasterHealthCenter) {
 				if (withExpDateFilter) {
 					products = findNotEmptyProductInMasterWarehouseWithExpDateBefore(expiredDateWithin , pageable);

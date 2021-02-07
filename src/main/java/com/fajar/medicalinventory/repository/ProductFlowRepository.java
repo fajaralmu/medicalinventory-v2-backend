@@ -82,7 +82,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 
 	public List<ProductFlow> findByTransactionIn(List<Transaction> transactions);
 
-	@Query("select   sum(pf.count)  from ProductFlow pf "  
+	@Query("select sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p " + 
 			"where tx.type = 'TRANS_IN' and p.id=?1 and tx.transactionDate <= ?2")
@@ -94,12 +94,26 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p.id=?1 and tx.transactionDate <= ?2 and destination.id = ?3")
 	public BigInteger getTotalIncomingProductAtBranchWarehouse(long productId, Date date, long locationId);
 	
-	@Query("select   sum(pf.count)  from ProductFlow pf "  
+	@Query("select sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p "
 			+ "left join tx.healthCenterLocation location " + 
 			"where tx.type = 'TRANS_OUT' and p.id=?1 and tx.transactionDate <= ?2 and location.id = ?3")
 	public BigInteger getTotalUsedProductToCustomer(Long productId, Date date, Long locationId);
+	
+	
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
+			+ " and tx.healthCenterDestination.id = ?1 "
+			+ " and (pf.count-pf.usedCount) > 0")
+	public BigInteger getTotalItemsAtBranchWarehouse(Long locationId);
+	@Query("select sum(pf.count-pf.usedCount) from ProductFlow pf "
+			+ " left join pf.transaction tx "
+			+ " where tx.type = 'TRANS_IN' "
+//			+ " and tx.healthCenterDestination.id = ?1 "
+			+ " and (pf.count-pf.usedCount) > 0")
+	public BigInteger getTotalItemsAtMasterWarehouse();
 
 
 }
