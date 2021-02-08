@@ -51,7 +51,7 @@ public class CustomerModel extends BaseModel<Customer>{
 	private Gender gender;
 	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date birthDate;
-	@FormField(editable = false)
+	@FormField(editable = false, filterable = false)
 	@Getter(value=AccessLevel.NONE)
 	private int age;
 	
