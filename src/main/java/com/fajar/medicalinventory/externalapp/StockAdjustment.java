@@ -122,13 +122,13 @@ where p_ref.id != p.id
 	/**
 	 * GET DIFF DATE between supply and used
 	 * select 
-tx.transactiondate as date_used, tx_ref.transactiondate as date_supply, tx_ref.id as supply_id, pf.id as used_flow_id 
+tx.transaction_date as date_used, tx_ref.transaction_date as date_supply, tx_ref.id as supply_id, pf.id as used_flow_id 
 from product_flow pf 
 left join product_flow pf_ref on pf_ref.id = pf.reference_flow_id
 left join "transaction" tx on tx.id = pf.transaction_id
 left join "transaction" tx_ref on tx_ref.id = pf_ref.transaction_id
-where tx_ref.transactiondate > tx.transactiondate and pf.reference_flow_id is not null
-order by tx_ref.id, tx.transactiondate 
+where tx_ref.transaction_date > tx.transaction_date and pf.reference_flow_id is not null
+order by tx_ref.id, tx.transaction_date 
 	 */
 	static final String FLOW_IDS = "5492\r\n" + 
 			"5507\r\n" + 
