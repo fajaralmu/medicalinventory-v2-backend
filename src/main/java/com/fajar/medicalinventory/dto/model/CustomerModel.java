@@ -16,9 +16,11 @@ import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.constants.Gender;
 import com.fajar.medicalinventory.entity.Customer;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 
@@ -49,6 +51,9 @@ public class CustomerModel extends BaseModel<Customer>{
 	private Gender gender;
 	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date birthDate;
+	@FormField(editable = false)
+	@Getter(value=AccessLevel.NONE)
+	private int age;
 	
 	
 	public int getAge() {
