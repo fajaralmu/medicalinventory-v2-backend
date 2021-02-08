@@ -164,9 +164,11 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 	@Override
 	public TransactionModel toModel() {
 		TransactionModel model = new TransactionModel();
-		productFlows.forEach(p-> {
-			model.addProductFlow(p.toModel());
-		});
+		if (null != productFlows) {
+			productFlows.forEach(p-> {
+				model.addProductFlow(p.toModel());
+			});
+		}
 		return copy(model, "productFlows");
 	}
 	 
