@@ -13,8 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.dto.model.HealthCenterModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -42,15 +40,14 @@ public class HealthCenter extends BaseEntity<HealthCenterModel> implements Seria
 	private static final long serialVersionUID = 2688885440038052615L;
 	
 	@Column(unique = true)
-	@FormField
 	private String code;
 	@Column(unique = true)
-	@FormField
 	private String name;
 	@Column
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String address;
-
+	@Column
+	private String contact;
+	
 	@Transient
 	@JsonIgnore
 	private Integer monthlyProductCount;

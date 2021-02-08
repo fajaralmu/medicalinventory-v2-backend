@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +68,16 @@ public class RestReportController extends BaseController {
 		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		
 		reportService.receiveRequestSheet(webRequest, httpRequest, httpServletResponse);
+	}
+	@PostMapping(value = "/transactionreceipt/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public void transactionReceipt(@PathVariable(name="code") String code, HttpServletRequest httpRequest,
+			HttpServletResponse httpServletResponse) throws Exception {
+		log.info("transactionreceipt with code: {}", code);
+		httpServletResponse.setContentType("text/pdf");
+		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		
+		reportService.generateTransactionReceipt(code, httpRequest, httpServletResponse);
 	}
 
 }

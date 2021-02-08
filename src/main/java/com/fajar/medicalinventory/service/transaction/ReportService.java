@@ -1,5 +1,7 @@
 package com.fajar.medicalinventory.service.transaction;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,6 +50,13 @@ public class ReportService {
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xls");
 		
 		reportGenerator.generateProductRequestSheet(webRequest , httpServletResponse.getOutputStream(), httpRequest);
+	}
+
+	public void generateTransactionReceipt(String code, HttpServletRequest httpRequest,
+			HttpServletResponse httpServletResponse) throws IOException, Exception {
+		String fileName = "Receipt_"+code;
+		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".pdf");
+		reportGenerator.transactionNote(code, httpRequest, httpServletResponse.getOutputStream());
 	}
 
 }

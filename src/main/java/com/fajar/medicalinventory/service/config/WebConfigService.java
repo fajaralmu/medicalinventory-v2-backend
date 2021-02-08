@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WebConfigService {
   
-	private String uploadedImageRealPath, uploadedImagePath, reportPath;
+	private String uploadedImageRealPath;//, uploadedImagePath, reportPath;
 	
 	@Autowired
 	private AppProfileRepository ProfileRepository;

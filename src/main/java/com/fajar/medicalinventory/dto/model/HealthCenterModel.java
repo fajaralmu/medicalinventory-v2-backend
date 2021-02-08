@@ -36,6 +36,8 @@ public class HealthCenterModel extends BaseModel<HealthCenter>{
 	private String name;
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String address;
+	@FormField
+	private String contact;
 
 	@JsonIgnore
 	private Integer monthlyProductCount; 

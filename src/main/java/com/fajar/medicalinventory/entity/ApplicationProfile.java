@@ -41,45 +41,32 @@ public class ApplicationProfile extends BaseEntity<ApplicationProfileModel>  imp
 	@FormField
 	private String name;
 	@Column(name = "mart_code", unique = true)
-	@FormField(type = FieldType.FIELD_TYPE_HIDDEN)
 	private String appCode;
 	@Column(name = "short_description")
-	@FormField(type = FIELD_TYPE_TEXTAREA)
 	private String shortDescription;
 	@Column
-	@FormField(type = FIELD_TYPE_TEXTAREA)
 	private String about;
 	@Column(name = "welcoming_message")
-	@FormField(type = FIELD_TYPE_TEXTAREA)
 	private String welcomingMessage;
 	@Column
-	@FormField(type = FIELD_TYPE_TEXTAREA)
 	private String address;
 
 	@Column
-	@FormField(type = FIELD_TYPE_TEXTAREA)
 	private String contact;
 	@Column
-	@FormField
 	private String website;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultIcon.BMP")
 	@Column(name = "icon_url")
 	private String iconUrl;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, iconImage = true, required = false, defaultValue = "DefaultIcon.BMP")
 	@Column(name = "page_icon_url")
 	private String pageIcon;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultBackground.BMP")
 	@Column(name = "background_url")
 	private String backgroundUrl;
-	@FormField(type = FieldType.FIELD_TYPE_PLAIN_LIST, hasPreview = true, previewLink = "fa-preview" , required = false, defaultValue = "home")
 	@Column(name= "footer_icon_class")
 	@Enumerated(EnumType.STRING) 
 	private FontAwesomeIcon footerIconClass; 
 	
-	@FormField(type = FieldType.FIELD_TYPE_COLOR, required = false, defaultValue = "#1e1e1e")
 	@Column(name = "general_color")
 	private String color;
-	@FormField(type = FieldType.FIELD_TYPE_COLOR, required = false, defaultValue = "#f5f5f5")
 	@Column(name = "font_color")
 	private String fontColor;
 	
