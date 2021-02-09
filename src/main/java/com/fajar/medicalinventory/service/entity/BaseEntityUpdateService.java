@@ -112,16 +112,24 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 				}
 				object.validateNullValues();
 			}
-
-			List<Field> fields = EntityUtil.getDeclaredFields(object.getClass());
-			for (int i = 0; i < fields.size(); i++) {
-				Field field = fields.get(i);
+			Class modelClass = object.getTypeArgument();
+			log.info("{} -> model: {}", object.getClass(), modelClass);
+			List<Field> modelFields = EntityUtil.getDeclaredFields(modelClass);
+			for (int i = 0; i < modelFields.size(); i++) {
+				Field modelField = modelFields.get(i);
+				FormField formfield = modelField.getAnnotation(FormField.class);
+				if (null == formfield) {
+					log.info("FormField not present at model field: {}", modelField.getName());
+					continue;
+				}
+				
+				Field field = EntityUtil.getDeclaredField(object.getClass(), modelField.getName());
+				if (null == field) {
+					log.debug("no field with name {} in entity:{}", modelField.getName(), object.getClass());
+					continue;
+				}
 
 				try {
-					FormField formfield = field.getAnnotation(FormField.class);
-					if (null == formfield) {
-						continue;
-					}
 
 					Object fieldValue = field.get(object);
 					log.info("validating field: {}, type: {}", field.getName(), formfield.type());
@@ -138,6 +146,7 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 							break; 
 						} 
 						if (object instanceof SingleImageModel) {
+							log.info("{} is instance of SingleImageModel", object.getClass());
 							imageUploadService.uploadImage((SingleImageModel) object, httpServletRequest);
 						}
 						if (object instanceof MultipleImageModel) {
@@ -192,7 +201,6 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 			e.printStackTrace();
 		}
 	}
-
 	
 
 	

@@ -3,6 +3,7 @@ package com.fajar.medicalinventory.entity;
 import java.beans.Transient;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -156,6 +157,14 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@JsonIgnore
+	public final Class<M> getTypeArgument() {
+		Class<?> _class = getClass();
+		 java.lang.reflect.Type genericeSuperClass = _class.getGenericSuperclass();
+		 ParameterizedType parameterizedType = (ParameterizedType) genericeSuperClass;
+		 return  (Class<M>) parameterizedType.getActualTypeArguments()[0];
 	}
 	
 	protected M getEntityNewInstance() throws Exception {
