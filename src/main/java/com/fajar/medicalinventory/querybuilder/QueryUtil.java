@@ -35,7 +35,7 @@ public class QueryUtil {
 	public static Field getFieldByName(String name, List<Field> fields) {
 		return EntityUtil.getObjectFromListByFieldName("name", name, fields);
 	}
-
+ 
 	public static String getColumnName(Field field) {
 		log.info("get column Name " + field.getDeclaringClass() + " from " + field.getName());
 
@@ -119,10 +119,16 @@ public class QueryUtil {
 	} 
 
 	private static String getOptionItemName(Field field) {
-		FormField formField 	= field.getAnnotation(FormField.class);
+		Field modelField = BaseEntity.getModelField(field);
+		if (null == modelField) {
+			System.out.println("modelField "+field.getName()+" IS NULL ");
+		}
+		FormField formField = modelField.getAnnotation(FormField.class);
 		String referenceFieldName = formField.optionItemName();
 		return referenceFieldName;
-	}public static String getTableName(Class<?> entityClass) {
+	}
+	
+	public static String getTableName(Class<?> entityClass) {
 		log.info("getTableName From entity class: " + entityClass.getCanonicalName());
 		
 		Table table = getClassAnnotation(entityClass, Table.class);

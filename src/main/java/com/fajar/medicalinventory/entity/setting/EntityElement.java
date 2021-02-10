@@ -29,14 +29,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Builder.Default;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder
 @AllArgsConstructor
-@Dto
 @Slf4j 
 @JsonInclude(Include.NON_NULL)
 public class EntityElement implements Serializable {
@@ -104,6 +103,7 @@ public class EntityElement implements Serializable {
 			this.editable = formField.editable();
 			setOptionItemName(formField.optionItemName());
 			setFilterable(formField.filterable());
+			setRequiredProp(formField );
 			
 		}else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
@@ -204,7 +204,7 @@ public class EntityElement implements Serializable {
 		if (formField.type().equals(FieldType.FIELD_TYPE_CHECKBOX)) {
 			setRequired(false);
 		} else {
-			setRequired(true);
+			setRequired(formField.required());
 		}
 	}
 
@@ -232,7 +232,6 @@ public class EntityElement implements Serializable {
 			setType(determinedFieldType.value);
 			
 			setId(field.getName()); 
-			setRequiredProp(formField );
 			setMultiple(formField.multipleImage());
 			setClassName(field.getType().getCanonicalName()); 
 			

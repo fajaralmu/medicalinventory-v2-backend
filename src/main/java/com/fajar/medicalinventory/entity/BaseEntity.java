@@ -213,4 +213,21 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 		BeanUtils.copyProperties(this, e, ignoredProperties);
 		return e;
 	}
+	
+	public static Class getTypeArgumentOfGenericSuperClass(Class _class) {
+		java.lang.reflect.Type genericeSuperClass = _class.getGenericSuperclass();
+		 ParameterizedType parameterizedType = (ParameterizedType) genericeSuperClass;
+		 return  (Class) parameterizedType.getActualTypeArguments()[0];
+	}
+	
+	public void preventStackOverFlowError() {
+		
+	}
+	
+	public static Field getModelField(Field entityField) {
+		Class<?> entityClass = entityField.getDeclaringClass();
+		Class modelClass = BaseEntity.getTypeArgumentOfGenericSuperClass(entityClass);
+		Field modelField = EntityUtil.getDeclaredField(modelClass, entityField.getName());
+		return modelField;
+	}
 }
