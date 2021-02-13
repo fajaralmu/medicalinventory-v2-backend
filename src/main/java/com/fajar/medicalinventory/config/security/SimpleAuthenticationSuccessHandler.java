@@ -83,7 +83,7 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 		}
 	}
 
-	private boolean isJsonResponse(HttpServletRequest httpServletRequest) {
+	public static boolean isJsonResponse(HttpServletRequest httpServletRequest) {
 		boolean isJsonResponse = httpServletRequest.getParameter("transport_type")!=null
 				&&
 				httpServletRequest.getParameter("transport_type").equals("rest");

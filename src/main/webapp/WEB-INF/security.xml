@@ -14,6 +14,10 @@
  	<beans:bean id="jwtAuthFilter" class="com.fajar.medicalinventory.config.security.JWTAuthFilter">
  		<beans:property name="userDetailsService" ref="userDetailsService"></beans:property>
  	</beans:bean>
+ 	<beans:bean id="loginFailureHandler" class="com.fajar.medicalinventory.config.security.CustomAuthenticationFailureHandler">
+ 		<beans:property name="objectMapper" ref="objectMapper"></beans:property>
+ 		<beans:property name="jwtUtils" ref="jwtUtils"></beans:property>
+ 	</beans:bean>
  	<beans:bean id="loginSuccessHandler" class="com.fajar.medicalinventory.config.security.SimpleAuthenticationSuccessHandler">
  		<beans:property name="objectMapper" ref="objectMapper"></beans:property>
  		<beans:property name="jwtUtils" ref="jwtUtils"></beans:property>
@@ -29,7 +33,7 @@
 		<form-login login-page="/login.html"
 			default-target-url="/app/dashboard"  username-parameter="username"
 			password-parameter="password" always-use-default-target="true"
-			authentication-failure-url="/login.html?error=true"
+			authentication-failure-handler-ref="loginFailureHandler"
 			authentication-success-forward-url="/loginsuccess" 
 			authentication-success-handler-ref="loginSuccessHandler"
 			/>

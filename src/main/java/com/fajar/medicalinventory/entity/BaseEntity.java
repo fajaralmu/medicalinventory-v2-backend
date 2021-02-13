@@ -215,9 +215,12 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 	}
 	
 	public static Class getTypeArgumentOfGenericSuperClass(Class _class) {
-		java.lang.reflect.Type genericeSuperClass = _class.getGenericSuperclass();
-		 ParameterizedType parameterizedType = (ParameterizedType) genericeSuperClass;
-		 return  (Class) parameterizedType.getActualTypeArguments()[0];
+		if (BaseEntity.class.equals(_class.getSuperclass())){
+			java.lang.reflect.Type genericeSuperClass = _class.getGenericSuperclass();
+			 ParameterizedType parameterizedType = (ParameterizedType) genericeSuperClass;
+			 return  (Class) parameterizedType.getActualTypeArguments()[0];
+		} 
+		return null;
 	}
 	
 	public void preventStackOverFlowError() {
