@@ -19,7 +19,7 @@ public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
 		log.info("saving entity: {}", entity.getClass());
 		entity = copyNewElement(entity, newRecord);
 		
-		validateEntityFields(entity, newRecord, httpServletRequest);
+		validateEntityFormFields(entity, newRecord, httpServletRequest);
 		
 		interceptPreUpdate(entity);
 		BaseEntity newEntity = entityRepository.save(entity);

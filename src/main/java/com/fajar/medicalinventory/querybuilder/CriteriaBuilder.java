@@ -312,7 +312,17 @@ public class CriteriaBuilder {
 			return null;
 		}
 		if (field.getAnnotation(JoinColumn.class) != null) {
-			FormField formField = field.getAnnotation(FormField.class);
+			Class modelClass = BaseEntity.getTypeArgumentOfGenericSuperClass(entityClass);
+			Field modelField = EntityUtil.getDeclaredField(modelClass, field.getName());
+			if (null == modelField) {
+				log.info("model field : {} NOT FOUND", field.getName());
+				return null;
+			}
+			FormField formField = modelField.getAnnotation(FormField.class);
+			if (null == formField) {
+				log.info("formField : {} NOT FOUND", modelField.getName());
+				return null;
+			}
 			String foreginFieldName = formField.optionItemName();
 			Field foreignField = EntityUtil.getDeclaredField(field.getType(), foreginFieldName);
 			return orderBy+"."+foreginFieldName;

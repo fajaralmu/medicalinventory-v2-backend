@@ -38,7 +38,7 @@ public class ProductModel extends BaseModel<Product>{
 	private String name;
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String description;
-	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	private UnitModel unit;
 	@FormField(type = FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean utilityTool;

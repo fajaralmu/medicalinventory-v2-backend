@@ -20,7 +20,7 @@ import javax.persistence.JoinColumn;
 import org.apache.commons.lang3.SerializationUtils;
 
 import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.BaseEntity; 
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -330,26 +330,30 @@ public class EntityUtil {
 			return null;
 		}
 	}
+	 
 
 	public static List<Field> getFixedListFields(Class<? extends BaseEntity> entityClass) {
 		List<Field> fields = new ArrayList<>();
 
 		List<Field> declaredFields = getDeclaredFields(entityClass);
 		for (int i = 0; i < declaredFields.size(); i++) {
-			final Field field = declaredFields.get(i);
-
-			FormField formField = getFieldAnnotation(field, FormField.class);
+			final Field entityField = declaredFields.get(i);
+			final Field modelField = BaseEntity.getModelField(declaredFields.get(i));
+			if (null == modelField) {
+				continue;
+			}
+			FormField formField = modelField.getAnnotation(FormField.class);
 			if (null == formField) {
 				continue;
 			}
 
-			boolean superClassAvailable = field.getType().getSuperclass() != null;
+			boolean superClassAvailable = entityField.getType().getSuperclass() != null;
 			boolean isBaseEntitySubClass = superClassAvailable
-					&& field.getType().getSuperclass().equals(BaseEntity.class);
-			boolean isCollectionOfBaseEntity = CollectionUtil.isCollectionOfBaseEntity(field);
+					&& entityField.getType().getSuperclass().equals(BaseEntity.class);
+			boolean isCollectionOfBaseEntity = CollectionUtil.isCollectionOfBaseEntity(entityField);
 
 			if ((isBaseEntitySubClass || isCollectionOfBaseEntity) && formField.type().equals(FIELD_TYPE_FIXED_LIST)) {
-				fields.add(field);
+				fields.add(entityField);
 			}
 
 		}

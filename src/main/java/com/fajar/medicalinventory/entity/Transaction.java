@@ -58,38 +58,30 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 	 * 
 	 */
 	private static final long serialVersionUID = -1055517081803635273L;
-	@Column(unique = true)
-	@FormField
+	@Column(unique = true) 
 	private String code;
-	@Column(name="transaction_date")
-	@FormField(type = FieldType.FIELD_TYPE_DATE)
+	@Column(name="transaction_date") 
 	@Default
 	private Date transactionDate = new Date();
-	@Column(columnDefinition = "TEXT")
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@Column(columnDefinition = "TEXT") 
 	private String description;
 
-	@Column
-	@FormField
+	@Column 
 	@Enumerated(EnumType.STRING)
 	private TransactionType type;
-	@ManyToOne
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@ManyToOne 
 	@JoinColumn(name = "user_id")
 	private User user;
-	@ManyToOne
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@ManyToOne 
 	@JoinColumn(name = "supplier_id")
 	@Nullable
 	private Supplier supplier;
-	@ManyToOne
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@ManyToOne 
 	@JoinColumn(name = "customer_id")
 	@Nullable
 	private Customer customer;
 	@ManyToOne // dibutuhkan di stok obat
-	@JoinColumn(name = "health_center_destination_id")
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@JoinColumn(name = "health_center_destination_id") 
 	@Nullable
 	private HealthCenter healthCenterDestination;
 	
@@ -97,8 +89,7 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 	 * health center where transaction is performed
 	 */
 	@ManyToOne
-	@JoinColumn(name = "health_center_location_id")
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@JoinColumn(name = "health_center_location_id") 
 	private HealthCenter healthCenterLocation;
 
 	@Transient

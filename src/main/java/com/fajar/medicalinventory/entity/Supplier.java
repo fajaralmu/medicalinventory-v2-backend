@@ -10,8 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.dto.model.SupplierModel;
 
 import lombok.AllArgsConstructor;
@@ -38,17 +36,13 @@ public class Supplier extends BaseEntity<SupplierModel>{
 	 */
 	private static final long serialVersionUID = -6919147802315112851L;
 	 
-	@Column(unique = true)
-	@FormField
+	@Column(unique = true) 
     private String code;
-	@Column 
-	@FormField
+	@Column  
     private String name;
-	@Column
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
-    private String address;
 	@Column 
-	@FormField
+    private String address;
+	@Column  
     private String contact;
 
   

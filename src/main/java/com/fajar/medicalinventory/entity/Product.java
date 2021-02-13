@@ -12,8 +12,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.dto.model.ProductModel;
 import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,27 +40,21 @@ public class Product extends BaseEntity<ProductModel> implements MultipleImageMo
 	private static final long serialVersionUID = -4398862371443391887L;
 
 	 
-	@Column(unique = true)
-	@FormField
+	@Column(unique = true) 
 	private String code;
-	@Column
-	@FormField
+	@Column 
 	private String name;
-	@Column
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@Column 
 	private String description;
-	@ManyToOne
-	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name")
+	@ManyToOne 
 	@JoinColumn(name = "unit_id")
-	private Unit unit;
-	@FormField(type = FieldType.FIELD_TYPE_CHECKBOX)
+	private Unit unit; 
 	@Column(name = "utility_tool")
 	private boolean utilityTool;
 
 	// web stuff
 
-	@Column(name = "image_names")
-	@FormField(multipleImage = true, type = FieldType.FIELD_TYPE_IMAGE)
+	@Column(name = "image_names") 
 	private String imageNames;
 
 	@JsonIgnore

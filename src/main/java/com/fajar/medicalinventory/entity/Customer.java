@@ -43,24 +43,18 @@ public class Customer extends BaseEntity<CustomerModel> implements Serializable{
 	 */
 	private static final long serialVersionUID = -2953923202077469683L;
 	 
-	@Column(unique = true)
-	@FormField
+	@Column(unique = true) 
 	private String code;
-	@Column(name="family_code")
-	@FormField(required = true)
+	@Column(name="family_code") 
 	private String familyCode;
-	@Column
-	@FormField
+	@Column 
 	private String name;
-	@Column
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@Column 
 	private String address;
 	@Column
-	@Enumerated(EnumType.STRING)
-	@FormField(type=FieldType.FIELD_TYPE_PLAIN_LIST)
+	@Enumerated(EnumType.STRING) 
 	private Gender gender;
-	@Column(name="date_of_birth")
-	@FormField(type=FieldType.FIELD_TYPE_DATE)
+	@Column(name="date_of_birth") 
 	private Date birthDate;
 //	 
 //	@ManyToOne

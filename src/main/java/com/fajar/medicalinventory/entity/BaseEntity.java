@@ -18,7 +18,7 @@ import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.Type;
 import org.springframework.beans.BeanUtils;
-
+ 
 import com.fajar.medicalinventory.annotation.BaseField;
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
@@ -42,8 +42,7 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 	private static final long serialVersionUID = 5713292970611528372L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@FormField
+	@GeneratedValue(strategy = GenerationType.IDENTITY) 
 	@Type(type = "org.hibernate.type.LongType")
 	@Column 
 	@BaseField
@@ -228,8 +227,10 @@ public class BaseEntity<M extends BaseModel> implements Serializable{
 	}
 	
 	public static Field getModelField(Field entityField) {
+		log.info("get model field for: {}", entityField.getName());
 		Class<?> entityClass = entityField.getDeclaringClass();
 		Class modelClass = BaseEntity.getTypeArgumentOfGenericSuperClass(entityClass);
+		if (null == modelClass) return null;
 		Field modelField = EntityUtil.getDeclaredField(modelClass, entityField.getName());
 		return modelField;
 	}

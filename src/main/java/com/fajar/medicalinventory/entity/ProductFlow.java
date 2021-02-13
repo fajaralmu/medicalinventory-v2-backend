@@ -18,9 +18,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
-import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.model.ProductFlowModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,41 +52,32 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 
 //	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "transaction_id", nullable = false)
-	@FormField(optionItemName = "code", editable = false) 
+	@JoinColumn(name = "transaction_id", nullable = false) 
 	private Transaction transaction;
 
 	@ManyToOne
-	@JoinColumn(name = "product_id", nullable = false)
-	@FormField(optionItemName = "name", editable = false)
+	@JoinColumn(name = "product_id", nullable = false) 
 	private Product product;
 
-	@Column(name="expired_date")
-	@FormField(type=FieldType.FIELD_TYPE_DATE)
+	@Column(name="expired_date") 
 	private Date expiredDate;
-	@Column
-	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
+	@Column 
 	private int count;
-	@Column(name="used_count", nullable = false)
-	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
+	@Column(name="used_count", nullable = false) 
 	private int usedCount;
 	
 	@Nullable
 	@ManyToOne
 	@JoinColumn(name = "reference_flow_id")
-	@Setter(value = AccessLevel.NONE)
-	@FormField(optionItemName = "id", editable = false) 
+	@Setter(value = AccessLevel.NONE) 
 	private ProductFlow referenceProductFlow;
 
 	@Column
-	@Default
-	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
+	@Default 
 	private boolean suitable = true;
-	@Column
-	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
+	@Column 
 	private long price;
-	@Column
-	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
+	@Column 
 	private boolean generic;  
 	 
 	

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fajar.medicalinventory.config.security.JWTAuthFilter;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,9 +45,10 @@ public class UtilitiesController extends BaseController{
 			httpResponse.sendRedirect(httpRequest.getContextPath()+"/index");
 			return null;
 		}
-
+		
 		errorPage.addObject("errorCode", httpErrorCode);
 		errorPage.addObject("errorMessage", getAttribute(httpRequest, "javax.servlet.error.exception"));
+		JWTAuthFilter.setCorsHeaders(httpResponse);
 		printHttpRequestAttrs(httpRequest);
 		return errorPage;
 	}
@@ -64,10 +66,11 @@ public class UtilitiesController extends BaseController{
 		Object message = getAttribute(httpRequest, "javax.servlet.error.exception");
 		WebResponse payload = WebResponse.failed(String.valueOf(message));
 		payload.setCode("404");
-		httpResponse.setStatus(404);
-
+		httpResponse.setStatus(404); 
+		
 		String jsonString = objectMapper.writeValueAsString(payload); 
 		httpResponse.getWriter().write(jsonString);
+		JWTAuthFilter.setCorsHeaders(httpResponse);
 		printHttpRequestAttrs(httpRequest);
 		
 	}
@@ -85,9 +88,10 @@ public class UtilitiesController extends BaseController{
 		WebResponse payload = WebResponse.failed(String.valueOf(message));
 		payload.setCode("400");
 		httpResponse.setStatus(400);
-
+		
 		String jsonString = objectMapper.writeValueAsString(payload); 
 		httpResponse.getWriter().write(jsonString);
+		JWTAuthFilter.setCorsHeaders(httpResponse);
 		printHttpRequestAttrs(httpRequest);
 		
 	}

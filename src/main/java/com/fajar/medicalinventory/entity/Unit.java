@@ -10,9 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.Dto;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.dto.model.UnitModel;
 
 import lombok.AllArgsConstructor;
@@ -37,11 +34,9 @@ public class Unit extends BaseEntity<UnitModel> {
 	 */
 	private static final long serialVersionUID = -8298314953785695479L;
 
-	@Column(unique = true)
-	@FormField
+	@Column(unique = true) 
 	private String name;
-	@Column
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@Column 
 	private String description;
 
 }

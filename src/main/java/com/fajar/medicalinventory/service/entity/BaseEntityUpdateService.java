@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,6 @@ import com.fajar.medicalinventory.service.resources.ImageUploadService;
 import com.fajar.medicalinventory.util.EntityUtil;
 
 import lombok.extern.slf4j.Slf4j;
-
 @Service
 @Slf4j
 public class BaseEntityUpdateService<T extends BaseEntity> {
@@ -44,9 +44,10 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 		LogProxyFactory.setLoggers(this);
 	}
 
-	public T saveEntity(T baseEntity, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
-		log.error("saveEntity Method not implemented");
-		return null;
+	public T saveEntity(T object, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
+		log.error("SaveEntity Method NOT IMPLEMENTED IN BASEENTITY UPDATE SERVICE");
+		
+		throw new NotImplementedException("SaveEntity Method NOT IMPLEMENTED IN BASEENTITY UPDATE SERVICE");
 	}
 	
 	public void postFilter(List<T> objects) {
@@ -94,12 +95,12 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 	}
 	
 	/**
-	 * validate object properties' value
+	 * validate object properties' value annotated with @FormField
 	 * 
 	 * @param object
 	 * @param newRecord
 	 */
-	protected void validateEntityFields(BaseEntity object, boolean newRecord, HttpServletRequest httpServletRequest) {
+	protected void validateEntityFormFields(BaseEntity object, boolean newRecord, HttpServletRequest httpServletRequest) {
 		log.info("validating entity: {} newRecord: {}", object.getClass(), newRecord);
 		object.validateNullValues();
 		try {
@@ -201,6 +202,7 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 			e.printStackTrace();
 		}
 	}
+
 	
 
 	

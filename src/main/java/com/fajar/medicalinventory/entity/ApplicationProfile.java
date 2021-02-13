@@ -37,8 +37,7 @@ public class ApplicationProfile extends BaseEntity<ApplicationProfileModel>  imp
 	* 
 	*/
 	private static final long serialVersionUID = 4095664637854922384L;
-	@Column 
-	@FormField
+	@Column  
 	private String name;
 	@Column(name = "mart_code", unique = true)
 	private String appCode;
