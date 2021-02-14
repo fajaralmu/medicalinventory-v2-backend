@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@Dto(entityClass = Product.class)
+@Dto(entityClass = Product.class, value= "Produk")
 @Builder
 @Data
 @AllArgsConstructor
@@ -36,7 +36,7 @@ public class ProductModel extends BaseModel<Product>{
 	private String code;
 	@FormField
 	private String name;
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String description;
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	private UnitModel unit;

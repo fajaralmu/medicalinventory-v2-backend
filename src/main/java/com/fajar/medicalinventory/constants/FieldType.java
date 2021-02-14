@@ -16,6 +16,7 @@ public enum FieldType {
 	 FIELD_TYPE_TEXTAREA ( "textarea"),
 	 FIELD_TYPE_PLAIN_LIST ( "plainlist"),
 	 FIELD_TYPE_DATE ( "date"),
+	 FIELD_TYPE_DATETIME ( "date"),
 	 FIELD_TYPE_TEXTEDITOR ( "texteditor"),
 	FIELD_TYPE_CHECKBOX ( "checkbox");
 	public final String value;

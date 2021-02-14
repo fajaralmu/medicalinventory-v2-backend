@@ -32,7 +32,7 @@ public class UnitModel extends BaseModel<Unit> {
 
 	@FormField
 	private String name;
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String description; 
 
 }

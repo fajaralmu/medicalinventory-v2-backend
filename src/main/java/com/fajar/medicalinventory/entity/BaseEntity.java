@@ -18,11 +18,10 @@ import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.Type;
 import org.springframework.beans.BeanUtils;
- 
+
 import com.fajar.medicalinventory.annotation.BaseField;
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
-import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.fajar.medicalinventory.util.EntityUtil;

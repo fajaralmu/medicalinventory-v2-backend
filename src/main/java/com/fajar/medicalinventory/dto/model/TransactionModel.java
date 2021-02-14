@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@Dto(editable = false, entityClass=Transaction.class, updateService = "transactionUpdateService")
+@Dto(editable = false, entityClass=Transaction.class, updateService = "transactionUpdateService", value= "Transaksi")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,7 +46,7 @@ public class TransactionModel extends BaseModel<Transaction>{
 	private static final long serialVersionUID = -1055517081803635273L;
 	@FormField
 	private String code;
-	@FormField(type = FieldType.FIELD_TYPE_DATE)
+	@FormField(type = FieldType.FIELD_TYPE_DATETIME)
 	@Default
 	private Date transactionDate = new Date();
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)

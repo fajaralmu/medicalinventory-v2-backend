@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@Dto(entityClass = Supplier.class)
+@Dto(entityClass = Supplier.class, value="Pemasok")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

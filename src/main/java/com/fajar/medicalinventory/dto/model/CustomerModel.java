@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@Dto(entityClass = Customer.class)
+@Dto(entityClass = Customer.class,value = "Pelanggan")
 @Builder
 @Data
 @AllArgsConstructor
@@ -41,11 +41,11 @@ public class CustomerModel extends BaseModel<Customer>{
 	 
 	@FormField
 	private String code;
-	@FormField(required = true)
+	@FormField(required = false)
 	private String familyCode;
 	@FormField
 	private String name;
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String address;
 	@FormField(type=FieldType.FIELD_TYPE_PLAIN_LIST)
 	private Gender gender;
