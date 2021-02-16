@@ -128,6 +128,7 @@ public class MasterDataService {
 			EntityResult entityResult = filterEntities(filter, entityClass);
 			updateService.postFilter(entityResult.getEntities());
 			return WebResponse.builder()
+					.entityClass(entityClass)
 					.entities(BaseModel.toModels(entityResult.entities))
 					.totalData(entityResult.count).filter(request.getFilter()).build();
 

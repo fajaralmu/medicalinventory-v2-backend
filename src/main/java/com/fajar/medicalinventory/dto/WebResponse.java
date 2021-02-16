@@ -11,6 +11,7 @@ import com.fajar.medicalinventory.dto.model.ConfigurationModel;
 import com.fajar.medicalinventory.dto.model.HealthCenterModel;
 import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.dto.model.UserModel;
+import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -73,7 +74,7 @@ public class WebResponse implements Serializable {
 	private Boolean loggedIn;
  
 	@JsonIgnore
-	private Class<? extends BaseModel> entityClass; 
+	private Class<? extends BaseEntity> entityClass; 
 	
 	public WebResponse(String code, String message) {
 		this.code = code;

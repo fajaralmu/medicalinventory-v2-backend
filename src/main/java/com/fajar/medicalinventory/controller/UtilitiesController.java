@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.NestedServletException;
 
 import com.fajar.medicalinventory.config.security.JWTAuthFilter;
 import com.fajar.medicalinventory.dto.WebResponse;
@@ -45,9 +46,9 @@ public class UtilitiesController extends BaseController{
 			httpResponse.sendRedirect(httpRequest.getContextPath()+"/index");
 			return null;
 		}
-		
+
 		errorPage.addObject("errorCode", httpErrorCode);
-		errorPage.addObject("errorMessage", getAttribute(httpRequest, "javax.servlet.error.exception"));
+		errorPage.addObject("errorMessage", getErrorMessage(httpRequest ));
 		JWTAuthFilter.setCorsHeaders(httpResponse);
 		printHttpRequestAttrs(httpRequest);
 		return errorPage;
@@ -63,17 +64,33 @@ public class UtilitiesController extends BaseController{
 			return;
 		}
 
-		Object message = getAttribute(httpRequest, "javax.servlet.error.exception");
-		WebResponse payload = WebResponse.failed(String.valueOf(message));
-		payload.setCode("404");
-		httpResponse.setStatus(404); 
 		
+		WebResponse payload = WebResponse.failed(getErrorMessage(httpRequest));
+		payload.setCode("404");
+		httpResponse.setStatus(404);
+
 		String jsonString = objectMapper.writeValueAsString(payload); 
-		httpResponse.getWriter().write(jsonString);
 		JWTAuthFilter.setCorsHeaders(httpResponse);
+		httpResponse.getWriter().write(jsonString);
 		printHttpRequestAttrs(httpRequest);
 		
 	}
+	private String getErrorMessage(HttpServletRequest httpRequest) {
+		try {
+			Object exception = getAttribute(httpRequest, "javax.servlet.error.exception");
+			log.error("======= !! HANDLING exception: {}", exception);
+			if (exception != null && exception instanceof NestedServletException) {
+				NestedServletException nestedServletException = (NestedServletException) exception;
+				return nestedServletException.getRootCause().getMessage();
+			}
+			
+			return String.valueOf(exception);
+		} catch (Exception e) {
+			return "Error occured";
+		}
+	}
+	 
+
 	@RequestMapping(value = "/error-general", produces = MediaType.APPLICATION_JSON_VALUE, method = {RequestMethod.POST, RequestMethod.GET}) 
 	public void errorGeneral(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
 		 
@@ -84,11 +101,11 @@ public class UtilitiesController extends BaseController{
 			return;
 		}
 
-		Object message = getAttribute(httpRequest, "javax.servlet.error.exception");
+		Object message = getErrorMessage(httpRequest );
 		WebResponse payload = WebResponse.failed(String.valueOf(message));
 		payload.setCode("400");
 		httpResponse.setStatus(400);
-		
+
 		String jsonString = objectMapper.writeValueAsString(payload); 
 		httpResponse.getWriter().write(jsonString);
 		JWTAuthFilter.setCorsHeaders(httpResponse);
