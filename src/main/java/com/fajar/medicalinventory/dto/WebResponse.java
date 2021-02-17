@@ -86,6 +86,7 @@ public class WebResponse implements Serializable {
 	public <T extends BaseModel> void setEntities(List<T > entities) {
 		this.entities = CollectionUtil.convertList(entities);
 	}
+	 
 	
 	public static WebResponse failedResponse() {
 		return new WebResponse("01", "INVALID REQUEST");

@@ -195,8 +195,11 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 	 * @return
 	 */
 	@Query("select pf from ProductFlow pf left join pf.transaction tx left join pf.product p "
-			+ " where  tx.type = ?1 and tx.transactionDate between ?2 and ?3 order by tx.transactionDate")
-	public List<ProductFlow> getByTransactionTypeAndDateBetween( TransactionType type, Date startDate, Date endDate);
+			+ " where pf.product in ?4 and tx.type = ?1 and tx.transactionDate between ?2 and ?3 order by tx.transactionDate")
+	public List<ProductFlow> getByTransactionTypeAndDateBetweenAndProducts( TransactionType type, Date startDate, Date endDate, List<Product> products);
 
+	
+	@Query("select sum(pf.count) from ProductFlow pf left join pf.transaction tx where tx.type = ?1 and pf.product.id = ?2")
+	public BigInteger getSumOfProductFlowByTransactionType(TransactionType type, Long productId);
 
 }

@@ -23,7 +23,16 @@ public class StatisticTables {
 		setChiTable();
 		setKolomogorovTable();
 	}
-
+	
+	public Map<Double, Tabelz> getzTabels() {
+		return zTabels;
+	}
+	public Map<Integer, Tabelchi> getChiTabels() {
+		return chiTabels;
+	}
+	public Map<Integer, Tabelkolmogorov> getKolmogorovTables() {
+		return kolmogorovTables;
+	}
 	Double db(String val) {
 		return Double.valueOf(val);
 	}

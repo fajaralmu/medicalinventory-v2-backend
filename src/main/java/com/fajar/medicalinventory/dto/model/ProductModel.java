@@ -9,6 +9,8 @@ import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.entity.Product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +26,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(value = Include.NON_NULL)
 public class ProductModel extends BaseModel<Product>{
 
 	/**
@@ -48,7 +51,7 @@ public class ProductModel extends BaseModel<Product>{
 	@FormField(multipleImage = true, type = FieldType.FIELD_TYPE_IMAGE)
 	private String imageNames;
 
-	@JsonIgnore
+//	@JsonIgnore
 	private Integer count;
 	@JsonIgnore
 	private Integer price;

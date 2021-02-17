@@ -29,7 +29,9 @@ public class InventoryData implements Serializable{
 	
 	private Integer month, year;
 	
-	private void checkNulls() {
+	private PeriodicReviewResult periodicReviewResult;
+	
+	public void checkNulls() {
 		if (null == totalItemsSum) totalItemsSum = 0;
 		if (null == totalWillExpiredSum) totalWillExpiredSum = 0;
 		if (null == totalExpiredSum) totalExpiredSum = 0;

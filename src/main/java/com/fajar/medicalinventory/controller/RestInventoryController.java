@@ -48,7 +48,7 @@ public class RestInventoryController extends BaseController {
 	}
 	@PostMapping(value = "/getproducts", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
 	@CustomRequestInfo(withRealtimeProgress = true)
-	public WebResponse getproducts(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+	public WebResponse getproductsAtLocation(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
 		log.info("getproducts   at {} ", webRequest.getHealthcenter().getName());
 		return inventoryService.getProducts( webRequest, httpRequest);
 	}
@@ -71,6 +71,13 @@ public class RestInventoryController extends BaseController {
 		log.info("getProductUsage");
 		String productCode = webRequest.getProduct().getCode();
 		return productStatisticService.getProductUsage(productCode, webRequest, httpRequest);
+	}
+	@PostMapping(value = "/getproductswithusage", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse getProductsWithUsage( @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+		log.info("getProductsWithUsage");
+		 
+		return productStatisticService.getProductListWithUsage( webRequest, httpRequest);
 	}
 	 
 }
