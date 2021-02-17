@@ -153,11 +153,12 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	public boolean isDistributed  () {
 		return null != referenceProductFlow;
 	}
-	@JsonIgnore
+	
 	/**
-	 * 
+	 *  month starts at 1
 	 * @return month starts at 1
 	 */
+	@JsonIgnore
 	public int getTransactionMonth () {
 		if (null == transaction) return 1;
 		Date date = transaction.getTransactionDate();

@@ -283,14 +283,14 @@ public class DateUtil {
 	 * 
 	 * @param calendar
 	 * @param diff
-	 * @return
+	 * @return List<int[]{year, month(start at 1)>
 	 */
 	public static List<int[]> getMonths(Calendar calendar, int diff) {
 
 		Integer currentMonth = calendar.get(Calendar.MONTH) + 1;
 		Integer currentYear = calendar.get(Calendar.YEAR);
 		List<int[]> periods = new ArrayList<>();
-		String monthString = currentMonth >= 10 ? currentMonth.toString() : "0" + currentMonth;
+		String monthString = StringUtil.twoDigits(currentMonth);
 
 		periods.add(new int[] { currentYear, Integer.parseInt(monthString) });
 
@@ -300,7 +300,7 @@ public class DateUtil {
 				currentMonth = 12;
 				currentYear--;
 			}
-			monthString = currentMonth >= 10 ? currentMonth.toString() : "0" + currentMonth;
+			monthString = StringUtil.twoDigits(currentMonth);
 			periods.add(new int[] { currentYear, Integer.parseInt(monthString) });
 		}
 		return reverse(periods);

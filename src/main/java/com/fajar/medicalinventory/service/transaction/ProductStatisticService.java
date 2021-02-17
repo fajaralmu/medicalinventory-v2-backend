@@ -1,10 +1,12 @@
 package com.fajar.medicalinventory.service.transaction;
 
+import static com.fajar.medicalinventory.util.DateUtil.cal;
 import static com.fajar.medicalinventory.util.DateUtil.getCalendarMonth;
 import static com.fajar.medicalinventory.util.DateUtil.getCalendarYear;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +77,7 @@ public class ProductStatisticService {
 			if (null == productFlow.getTransaction())
 				continue;
 			try {
-				int month = productFlow.getTransactionMonth();
+				int month = productFlow.getTransactionMonth()  ;
 				int year = productFlow.getTransactionYear();
 				String key = month + "-" + year;
 				if (null == mappedUsage.get(key)) {
@@ -93,10 +95,10 @@ public class ProductStatisticService {
 	private Map<String, InventoryData> blankMappedUsage(Date from, Date to) {
 		int diffMonth = DateUtil.getDiffMonth(getCalendarMonth(from) + 1, 
 				getCalendarYear(from),
-				getCalendarMonth(to) + 1, 
+				getCalendarMonth(to)+1, 
 				getCalendarYear(to));
-		List<int[]> periods = DateUtil.getMonths(DateUtil.cal(to), diffMonth);
-		Map<String, InventoryData> mappedUsage = new HashMap<>();
+		List<int[]> periods = DateUtil.getMonths(cal(to), diffMonth);
+		Map<String, InventoryData> mappedUsage = new LinkedHashMap<>();
 		for (int[] period : periods) {
 			int month = period[1];
 			int year = period[0];
@@ -105,5 +107,13 @@ public class ProductStatisticService {
 			 
 		}
 		return mappedUsage;
+	}
+	
+	public static void main(String[] args) {
+		  List<int[]> periods = DateUtil.getMonths(cal(DateUtil.getDate(2019, 8, 10)), 10);
+		for (int[] is : periods) {
+			System.out.println(is[0]+"-"+is[1]);
+		}
+		
 	}
 }

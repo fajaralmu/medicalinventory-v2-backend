@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class MapUtil {
 	}
 	 
 	public static <T> List<T> mapValuesToList(Map<?, T> map) {
-		List<T> result = new ArrayList<T>();
+		List<T> result = new LinkedList<T>();
 
 		for (Object key : map.keySet()) {
 			result.add(map.get(key));
