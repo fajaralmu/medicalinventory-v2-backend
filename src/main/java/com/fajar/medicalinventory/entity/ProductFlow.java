@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.dto.model.ProductFlowModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
+import com.fajar.medicalinventory.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AccessLevel;
@@ -94,10 +95,17 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		return count - usedCount;
 	}
 
-	public static int sumCount(List<ProductFlow> productFlows) {
+	public static int sumStockCount(List<ProductFlow> productFlows) {
 		int sum = 0;
 		for (ProductFlow productFlow : productFlows) {
 			sum+=productFlow.getStock();
+		}
+		return sum;
+	}
+	public static int sumQtyCount(List<ProductFlow> productFlows) {
+		int sum = 0;
+		for (ProductFlow productFlow : productFlows) {
+			sum+=productFlow.getCount();
 		}
 		return sum;
 	}
@@ -145,6 +153,20 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	public boolean isDistributed  () {
 		return null != referenceProductFlow;
 	}
-
+	@JsonIgnore
+	/**
+	 * 
+	 * @return month starts at 1
+	 */
+	public int getTransactionMonth () {
+		if (null == transaction) return 1;
+		Date date = transaction.getTransactionDate();
+		return DateUtil.getCalendarMonth(date) + 1;
+	}
+	public int getTransactionYear () {
+		if (null == transaction) return 0;
+		Date date = transaction.getTransactionDate();
+		return DateUtil.getCalendarYear(date);
+	}
  
 }

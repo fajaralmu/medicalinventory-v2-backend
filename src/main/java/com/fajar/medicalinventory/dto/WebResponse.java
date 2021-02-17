@@ -48,6 +48,7 @@ public class WebResponse implements Serializable {
 	private List<BaseModel> entities = new ArrayList<>();
 	
 	private InventoryData inventoryData;
+	private List<InventoryData> inventoriesData;
 	private List<?> generalList;
 	
 	private BaseModel entity; 

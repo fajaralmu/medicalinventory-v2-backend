@@ -17,6 +17,7 @@ import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.transaction.InventoryService;
+import com.fajar.medicalinventory.service.transaction.ProductStatisticService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +29,8 @@ public class RestInventoryController extends BaseController {
 
 	@Autowired
 	private InventoryService inventoryService; 
+	@Autowired
+	private ProductStatisticService productStatisticService;
 
 	public RestInventoryController() {
 		log.info("------------------RestInventoryController-----------------");
@@ -61,6 +64,13 @@ public class RestInventoryController extends BaseController {
 	public WebResponse getInventoriesData( HttpServletRequest httpRequest) {
 		log.info("getInventoriesData");
 		return inventoryService.getInventoriesData(httpRequest);
+	}
+	@PostMapping(value = "/getproductusage", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public WebResponse getProductUsage( @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+		log.info("getProductUsage");
+		String productCode = webRequest.getProduct().getCode();
+		return productStatisticService.getProductUsage(productCode, webRequest, httpRequest);
 	}
 	 
 }

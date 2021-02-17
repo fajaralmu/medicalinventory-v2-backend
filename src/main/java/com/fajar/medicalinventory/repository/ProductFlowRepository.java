@@ -175,5 +175,9 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 		return getTotalItemsAtMasterWarehouse();
 	}
 
+	@Query("select pf from ProductFlow pf left join pf.transaction tx left join pf.product p "
+			+ " where p.code = ?1 and tx.type = ?2 and tx.transactionDate between ?3 and ?4 order by tx.transactionDate")
+	public List<ProductFlow> getByTransactionTypeAndDateBetween(String productCode, TransactionType type, Date startDate, Date endDate);
+
 
 }

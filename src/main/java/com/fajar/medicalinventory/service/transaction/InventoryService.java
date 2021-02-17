@@ -40,7 +40,10 @@ import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class InventoryService {
 
 	@Autowired
@@ -222,24 +225,23 @@ public class InventoryService {
 	public WebResponse getInventoriesData(HttpServletRequest httpServletRequest) {
 		Configuration config = inventoryConfigurationService.getTempConfiguration();
 		int warningDays = config.getExpiredWarningDays();
-		
+
 		List<HealthCenter> locations = healthCenterRepository.findAll();
 		progressService.sendProgress(10, httpServletRequest);
 		List<ProductInventory> willExpiredList = getExpiringProductsData(locations, warningDays, httpServletRequest);
 		List<ProductInventory> expiredList = getExpiringProductsData(locations, 0, httpServletRequest);
 		List<ProductInventory> totalList = getExpiringProductsData(locations, null, httpServletRequest);
-		
-		
+
 		InventoryData inventoryData = new InventoryData();
 		inventoryData.setInventories(ProductInventory.combine(totalList, willExpiredList, expiredList));
-		inventoryData.calculateSummary();
-		
+		inventoryData.calculateInventoryStatusSummary();
+
 		WebResponse response = new WebResponse();
 		response.setConfiguration(config.toModel());
-		response.setInventoryData(inventoryData );
-		return response ;
+		response.setInventoryData(inventoryData);
+		return response;
 	}
-	
+
 	private List getDistributedFlow(Session session) {
 		Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
 		criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
@@ -262,4 +264,6 @@ public class InventoryService {
 		}
 		return productFlowMap;
 	}
+
+	
 }

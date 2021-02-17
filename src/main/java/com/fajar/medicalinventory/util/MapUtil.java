@@ -28,17 +28,16 @@ public class MapUtil {
 
 		return result;
 	}
-	public static <K, T> List<T> convertMapList(List<Map<K, T>> mapList, Class<T> objectClass) {
-
+	 
+	public static <T> List<T> mapValuesToList(Map<?, T> map) {
 		List<T> result = new ArrayList<T>();
 
-		for (Object object : mapList) {
-			result.add(mapToObject((Map<?, ?>) object, objectClass));
+		for (Object key : map.keySet()) {
+			result.add(map.get(key));
 		}
 
 		return result;
 	}
-
 	/*
 	 * public static void printMap(Map map) { Log.log("printing map"); for(Object
 	 * key:map.keySet()) { Log.log("key:", key,":",map.get(key)); } }

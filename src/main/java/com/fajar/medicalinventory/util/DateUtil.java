@@ -41,6 +41,26 @@ public class DateUtil {
 		return cal.getTime();
 
 	}
+	
+	/**
+	 * 
+	 * @param month starts at 0
+	 * @param year
+	 * @return
+	 */
+	public static Date getStartPeriod(int month, int year) { 
+		return getDate(year, month, 1);
+	}
+	/**
+	 * 
+	 * @param month starts at 0
+	 * @param year
+	 * @return
+	 */
+	public static Date getEndPeriod(int month, int year) {
+		int dayCount = getMonthDayCount(year, month);
+		return getDate(year, month, dayCount);
+	}
 
 	public static Date getDate(Filter filter) { 
 		return getDate(filter.getYear(), filter.getMonth() - 1, filter.getDay()); 
@@ -220,9 +240,9 @@ public class DateUtil {
 
 	/**
 	 * 
-	 * @param m0 from month
+	 * @param m0 from month start at 1 
 	 * @param y0 from year
-	 * @param m1 to month
+	 * @param m1 to month start at 1 
 	 * @param y1 to year
 	 * @return
 	 */
@@ -259,7 +279,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * get list of months with length: diff
+	 * get list of previous months with length: diff
 	 * 
 	 * @param calendar
 	 * @param diff
