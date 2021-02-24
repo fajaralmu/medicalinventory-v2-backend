@@ -57,7 +57,7 @@ public class EntityProperty implements Serializable {
 
 		Dto dto = modelClass.getAnnotation(Dto.class);
 		Objects.requireNonNull(dto);
-		Class<? extends BaseEntity> entityClass = dto.entityClass();
+		Class<? extends BaseEntity> entityClass = BaseModel.getEntityClass(modelClass);
 		
 		setIgnoreBaseField(dto.ignoreBaseField());
 		setEntityName(entityClass.getSimpleName().toLowerCase());

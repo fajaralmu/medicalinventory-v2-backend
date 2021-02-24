@@ -62,7 +62,7 @@ public class EntityManagementConfig implements Serializable {
 		if (null == customEntity) {
 			throw new ApplicationException("NOT Custom Entity: "+ entityClass) ;
 		}
-		modelClass = customEntity.value();
+		modelClass = BaseEntity.getModelClass(entityClass);
 		
 		Dto dtoAnnotation = modelClass.getAnnotation(Dto.class);
 		if (null == dtoAnnotation) {

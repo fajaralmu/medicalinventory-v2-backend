@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@CustomEntity(ProductModel.class)
+@CustomEntity 
 @Entity
 @Table(name = "product")
 @Builder

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
-@Dto(ignoreBaseField = false, updateService = "shopProfileUpdateService", entityClass = ApplicationProfile.class)
+@Dto(ignoreBaseField = false, updateService = "shopProfileUpdateService")
 @Data
 public class ApplicationProfileModel extends BaseModel<ApplicationProfile>  {
 

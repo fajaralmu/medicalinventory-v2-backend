@@ -25,7 +25,7 @@ import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@CustomEntity(UserModel.class)
+@CustomEntity
 @Entity
 @Table(name = "users")
 @Builder

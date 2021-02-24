@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-@Dto(entityClass = Configuration.class)
+@Dto()
 @Builder
 @Data
 @AllArgsConstructor

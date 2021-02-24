@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@CustomEntity(HealthCenterModel.class)
+@CustomEntity 
 @Entity
 @Table(name = "health_center")
 @Builder

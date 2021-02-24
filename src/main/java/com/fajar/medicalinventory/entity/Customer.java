@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author fajar
  */
-@CustomEntity(CustomerModel.class)
+@CustomEntity
 @Entity
 @Table(name = "customer")
 @Builder

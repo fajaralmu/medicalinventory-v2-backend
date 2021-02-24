@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@Dto(entityClass = HealthCenter.class, value="Puskesmas")
+@Dto(  value="Puskesmas")
 @Builder
 @Data
 @AllArgsConstructor

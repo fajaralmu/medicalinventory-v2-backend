@@ -35,7 +35,7 @@ import lombok.Setter;
  * 
  * @author fajar
  */
-@CustomEntity(ProductFlowModel.class)
+@CustomEntity
 //@Dto(updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
 @Component
 @Entity

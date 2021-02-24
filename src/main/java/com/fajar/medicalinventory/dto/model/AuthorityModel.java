@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Dto(entityClass = Authority.class)
+@Dto
 public class AuthorityModel extends BaseModel<Authority> {
 	/**
 	 * 

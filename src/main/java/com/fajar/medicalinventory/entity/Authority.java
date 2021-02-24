@@ -16,7 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-@CustomEntity(AuthorityModel.class)
+@CustomEntity
 @Entity
 @Table(name = "authority")
 @Data

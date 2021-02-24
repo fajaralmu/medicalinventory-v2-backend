@@ -13,7 +13,6 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.constants.TransactionType;
-import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -32,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@Dto(editable = false, entityClass=Transaction.class, updateService = "transactionUpdateService", value= "Transaksi")
+@Dto(editable = false, updateService = "transactionUpdateService", value= "Transaksi")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

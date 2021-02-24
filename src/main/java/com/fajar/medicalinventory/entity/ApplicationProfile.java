@@ -24,7 +24,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Dto(ignoreBaseField = false, updateService = "shopProfileUpdateService")
-@CustomEntity(ApplicationProfileModel.class)
+@CustomEntity
 @Entity
 @Table(name = "shop_profile")
 @Data

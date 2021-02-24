@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@CustomEntity(TransactionModel.class)
+@CustomEntity
 @Entity
 @Table(name = "transaction")
 @Data

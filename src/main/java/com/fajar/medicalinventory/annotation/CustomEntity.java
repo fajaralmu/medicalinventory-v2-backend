@@ -18,6 +18,6 @@ import com.fajar.medicalinventory.dto.model.BaseModel;
         ElementType.TYPE)
 public @interface CustomEntity {
 
-   public Class<? extends BaseModel> value();
+//   public Class<? extends BaseModel> value();
 
 }

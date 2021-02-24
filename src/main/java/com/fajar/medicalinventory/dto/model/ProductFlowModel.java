@@ -24,7 +24,7 @@ import lombok.Setter;
  * 
  * @author fajar
  */
-@Dto(entityClass = ProductFlow.class, updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
+@Dto(  updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
 
 @Builder
 @Data

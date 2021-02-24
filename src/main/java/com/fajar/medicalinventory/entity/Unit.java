@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@CustomEntity(UnitModel.class)
+@CustomEntity
 @Entity
 @Table(name = "unit")
 @Data

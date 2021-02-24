@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@CustomEntity(ConfigurationModel.class)
+@CustomEntity
 @Entity
 @Table(name = "appplication_configuration")
 @Builder

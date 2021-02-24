@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@Dto(entityClass = Unit.class)
+@Dto
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

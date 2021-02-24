@@ -137,7 +137,7 @@ public class EntityElement implements Serializable {
 		Dto dto = modelClass.getAnnotation(Dto.class);
 		if (null == dto) return null;
 		
-		Class<? extends BaseEntity> entityClass = dto.entityClass();
+		Class<? extends BaseEntity> entityClass = BaseModel.getEntityClass(modelClass);
 		return entityClass;
 	}
 	private Field getEntityField() {

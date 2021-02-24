@@ -20,6 +20,6 @@ public @interface Dto {
 	String updateService() default "commonUpdateService";
 	public boolean commonManagementPage() default true; 
 	public boolean withProgressWhenUpdated() default false; 
-	Class<? extends BaseEntity> entityClass() default BaseEntity.class;
+ 
 	 
 }

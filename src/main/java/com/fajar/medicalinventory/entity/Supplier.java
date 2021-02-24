@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
  *
  * @author fajar
  */
-@CustomEntity(SupplierModel.class)
+@CustomEntity
 @Entity
 @Table(name="supplier")
 @Data

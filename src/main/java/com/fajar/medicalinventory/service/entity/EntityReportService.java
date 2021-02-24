@@ -33,7 +33,7 @@ public class EntityReportService {
 		log.info("Generate entity report: {}", entityClass); 
 		User currentUser = sessionValidationService.getLoggedUser(httpRequest);
 		String requestId = currentUser.getRequestId();
-		Class modelClass = BaseEntity.getTypeArgumentOfGenericSuperClass(entityClass);
+		Class modelClass = BaseEntity.getModelClass(entityClass);
 		
 		EntityProperty entityProperty = EntityPropertyBuilder.createEntityProperty(modelClass, null);
 //		ReportData reportData = ReportData.builder().entities(entities).entityProperty(entityProperty).requestId(requestId).build(); 

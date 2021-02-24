@@ -312,7 +312,7 @@ public class CriteriaBuilder {
 			return null;
 		}
 		if (field.getAnnotation(JoinColumn.class) != null) {
-			Class modelClass = BaseEntity.getTypeArgumentOfGenericSuperClass(entityClass);
+			Class modelClass = BaseEntity.getModelClass(entityClass);
 			Field modelField = EntityUtil.getDeclaredField(modelClass, field.getName());
 			if (null == modelField) {
 				log.info("model field : {} NOT FOUND", field.getName());

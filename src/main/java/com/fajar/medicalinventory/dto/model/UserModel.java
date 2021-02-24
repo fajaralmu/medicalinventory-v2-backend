@@ -14,7 +14,7 @@ import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Dto(entityClass = User.class)
+@Dto
 @Builder
 @Data
 @AllArgsConstructor
