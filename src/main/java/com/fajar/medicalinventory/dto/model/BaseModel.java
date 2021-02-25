@@ -81,7 +81,7 @@ public abstract class BaseModel<E extends BaseEntity> implements Serializable {
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
-		throw new ApplicationException("No entity class is mapped for " + _class);
+		return null;
 	}
 
 	List<Field> getObjectModelField() {

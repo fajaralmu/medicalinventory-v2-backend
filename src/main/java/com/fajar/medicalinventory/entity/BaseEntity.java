@@ -229,7 +229,7 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
-		throw new ApplicationException("No model class mapped to " + _class);
+		return null;
 	}
 
 	public void preventStackOverFlowError() {
