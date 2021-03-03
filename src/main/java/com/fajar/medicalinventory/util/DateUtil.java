@@ -17,10 +17,7 @@ public class DateUtil {
 
 	static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat();
 
-	public static void main(String[] args) {
-		double x = 9000.12;
-		System.out.println("res: " + (x < 5000));
-	}
+	 
 
 	static final Calendar cal() {
 		return Calendar.getInstance();
@@ -351,5 +348,29 @@ public class DateUtil {
 		Calendar cal = cal(date);
 		cal.add(Calendar.DAY_OF_MONTH, expiredDaysWithin);
 		return cal.getTime();
+	}
+
+	public static Date clock00Midnight(Date d) {
+		 
+		Calendar cal = DateUtil.cal(d);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		return cal.getTime();
+	}
+
+	public static Date clock24Midnight(Date d) {
+		Calendar cal = DateUtil.cal(d);
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.SECOND, 59);
+		return cal.getTime();
+		
+	}
+	
+	public static void main(String[] args) {
+		Date d = new Date();
+		System.out.println(clock00Midnight(d));
+		System.out.println(clock24Midnight(d));
 	}
 }

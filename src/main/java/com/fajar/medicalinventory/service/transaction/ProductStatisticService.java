@@ -34,7 +34,6 @@ import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.MapUtil;
-import com.fajar.medicalinventory.util.PeriodUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,17 +50,18 @@ public class ProductStatisticService {
 	@Autowired
 	private CalculationUtil calculationUtil;
 
-	public WebResponse getProductUsage(String productCode, WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public WebResponse getProductUsageByCode(String productCode, WebRequest webRequest,
+			HttpServletRequest httpServletRequest) {
 
 		Product product = productRepository.findTop1ByCode(productCode);
 		if (null == product) {
 			throw new DataNotFoundException("Product with code: " + productCode + " not found");
 		}
 
-		Date startDate = PeriodUtil.getStartPeriod(webRequest.getFilter());
-		Date endDate = PeriodUtil.getEndPeriod(webRequest.getFilter());
+		Date startDate = webRequest.getFilter().getStartPeriodByYYMM();
+		Date endDate = webRequest.getFilter().getEndPeriodByYYMM();
 		progressService.sendProgress(30, httpServletRequest);
-		
+
 		if (startDate.after(endDate)) {
 			throw new ApplicationException("invalid period");
 		}
@@ -71,7 +71,7 @@ public class ProductStatisticService {
 				TransactionType.TRANS_OUT, startDate, endDate);
 		List<InventoryData> usageData = getUsageData(productFlows, startDate, endDate);
 		progressService.sendProgress(30, httpServletRequest);
-		
+
 		int totalData = ProductFlow.sumQtyCount(productFlows);
 		InventoryData inventoryData = calculatePeriodicReview(product, usageData);
 		progressService.sendProgress(40, httpServletRequest);
@@ -91,7 +91,7 @@ public class ProductStatisticService {
 			BigInteger totalDistributedToCustomer = productFlowRepository
 					.getSumOfProductFlowByTransactionType(TransactionType.TRANS_OUT, product.getId());
 			stock = totalIncomingFromSupplier.intValue() - totalDistributedToCustomer.intValue();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 		}
 		PeriodicReviewResult result = calculationUtil.periodicReview(stock, usageData, true);
 		return InventoryData.builder().periodicReviewResult(result).build();
@@ -145,8 +145,8 @@ public class ProductStatisticService {
 
 	public WebResponse getProductListWithUsage(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Filter filter = webRequest.getFilter();
-		Date startDate = PeriodUtil.getStartPeriod(webRequest.getFilter());
-		Date endDate = PeriodUtil.getEndPeriod(webRequest.getFilter());
+		Date startDate = filter.getStartPeriodByYYMMDD();
+		Date endDate = filter.getEndPeriodByYYMMDD();
 
 		if (startDate.after(endDate)) {
 			throw new ApplicationException("invalid period");

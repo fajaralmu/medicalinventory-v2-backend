@@ -1,10 +1,13 @@
 package com.fajar.medicalinventory.dto;
 
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -69,6 +72,44 @@ public class Filter implements Serializable {
 	 */
 	public Integer getMonthTo() {
 		return monthTo;
+	}
+	
+	@JsonIgnore
+	public   Date getStartPeriodByYYMMDD( ) {
+
+		Integer startMonth =  getMonth();
+		Integer startYear =  getYear();
+		Date startDate = DateUtil.getDate(startYear, startMonth - 1,  getDay());
+		
+		return DateUtil.clock00Midnight(startDate);
+	}
+	
+	@JsonIgnore
+	public   Date getEndPeriodByYYMM( ) {
+
+		Integer endMonth = getMonthTo();
+		Integer endYear = getYearTo();
+		Date endDate =  DateUtil.getDate(endYear, endMonth - 1, getDayTo());
+		
+		return DateUtil.clock24Midnight(endDate);
+	}
+	
+	@JsonIgnore
+	public   Date getStartPeriodByYYMM() {
+		Filter filter = this;
+		Integer startMonth = filter.getMonth();
+		Integer startYear = filter.getYear();
+		Date startDate = DateUtil.getStartPeriod(startMonth - 1, startYear);
+		return DateUtil.clock00Midnight(startDate);
+	}
+	
+	@JsonIgnore
+	public   Date getEndPeriodByYYMMDD( ) {
+		Filter filter = this;
+		Integer endMonth = filter.getMonthTo();
+		Integer endYear = filter.getYearTo();
+		Date endDate =  DateUtil.getDate(endYear, endMonth - 1, filter.getDayTo());
+		return DateUtil.clock24Midnight(endDate);
 	}
 
 
