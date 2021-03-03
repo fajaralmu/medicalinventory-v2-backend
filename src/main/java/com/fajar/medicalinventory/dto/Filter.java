@@ -89,7 +89,7 @@ public class Filter implements Serializable {
 
 		Integer endMonth = getMonthTo();
 		Integer endYear = getYearTo();
-		Date endDate =  DateUtil.getDate(endYear, endMonth - 1, getDayTo());
+		Date endDate =  DateUtil.getEndPeriod(endMonth, endYear);
 		
 		return DateUtil.clock24Midnight(endDate);
 	}
