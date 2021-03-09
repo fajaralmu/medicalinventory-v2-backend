@@ -4,6 +4,7 @@ import static com.fajar.medicalinventory.util.DateUtil.clock00Midnight;
 import static com.fajar.medicalinventory.util.DateUtil.clock24Midnight;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,30 +23,46 @@ import com.fajar.medicalinventory.util.DateUtil;
 @Repository
 public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> {
 
+	default List<ProductFlow> empty(){
+		return new ArrayList<>();
+	}
 	public List<ProductFlow> findByTransaction(Transaction transaction);
 
 	public List<ProductFlow> findByProductAndTransaction_type(Product p, TransactionType transIn);
 
 	//LIST ALL LOCATION
-	@Query("select pf from ProductFlow pf left join pf.transaction tx "
-			+ " left join pf.product p "
+	@Query("select pf from ProductFlow pf left join pf.transaction tx left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
 			+ " and pf.expiredDate < ?2 order by pf.expiredDate") 
-	List<ProductFlow> findAvailableStocksAllLocationWithExpDateBefore(Long productId, Date expDate);
-	@Query("select pf from ProductFlow pf left join pf.transaction tx "
-			+ " left join pf.product p "
+	public List<ProductFlow> findAvailableStocksAllLocationWithExpDateBefore(Long productId, Date expDate);
+	@Query("select pf from ProductFlow pf left join pf.transaction tx  left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
 			+ " and pf.expiredDate < ?2  and pf.expiredDate > ?3 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailableStocksAllLocationWithExpDateBeforeAndAfter(Long productId,
 			Date expiredDateWithin, Date tomorrow);
 
-	@Query("select pf from ProductFlow pf left join pf.transaction tx "
-			+ " left join pf.product p "
+	@Query("select pf from ProductFlow pf left join pf.transaction tx left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailableStocksAllLocation(Long productId);
+	//--multiple products
+	@Query("select pf from ProductFlow pf left join pf.transaction tx  left join pf.product p "
+			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
+			+ " and p in ?1 and (pf.count- pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2 order by pf.expiredDate") 
+	public List<ProductFlow> findAvailableStocksAllLocationWithExpDateBefore(List<Product> products, Date expDate);
+	@Query("select pf from ProductFlow pf left join pf.transaction tx  left join pf.product p "
+			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
+			+ " and p in ?1 and (pf.count- pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2  and pf.expiredDate > ?3 order by pf.expiredDate") 
+	public List<ProductFlow> findAvailableStocksAllLocationWithExpDateBeforeAndAfter(List<Product> products,
+			Date expiredDateWithin, Date tomorrow);
+	@Query("select pf from ProductFlow pf left join pf.transaction tx left join pf.product p "
+			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
+			+ " and p in ?1 and (pf.count- pf.usedCount) > 0 order by pf.expiredDate") 
+	public List<ProductFlow> findAvailableStocksAllLocation(List<Product> products);
 	default List<ProductFlow> findAvailableStocksAllLocation(Long productId, Integer expDaysWithin) {
 		
 		if (null != expDaysWithin) {
@@ -59,6 +76,20 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 		}
 		
 		return findAvailableStocksAllLocation(productId);
+	}
+	default List<ProductFlow> findAvailableStocksAllLocation(List<Product> products, Integer expDaysWithin) {
+		if (null ==products || products.size() == 0) return empty();
+		if (null != expDaysWithin) {
+			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
+			if ( expDaysWithin > 0) {
+				Date tomorrow = DateUtil.plusDay(new Date(), 1 );
+				
+				return findAvailableStocksAllLocationWithExpDateBeforeAndAfter(products, clock24Midnight(expiredDateWithin), clock00Midnight(tomorrow));
+			}
+			return findAvailableStocksAllLocationWithExpDateBefore(products, clock24Midnight(expiredDateWithin));
+		}
+		
+		return findAvailableStocksAllLocation(products);
 	}
 	//LIST MAIN WAREHOUSE
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
@@ -77,6 +108,23 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
 			+ " and pf.expiredDate < ?2 and pf.expiredDate > ?3 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailabeProductsAtMainWareHouseWithExpDateBeforeAfter(Long productId, Date expDateBefore, Date expDateAfter);
+	// --multiple products
+	@Query("select pf from ProductFlow pf left join pf.transaction tx "
+			+ " left join pf.product p "
+			+ " where tx.type='TRANS_IN' and p in ?1 and (pf.count- pf.usedCount) > 0 ") 
+	public List<ProductFlow> findAvailabeProductsAtMainWareHouse(List<Product> products);
+	@Query("select pf from ProductFlow pf left join pf.transaction tx "
+			+ " left join pf.product p "
+			+ " where tx.type='TRANS_IN' "
+			+ " and p in ?1 and (pf.count- pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2 order by pf.expiredDate") 
+	public List<ProductFlow> findAvailabeProductsAtMainWareHouseWithExpDateBefore(List<Product> products, Date expDate);
+	@Query("select pf from ProductFlow pf left join pf.transaction tx "
+			+ " left join pf.product p "
+			+ " where tx.type='TRANS_IN' "
+			+ " and p in ?1 and (pf.count- pf.usedCount) > 0 "
+			+ " and pf.expiredDate < ?2 and pf.expiredDate > ?3 order by pf.expiredDate") 
+	public List<ProductFlow> findAvailabeProductsAtMainWareHouseWithExpDateBeforeAfter(List<Product> products, Date expDateBefore, Date expDateAfter);
 	
 	default List<ProductFlow> findAvailableStocksAtMainWareHouse(Long productId, @Nullable Integer expDaysWithin){
 		if (null != expDaysWithin) {
@@ -89,6 +137,19 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 		}
 		
 		return findAvailabeProductsAtMainWareHouse(productId);
+	}
+	default List<ProductFlow> findAvailableStocksAtMainWareHouse(List<Product> products, @Nullable Integer expDaysWithin){
+		if (null ==products || products.size() == 0) return empty();
+		if (null != expDaysWithin) {
+			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1); 
+			if ( expDaysWithin > 0) {
+				Date tomorrow = DateUtil.plusDay(new Date(), 1 );
+				return findAvailabeProductsAtMainWareHouseWithExpDateBeforeAfter(products, clock24Midnight(expiredDateWithin), clock00Midnight(tomorrow));
+			}
+			return findAvailabeProductsAtMainWareHouseWithExpDateBefore(products, clock24Midnight(expiredDateWithin));
+		}
+		
+		return findAvailabeProductsAtMainWareHouse(products);
 	}
 	
 //	@Query("select pf from ProductFlow pf left join pf.transaction tx "
@@ -121,6 +182,31 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " and (pf.count- pf.usedCount)  > 0 order by pf.expiredDate")
 	public List<ProductFlow> findAvailableStocksAtBranchWareHouseWithExpDateBeforeAfter(Long locationId, Long productId  , Date expDateBefore, Date expDateAfter);
  
+	//-multiple products
+	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "
+			+ " left join pf.product p "
+			+ " left join tx.healthCenterDestination location "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
+			+ " and location.id = ?1 and p in ?2 and "
+			+ " (pf.count- pf.usedCount)  > 0 ")
+	public List<ProductFlow> findAvailableStocksAtBranchWareHouse(Long locationId, List<Product> products);
+	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "
+			+ " left join pf.product p "
+			+ " left join tx.healthCenterDestination location "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
+			+ " and location.id = ?1 and p in ?2 "
+			+ " and pf.expiredDate < ?3"
+			+ " and (pf.count- pf.usedCount)  > 0 order by pf.expiredDate")
+	public List<ProductFlow> findAvailableStocksAtBranchWareHouseWithExpDateBefore(Long locationId,  List<Product> products, Date expDate);
+	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "
+			+ " left join pf.product p "
+			+ " left join tx.healthCenterDestination location "
+			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
+			+ " and location.id = ?1 and p in ?2 "
+			+ " and pf.expiredDate < ?3 and pf.expiredDate > ?4"
+			+ " and (pf.count- pf.usedCount)  > 0 order by pf.expiredDate")
+	public List<ProductFlow> findAvailableStocksAtBranchWareHouseWithExpDateBeforeAfter(Long locationId,  List<Product> products, Date expDateBefore, Date expDateAfter);
+ 
 	
 	default List<ProductFlow> findAvailableStocksAtBranchWareHouse(Long locationId, Long productId, @Nullable Integer expDaysWithin) {
 		if (null != expDaysWithin) {
@@ -132,6 +218,18 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			return findAvailableStocksAtBranchWareHouseWithExpDateBefore(locationId, productId, clock24Midnight(expiredDateWithin));
 		}
 		return findAvailableStocksAtBranchWareHouse(locationId, productId);
+	}
+	default List<ProductFlow> findAvailableStocksAtBranchWareHouse(Long locationId, List<Product> products, @Nullable Integer expDaysWithin) {
+		if (null ==products || products.size() == 0) return empty();
+		if (null != expDaysWithin) {
+			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
+			if ( expDaysWithin > 0) {
+				Date tomorrow = DateUtil.plusDay(new Date(), 1 );
+				return findAvailableStocksAtBranchWareHouseWithExpDateBeforeAfter(locationId, products, clock24Midnight(expiredDateWithin), clock00Midnight(tomorrow));
+			}
+			return findAvailableStocksAtBranchWareHouseWithExpDateBefore(locationId, products, clock24Midnight(expiredDateWithin));
+		}
+		return findAvailableStocksAtBranchWareHouse(locationId, products);
 	}
 	
 	////////////////////////////////////////////END AVAILABLE LIST//////////////////////

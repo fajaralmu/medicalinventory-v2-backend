@@ -2,8 +2,11 @@ package com.fajar.medicalinventory.service.transaction;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -103,28 +106,50 @@ public class InventoryService {
 		}
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>();
-		for (int i = 0; i < products.size(); i++) {
-			Product product = products.get(i);
-			List<ProductFlow> productFlows;
+//		for (int i = 0; i < products.size(); i++) {
+//			Product product = products.get(i);
+//			List<ProductFlow> productFlows;
+//			if (filter.isAllFlag()) {
+//				productFlows = productFlowRepository.findAvailableStocksAllLocation(product.getId(),
+//						expDaysWithin(filter));
+//			} else {
+//				if (isMasterHealthCenter) {
+//					productFlows = productFlowRepository.findAvailableStocksAtMainWareHouse(product.getId(),
+//							expDaysWithin(filter));
+//
+//				} else {
+//					productFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(location.getId(),
+//							product.getId(), expDaysWithin(filter));
+//
+//				}
+//			}
+//			ProductStock productStock = new ProductStock(product.toModel(), productFlows);
+//			productStocks.add(productStock);
+//			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
+//		}
+		
+		if (products.size() > 0) {
+			List<ProductFlow> allProductFlows; 
 			if (filter.isAllFlag()) {
-				productFlows = productFlowRepository.findAvailableStocksAllLocation(product.getId(),
+				allProductFlows = productFlowRepository.findAvailableStocksAllLocation(products,
 						expDaysWithin(filter));
 			} else {
 				if (isMasterHealthCenter) {
-					productFlows = productFlowRepository.findAvailableStocksAtMainWareHouse(product.getId(),
+					allProductFlows = productFlowRepository.findAvailableStocksAtMainWareHouse(products,
 							expDaysWithin(filter));
-
+	
 				} else {
-					productFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(location.getId(),
-							product.getId(), expDaysWithin(filter));
-
+					allProductFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(location.getId(),
+							products, expDaysWithin(filter));
+	
 				}
 			}
-			ProductStock productStock = new ProductStock(product.toModel(), productFlows);
-			productStocks.add(productStock);
-			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
+			progressService.sendProgress(60, httpServletRequest);
+			productStocks.addAll(mapProductFlows(products, allProductFlows));
+			progressService.sendProgress(20, httpServletRequest);
+		} else {
+			progressService.sendProgress(80, httpServletRequest);
 		}
-
 		final BigInteger totalData = getTotalProduct(isMasterHealthCenter, filter, location);
 		progressService.sendProgress(10, httpServletRequest);
 		final BigInteger totalItems = getTotalProductStockRecord(isMasterHealthCenter, filter, location);
@@ -138,6 +163,25 @@ public class InventoryService {
 		response.setTotalItems(totalItems == null ? 0 : totalItems.intValue());
 		response.setGeneralList(productStocks);
 		return response;
+	}
+
+	private List<ProductStock> mapProductFlows(List<Product> products, List<ProductFlow> allProductFlows) {
+		List<ProductStock> productStocks = new ArrayList<>();
+		Map<Long, List<ProductFlow> > map = new LinkedHashMap<>();
+		for (Product product : products) {
+			map.put(product.getId(), new LinkedList<>());
+		}
+		for(ProductFlow productFlow:allProductFlows) {
+			Long productId = productFlow.getProduct().getId();
+			if (null !=map.get(productId)) {
+				map.get(productId).add(productFlow);
+			}
+		}
+		for (Product product : products) {
+			ProductStock productStock = new ProductStock(product.toModel(), map.get(product.getId()));
+			productStocks.add(productStock);
+		}
+		return productStocks ;
 	}
 
 	private BigInteger getTotalProductStockRecord(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
