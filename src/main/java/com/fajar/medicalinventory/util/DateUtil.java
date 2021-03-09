@@ -372,5 +372,17 @@ public class DateUtil {
 		Date d = new Date();
 		System.out.println(clock00Midnight(d));
 		System.out.println(clock24Midnight(d));
+		System.out.println(afterToday(clock24Midnight(d)));
 	}
+
+	public static boolean isSameDayAsNow(Date d) {
+		return getCalendarDayOfMonth(d) == getCalendarDayOfMonth(new Date());
+	}
+
+	public static boolean afterToday(Date expiredDateWithin) {
+		 
+		return clock24Midnight(new Date()).compareTo(expiredDateWithin)<0;
+	}
+	
+	
 }

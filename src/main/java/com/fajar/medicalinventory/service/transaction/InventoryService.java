@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.math3.ode.events.FilterType;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.fajar.medicalinventory.constants.FilterFlag;
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.InventoryData;
@@ -77,7 +79,7 @@ public class InventoryService {
 			availableProductFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId());
 
 		} else {
-			availableProductFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(healthCenter.getId(),
+			availableProductFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(healthCenter.getId(),
 					product.getId());
 
 		}
@@ -86,61 +88,92 @@ public class InventoryService {
 	}
 
 	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
-
+		if (!webRequest.getFilter().isAllFlag()) {
+			healthCenterMasterService.checkLocationRecord(webRequest.getHealthcenter().toEntity());
+		}
 		final HealthCenter location = webRequest.getHealthcenter().toEntity();
 		final boolean isMasterHealthCenter = healthCenterMasterService.isMasterHealthCenter(location);
-
 		final Filter filter = webRequest.getFilter();
-		final PageRequest pageReuqest = PageRequest.of(filter.getPage(), filter.getLimit());
-		final boolean ignoreEmptyValue = webRequest.getFilter().isIgnoreEmptyValue();
-		final Integer expDateWithin = filter.isFilterExpDate() ? filter.getDay() : null;
-		final BigInteger totalData;
-		final BigInteger totalItems;
-		if (ignoreEmptyValue) {
-			totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, ignoreEmptyValue, expDateWithin,
-					location.getId());
-		} else {
-			totalData = productRepository.countAll();
-		}
-		final List<Product> products = productRepository.getAvailableProducts(ignoreEmptyValue, isMasterHealthCenter,
-				expDateWithin, location.getId(), pageReuqest);
-		progressService.sendProgress(10, httpServletRequest);
+		final List<Product> products;
 
-		if (isMasterHealthCenter) {
-			totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(expDateWithin);
+		if (filter.isAllFlag()) {
+			products = productRepository.getAvailableProductsAllLocation(filter);
 		} else {
-			totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(), expDateWithin);
+			products = productRepository.getAvailableProducts(isMasterHealthCenter, filter, location.getId());
 		}
-
-		progressService.sendProgress(10, httpServletRequest);
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>();
 		for (int i = 0; i < products.size(); i++) {
 			Product product = products.get(i);
 			List<ProductFlow> productFlows;
-
-			if (isMasterHealthCenter) {
-				productFlows = productFlowRepository.findAvailabeProductsAtMainWareHouse(product.getId(),
-						expDateWithin);
-
+			if (filter.isAllFlag()) {
+				productFlows = productFlowRepository.findAvailableStocksAllLocation(product.getId(),
+						expDaysWithin(filter));
 			} else {
-				productFlows = productFlowRepository.findAvailabeProductsAtBranchWareHouse(location.getId(),
-						product.getId(), expDateWithin);
+				if (isMasterHealthCenter) {
+					productFlows = productFlowRepository.findAvailableStocksAtMainWareHouse(product.getId(),
+							expDaysWithin(filter));
 
+				} else {
+					productFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(location.getId(),
+							product.getId(), expDaysWithin(filter));
+
+				}
 			}
 			ProductStock productStock = new ProductStock(product, productFlows);
 			productStocks.add(productStock);
 			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
 		}
 
+		final BigInteger totalData = getTotalProduct(isMasterHealthCenter, filter, location);
+		progressService.sendProgress(10, httpServletRequest);
+		final BigInteger totalItems = getTotalProductStockRecord(isMasterHealthCenter, filter, location);
+		progressService.sendProgress(10, httpServletRequest);
+
 		WebResponse response = new WebResponse();
 
 		ConfigurationModel configModel = inventoryConfigurationService.getTempConfiguration().toModel();
 		response.setConfiguration(configModel);
 		response.setTotalData(totalData.intValue());
+		response.setTotalItems(totalItems == null ? 0 : totalItems.intValue());
 		response.setGeneralList(productStocks);
-		response.setTotalItems(totalItems.intValue());
 		return response;
+	}
+
+	private BigInteger getTotalProductStockRecord(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
+		BigInteger totalItems;
+		if (filter.isAllFlag()) {
+			totalItems = productFlowRepository.getTotalItemsAllLocation(expDaysWithin(filter));
+		} else {
+			if (isMasterHealthCenter) {
+				totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(expDaysWithin(filter));
+			} else {
+				totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(),
+						expDaysWithin(filter));
+			}
+		}
+		return totalItems == null ? BigInteger.ZERO : totalItems;
+	}
+
+	private BigInteger getTotalProduct(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
+		final BigInteger totalData;
+		if (filter.isIgnoreEmptyValue()) {
+			if (filter.isAllFlag()) {
+				totalData = productRepository.countNontEmptyProductAllLocation(isMasterHealthCenter,
+						expDaysWithin(filter));
+			} else {
+				totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, expDaysWithin(filter),
+						location.getId());
+			}
+		} else {
+			totalData = productRepository.countAll();
+		}
+		return totalData == null ? BigInteger.ZERO : totalData;
+	}
+
+	private Integer expDaysWithin(Filter filter) {
+		final Integer expDaysWithin = filter.isFilterExpDate() ? filter.getDay() : null;
+		return expDaysWithin;
 	}
 
 	public int getProductStockAtDate(Product product, HealthCenter location, Date date) {
@@ -265,5 +298,4 @@ public class InventoryService {
 		return productFlowMap;
 	}
 
-	
 }
