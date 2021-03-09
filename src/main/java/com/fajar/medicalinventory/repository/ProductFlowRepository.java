@@ -31,20 +31,20 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
-			+ " and pf.expiredDate < ?2") 
+			+ " and pf.expiredDate < ?2 order by pf.expiredDate") 
 	List<ProductFlow> findAvailableStocksAllLocationWithExpDateBefore(Long productId, Date expDate);
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
 			+ " left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
-			+ " and pf.expiredDate < ?2  and pf.expiredDate > ?3") 
+			+ " and pf.expiredDate < ?2  and pf.expiredDate > ?3 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailableStocksAllLocationWithExpDateBeforeAndAfter(Long productId,
 			Date expiredDateWithin, Date tomorrow);
 
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
 			+ " left join pf.product p "
 			+ " where (tx.type='TRANS_IN' or tx.type='TRANS_OUT_TO_WAREHOUSE') "
-			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 ") 
+			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailableStocksAllLocation(Long productId);
 	default List<ProductFlow> findAvailableStocksAllLocation(Long productId, Integer expDaysWithin) {
 		
@@ -69,13 +69,13 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " left join pf.product p "
 			+ " where tx.type='TRANS_IN' "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
-			+ " and pf.expiredDate < ?2") 
+			+ " and pf.expiredDate < ?2 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailabeProductsAtMainWareHouseWithExpDateBefore(Long productId, Date expDate);
 	@Query("select pf from ProductFlow pf left join pf.transaction tx "
 			+ " left join pf.product p "
 			+ " where tx.type='TRANS_IN' "
 			+ " and p.id = ?1 and (pf.count- pf.usedCount) > 0 "
-			+ " and pf.expiredDate < ?2 and pf.expiredDate > ?3") 
+			+ " and pf.expiredDate < ?2 and pf.expiredDate > ?3 order by pf.expiredDate") 
 	public List<ProductFlow> findAvailabeProductsAtMainWareHouseWithExpDateBeforeAfter(Long productId, Date expDateBefore, Date expDateAfter);
 	
 	default List<ProductFlow> findAvailableStocksAtMainWareHouse(Long productId, @Nullable Integer expDaysWithin){
@@ -110,7 +110,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
 			+ " and location.id = ?1 and p.id = ?2 "
 			+ " and pf.expiredDate < ?3"
-			+ " and (pf.count- pf.usedCount)  > 0 ")
+			+ " and (pf.count- pf.usedCount)  > 0 order by pf.expiredDate")
 	public List<ProductFlow> findAvailableStocksAtBranchWareHouseWithExpDateBefore(Long locationId, Long productId  , Date expDate);
 	@Query( "select pf from ProductFlow pf left join pf.transaction tx  "
 			+ " left join pf.product p "
@@ -118,7 +118,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE'   "
 			+ " and location.id = ?1 and p.id = ?2 "
 			+ " and pf.expiredDate < ?3 and pf.expiredDate > ?4"
-			+ " and (pf.count- pf.usedCount)  > 0 ")
+			+ " and (pf.count- pf.usedCount)  > 0 order by pf.expiredDate")
 	public List<ProductFlow> findAvailableStocksAtBranchWareHouseWithExpDateBeforeAfter(Long locationId, Long productId  , Date expDateBefore, Date expDateAfter);
  
 	
