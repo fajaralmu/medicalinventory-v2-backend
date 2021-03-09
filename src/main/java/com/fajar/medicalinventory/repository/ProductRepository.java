@@ -155,7 +155,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			@Nullable Integer expDaysWithin, Long locationId) {
 		BigInteger totalData;
 		boolean withExpDateFilter = expDaysWithin != null;
-		int expDatAfter = expDaysWithin  > 0 ? 0 : MIN_VALUE;
+		int expDatAfter = expDaysWithin !=null && expDaysWithin  > 0 ? 0 : MIN_VALUE;
 		if (isMasterHealthCenter) {
 			if (withExpDateFilter) {
 				totalData = countNotEmptyProductInMasterWareHouseWithExpDaysBeforeAfter(expDaysWithin + 1, expDatAfter);
@@ -257,7 +257,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 		final boolean ignoreEmptyValue = filter.isIgnoreEmptyValue();
 		final Integer expDaysWithin = filter.isFilterExpDate() ? filter.getDay() : null;
 		final PageRequest pageable = filter.getPageRequest();
-		 
 
 		if (ignoreEmptyValue) {
 			boolean withExpDateFilter = expDaysWithin != null;

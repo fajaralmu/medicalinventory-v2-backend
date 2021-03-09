@@ -120,7 +120,7 @@ public class InventoryService {
 
 				}
 			}
-			ProductStock productStock = new ProductStock(product, productFlows);
+			ProductStock productStock = new ProductStock(product.toModel(), productFlows);
 			productStocks.add(productStock);
 			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
 		}

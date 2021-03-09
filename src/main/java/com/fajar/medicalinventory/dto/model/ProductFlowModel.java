@@ -62,6 +62,8 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private long price;
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean generic;  
+	
+	private String stockLocation;
 	 
  	
 	public int getStock() { 
