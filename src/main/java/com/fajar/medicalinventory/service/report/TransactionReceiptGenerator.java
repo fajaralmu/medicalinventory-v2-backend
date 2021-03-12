@@ -80,7 +80,8 @@ public class TransactionReceiptGenerator {
 		// doc.add(pJudul);
 		doc.add(Chunk.NEWLINE);
 
-		Integer total = 0, totalHarga = 0;
+		Double total = 0d;
+		Double totalHarga = 0d;
 		Paragraph identitas_transaksi[] = new Paragraph[4];
 		identitas_transaksi[0] = new Paragraph("Kode transaksi: " + transaction. getCode(), fontJudulTabel);
 		identitas_transaksi[1] = new Paragraph("Tanggal: " + dateToString(transaction.getTransactionDate()), fontJudulTabel);
@@ -167,7 +168,7 @@ public class TransactionReceiptGenerator {
 			PdfPCell ID_STOK = new PdfPCell(new Phrase(String.valueOf(id_stok), fontRincianTransaksi));
 			PdfPCell no = new PdfPCell(new Phrase(i.toString(), fontRincianTransaksi));
 			PdfPCell hargaItem = new PdfPCell(new Phrase(String.valueOf(ao.getPrice()), fontRincianTransaksi));
-			Integer totalHargaItem_int = (int) (ao.getPrice() * ao.getCount());
+			Double totalHargaItem_int = (double) (ao.getPrice() * ao.getCount());
 			PdfPCell totalHargaItem = new PdfPCell(new Phrase(totalHargaItem_int.toString(), fontRincianTransaksi));
 			no.setBorder(Rectangle.NO_BORDER);
 			nama.setBorder(Rectangle.NO_BORDER);
@@ -209,24 +210,7 @@ public class TransactionReceiptGenerator {
 		doc.close();
 	}
 
-	public String numbToCurrencyString(Integer Int) {
-		String nominal = Int.toString();
-		String hasil = "";
-		if (nominal.length() > 3) {
-			int nol = 0;
-			for (int i = nominal.length() - 1; i > 0; i--) {
-				nol++;
-				hasil = nominal.charAt(i) + hasil;
-				if (nol == 3) {
-					hasil = "." + hasil;
-					nol = 0;
-				}
-
-			}
-			hasil = nominal.charAt(0) + hasil;
-		} else {
-			hasil = Int.toString();
-		}
-		return hasil;
+	public String numbToCurrencyString(Object Int) {
+		return String.valueOf(Int);
 	}
 }

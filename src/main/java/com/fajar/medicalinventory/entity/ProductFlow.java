@@ -77,7 +77,7 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	@Default 
 	private boolean suitable = true;
 	@Column 
-	private long price;
+	private double price;
 	@Column 
 	private boolean generic;  
 	 

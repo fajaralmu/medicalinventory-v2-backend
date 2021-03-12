@@ -59,7 +59,7 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean suitable = true;
 	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
-	private long price;
+	private double price;
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean generic;  
 	
