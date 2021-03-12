@@ -235,6 +235,7 @@ public class DatabaseProcessor {
 
 			return result;
 		} catch (Exception e) {
+			e.printStackTrace();
 			if (null != transaction) {
 				transaction.rollback();
 			}

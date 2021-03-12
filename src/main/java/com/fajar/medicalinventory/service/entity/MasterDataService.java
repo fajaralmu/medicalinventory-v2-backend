@@ -82,7 +82,7 @@ public class MasterDataService {
 				log.info("newRecord: {}", newRecord);
 				
 				if (entityValue != null) {
-					 
+					log.info("updateService: {}", updateService.getClass().getSimpleName());
 					BaseEntity savedEntity = updateService.saveEntity(entityValue.toEntity(), newRecord, servletRequest); 
 					 
 					return WebResponse.builder().entity(savedEntity.toModel()).build();
