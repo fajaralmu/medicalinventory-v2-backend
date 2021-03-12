@@ -57,6 +57,7 @@ public class TransactionModel extends BaseModel<Transaction>{
 	@FormField
 	private TransactionType type;
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@Getter(value = AccessLevel.NONE)
 	private UserModel user;
 	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
 	private SupplierModel supplier;
@@ -95,5 +96,10 @@ public class TransactionModel extends BaseModel<Transaction>{
 		return count;
 	}
 	 
+	public UserModel getUser() {
+		user.setPassword(null);
+		user.setAuthorities(null);
+		return user;
+	}
 
 }

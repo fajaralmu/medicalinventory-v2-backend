@@ -22,8 +22,6 @@ import javax.persistence.Transient;
 import org.springframework.lang.Nullable;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
-import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
@@ -103,7 +101,7 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 		String dateCode = year + StringUtil.twoDigits(month+1) + StringUtil.twoDigits(day);
 		this.code = dateCode + type.ordinal()+"-" + StringUtil.generateRandomNumber(6);
 	}
-
+	
 	/**
 	 * determine type 
 	 */

@@ -7,6 +7,8 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.entity.Authority;
 import com.fajar.medicalinventory.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @AllArgsConstructor
+@JsonInclude(value = Include.NON_NULL)
 @NoArgsConstructor
 public class UserModel extends BaseModel<User>{
 
