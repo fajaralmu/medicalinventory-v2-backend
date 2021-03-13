@@ -239,6 +239,49 @@ public class InventoryService {
 				- (totalUsed == null ? 0 : totalUsed.intValue());
 		return stock;
 	}
+	/**
+	 * 
+	 * @param products
+	 * @param location
+	 * @param date
+	 * @return map of product id and remaining stocks
+	 */
+	public Map<Long, Integer> getProductsStockAtDate(List<Product> products, HealthCenter location, Date date) {
+		boolean isMasterLocation = healthCenterMasterService.isMasterHealthCenter(location);
+		Map<Long, Integer> result = getMapPopulatedWithKey(products);
+		
+		List<Object[]> tptalSupplied;
+		List<Object[]> totalUsed;
+		if (isMasterLocation) {
+			tptalSupplied = productFlowRepository.getTotalIncomingProductsFromSupplier(products, date);
+			totalUsed = productFlowRepository.getTotalUsedProductsToCustomerOrBranchWarehouseAtDate(products, date, location.getId());
+		} else {
+			tptalSupplied = productFlowRepository.getTotalIncomingProductsAtBranchWarehouse(products, date,
+					location.getId());
+			totalUsed = productFlowRepository.getTotalUsedProductsToCustomerAtDate(products, date, location.getId());
+		}
+		if (null == tptalSupplied) {
+			return result;
+		}
+		//populate supplied
+		for (Object[] objects : tptalSupplied) {
+			Long productId = Long.parseLong(objects[0].toString());
+			Integer suppliedCount = Integer.parseInt(objects[1].toString());
+			result.put(productId, suppliedCount);
+		}
+		if (null != totalUsed)
+			for (Object[] objects : totalUsed) {
+				Long productId = Long.parseLong(objects[0].toString());
+				Integer usedCount = Integer.parseInt(objects[1].toString());
+				Integer supplied = result.get(productId);
+				Integer stock = supplied - usedCount;
+				result.put(productId, stock);
+			}
+		 
+//		int stock = (tptalSupplied == null ? 0 : tptalSupplied.intValue())
+//				- (totalUsed == null ? 0 : totalUsed.intValue());
+		return result;
+	}
 
 	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
 		 return stockAdjusterService.adjustStock(httpServletRequest);
@@ -304,6 +347,51 @@ public class InventoryService {
 			result = productFlowRepository.getTotalUsedProductToCustomerBetweenDate(product.getId(), date1, date2, location.getId()); 
 		}
 		return result == null ? 0 : result.intValue();
+	}
+	public Map<Long, Integer> getUsedProductsBetweenDate(List<Product> products, HealthCenter location, Date date1, Date date2) {
+		Map<Long, Integer> result = getMapPopulatedWithKey(products);
+		
+		final List<Object[]> quantities;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			quantities= productFlowRepository.getTotalUsedProductsToCustomerOrBranchWarehouseBetweenDate(products, date1, date2, location.getId());
+		} else {
+			quantities = productFlowRepository.getTotalUsedProductsToCustomerBetweenDate(products, date1, date2, location.getId()); 
+		}
+		for (Object[] objects : quantities) {
+			Long productId = Long.parseLong(objects[0].toString());
+			Integer count = Integer.parseInt(objects[1].toString());
+			result.put(productId, count);
+		}
+		return result;
+	}
+	private Map<Long, Integer> getMapPopulatedWithKey(List<Product> products) {
+		Map<Long, Integer> result = new HashMap<>();
+		if (null== products || products.isEmpty()) {
+			result.put(-1L, 0);
+			return result;
+		}
+		
+		products.forEach(p->{
+			result.put(p.getId(), 0);
+		});
+		return result;
+	}
+
+	public Map<Long, Integer> getIncomingProductsBetweenDate(List<Product> products, HealthCenter location,
+			Date date1, Date date2) {
+		Map<Long, Integer> result = getMapPopulatedWithKey(products);
+		final List<Object[]> quantities;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			quantities = productFlowRepository.getTotalIncomingProductsFromSupplierBetweenDate(products, date1, date2);
+		} else {
+			quantities = productFlowRepository.getTotalIncomingProductsAtBranchWarehouseBetweenDate(products, date1, date2, location.getId()); 
+		}
+		for (Object[] objects : quantities) {
+			Long productId = Long.parseLong(objects[0].toString());
+			Integer count = Integer.parseInt(objects[1].toString());
+			result.put(productId, count);
+		}
+		return result;
 	}
 
 }

@@ -67,7 +67,7 @@ public class ReportGenerator {
 	private InventoryService inventoryService;
 	@Autowired
 	private DefaultHealthCenterMasterService defaultHealthCenterMasterService;
-	 
+
 	public XSSFWorkbook getMonthyReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
 
 		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
@@ -101,7 +101,7 @@ public class ReportGenerator {
 		if (transactions.size() == 0)
 			return transactions;
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
-		 
+
 		Map<Long, Transaction> transactionMap = new HashMap<>();
 		for (Transaction transaction : transactions) {
 			transactionMap.put(transaction.getId(), transaction);
@@ -112,15 +112,15 @@ public class ReportGenerator {
 			if (null == transactionMap.get(trxId))
 				continue;
 			transactionMap.get(trxId).addProductFlow(productFlow);
-		} 
+		}
 		return MapUtil.mapValuesToList(transactionMap);
 	}
 
 	public void transactionReceipt(String code, HttpServletRequest httpServletRequest, OutputStream os)
-			throws  Exception {
-		 
+			throws Exception {
+
 		Transaction t = transactionRepository.findByCode(code);
-		
+
 		progressService.sendProgress(20, httpServletRequest);
 		if (null == t) {
 			throw new DataNotFoundException("Transaction record not found");
@@ -128,10 +128,11 @@ public class ReportGenerator {
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransaction(t);
 		t.setProductFlows(productFlows);
 		HealthCenter location = defaultHealthCenterMasterService.getMasterHealthCenter();
-		
+
 		progressService.sendProgress(20, httpServletRequest);
-		
-		TransactionReceiptGenerator generator = new TransactionReceiptGenerator(t, location, notifier(httpServletRequest));
+
+		TransactionReceiptGenerator generator = new TransactionReceiptGenerator(t, location,
+				notifier(httpServletRequest));
 		generator.generateReport(os);
 
 	}
@@ -144,7 +145,7 @@ public class ReportGenerator {
 		Document doc = new Document(PageSize.A4);
 		doc.setMargins(10f, 10f, 10f, 10f);
 		doc.open();
-		
+
 		String filename = path + "Label-Obat-" + t.getCode() + ".pdf";
 		PdfWriter.getInstance(doc, new FileOutputStream(filename));
 		Font fontRincianIdStok = FontFactory.getFont(FontFactory.COURIER, 20f);
@@ -223,9 +224,8 @@ public class ReportGenerator {
 
 	}
 
-	
-	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest)
-			throws Exception {
+	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os,
+			HttpServletRequest httpServletRequest) throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Filter filter = webRequest.getFilter();
 		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
@@ -242,18 +242,18 @@ public class ReportGenerator {
 		fillProductFlows(transactionOneMonth);
 		Map<Long, Integer> mappedProductIdAndStartingStock = new HashMap<>();
 		progressService.sendProgress(10, httpServletRequest);
-		 
+
 		for (Product product : products) {
 			int startingStock = inventoryService.getProductStockAtDate(product, location, prevDate);
 			mappedProductIdAndStartingStock.put(product.getId(), startingStock);
 			progressService.sendProgress(1, products.size(), 50, httpServletRequest);
 		}
-		
-		
-		 ProductRequestSheetGenerator generator = new ProductRequestSheetGenerator(webRequest, products, mappedProductIdAndStartingStock, transactionOneMonth);
-		 generator.setMasterHealthCenter(isMasterHealthCenter);
-		 generator.setProgressNotifier(notifier(httpServletRequest));
-		 generator.generateReport(os);
+
+		ProductRequestSheetGenerator generator = new ProductRequestSheetGenerator(webRequest, products,
+				mappedProductIdAndStartingStock, transactionOneMonth);
+		generator.setMasterHealthCenter(isMasterHealthCenter);
+		generator.setProgressNotifier(notifier(httpServletRequest));
+		generator.generateReport(os);
 
 	}
 
@@ -269,38 +269,53 @@ public class ReportGenerator {
 	public XSSFWorkbook getStockOpnameReport(WebRequest webRequest, HttpServletRequest httpServletRequest)
 			throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
-		Date d = DateUtil.getDate(webRequest.getFilter());
+		Date selectedDate = DateUtil.getDate(webRequest.getFilter());
 		List<Product> products = (List<Product>) productRepository.findAll();
 		List<ProductStock> stockModels = new LinkedList<>();
-		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(d);
+		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(selectedDate);
 		Map<Long, Double> mappedPrice = parseProductPriceMap(mappedPricesAndIDs);
 
 		log.info("products: {}", products.size());
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		progressService.sendProgress(10, httpServletRequest);
-		
-		//prev year date
+
+		// prev year date
 		int prevYear = webRequest.getFilter().getYear() - 1;
 		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
+		int taskProp = 16;
+		Map<Long, Integer> productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
+		progressService.sendProgress(taskProp, httpServletRequest);
 		
+		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location,lastDayOfYear);
+		progressService.sendProgress(taskProp, httpServletRequest);
+		
+		Map<Long, Integer> incomingStocksBetweenDate = inventoryService.getIncomingProductsBetweenDate(products,location, lastDayOfYear, selectedDate);
+		progressService.sendProgress(taskProp, httpServletRequest);
+		
+		Map<Long, Integer> usedCountBetweenDate = inventoryService.getUsedProductsBetweenDate(products, location,lastDayOfYear, selectedDate);
+		progressService.sendProgress(taskProp, httpServletRequest);
+
 		for (Product product : products) {
 			log.info("get stock info for: {}", product.getName());
 			Double price = mappedPrice.get(product.getId());
-			
-			int productStockInTheBeginningOfYear = inventoryService.getProductStockAtDate(product, location, lastDayOfYear);
-			int incomingCount = inventoryService.getIncomingProductBetweenDate(product, location, lastDayOfYear, d);
-			int usedCount = inventoryService.getUsedProductBetweenDate(product, location, lastDayOfYear, d);
-			int productStockAtSelectedDate = inventoryService.getProductStockAtDate(product, location, d);
-			
+
+			int productStockInTheBeginningOfYear = remainingStocksAtYear.get(product.getId());
+			int incomingCount = incomingStocksBetweenDate.get(product.getId());
+			int usedCount = usedCountBetweenDate.get(product.getId());
+			int productStockAtSelectedDate = productStocks.get(product.getId());
+
 			product.setPrice(price);
-			
-			ProductStock stockModel = new ProductStock(product.toModel(), incomingCount, usedCount, productStockAtSelectedDate, productStockInTheBeginningOfYear);
+
+			ProductStock stockModel = new ProductStock(product.toModel(), incomingCount, usedCount,
+					productStockAtSelectedDate, productStockInTheBeginningOfYear);
 			stockModels.add(stockModel);
-			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
+
 		}
+		progressService.sendProgress(taskProp, httpServletRequest);
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		try {
-			StockOpnameGenerator generator = new StockOpnameGenerator(location, stockModels, d);
+			StockOpnameGenerator generator = new StockOpnameGenerator(location, stockModels, selectedDate);
+			generator.setYear(webRequest.getFilter().getYear());
 			XSSFWorkbook wb = generator.generateReport();
 			progressService.sendProgress(10, httpServletRequest);
 
@@ -324,7 +339,5 @@ public class ReportGenerator {
 		}
 		return map;
 	}
-
-	
 
 }
