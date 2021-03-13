@@ -70,7 +70,7 @@ public class ReportService {
 			HttpServletResponse httpServletResponse) throws IOException, Exception {
 		String fileName = "Receipt_"+code;
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".pdf");
-		reportGenerator.transactionReceipt(code, httpRequest, httpServletResponse.getOutputStream());
+		reportGenerator.generateTransactionReceipt(code, httpRequest, httpServletResponse.getOutputStream());
 	}
 
 	public CustomWorkbook generateEntityReport(WebRequest request, HttpServletRequest httpRequest) throws Exception {

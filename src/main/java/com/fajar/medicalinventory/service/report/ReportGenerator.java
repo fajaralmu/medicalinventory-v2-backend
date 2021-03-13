@@ -32,6 +32,7 @@ import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.inventory.InventoryService;
+import com.fajar.medicalinventory.service.inventory.ProductUsageService;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.MapUtil;
 import com.itextpdf.text.BaseColor;
@@ -56,7 +57,7 @@ public class ReportGenerator {
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
-	private ProductFlowRepository aliranObatRepository;
+	private ProductFlowRepository productFlowRepository;
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -67,6 +68,8 @@ public class ReportGenerator {
 	private InventoryService inventoryService;
 	@Autowired
 	private DefaultHealthCenterMasterService defaultHealthCenterMasterService;
+	@Autowired
+	private ProductUsageService productUsageService;
 
 	public XSSFWorkbook getMonthyReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
 
@@ -100,7 +103,7 @@ public class ReportGenerator {
 	private List<Transaction> fillProductFlows(List<Transaction> transactions) {
 		if (transactions.size() == 0)
 			return transactions;
-		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
+		List<ProductFlow> productFlows = productFlowRepository.findByTransactionIn(transactions);
 
 		Map<Long, Transaction> transactionMap = new HashMap<>();
 		for (Transaction transaction : transactions) {
@@ -116,7 +119,7 @@ public class ReportGenerator {
 		return MapUtil.mapValuesToList(transactionMap);
 	}
 
-	public void transactionReceipt(String code, HttpServletRequest httpServletRequest, OutputStream os)
+	public void generateTransactionReceipt(String code, HttpServletRequest httpServletRequest, OutputStream os)
 			throws Exception {
 
 		Transaction t = transactionRepository.findByCode(code);
@@ -125,19 +128,19 @@ public class ReportGenerator {
 		if (null == t) {
 			throw new DataNotFoundException("Transaction record not found");
 		}
-		List<ProductFlow> productFlows = aliranObatRepository.findByTransaction(t);
+		List<ProductFlow> productFlows = productFlowRepository.findByTransaction(t);
 		t.setProductFlows(productFlows);
 		HealthCenter location = defaultHealthCenterMasterService.getMasterHealthCenter();
 
 		progressService.sendProgress(20, httpServletRequest);
 
-		TransactionReceiptGenerator generator = new TransactionReceiptGenerator(t, location,
-				notifier(httpServletRequest));
+		TransactionReceiptGenerator generator = new TransactionReceiptGenerator(t, location);
+		generator.setProgressNotifier(notifier(httpServletRequest));
 		generator.generateReport(os);
 
 	}
 
-	public String printLable(Transaction t, String path) throws Exception {
+	public Document printLable(Transaction t, OutputStream os) throws Exception {
 		if (!t.getType().equals(TransactionType.TRANS_IN))
 			return null;
 		System.out.println(t.toString());
@@ -146,8 +149,7 @@ public class ReportGenerator {
 		doc.setMargins(10f, 10f, 10f, 10f);
 		doc.open();
 
-		String filename = path + "Label-Obat-" + t.getCode() + ".pdf";
-		PdfWriter.getInstance(doc, new FileOutputStream(filename));
+		PdfWriter.getInstance(doc, os);
 		Font fontRincianIdStok = FontFactory.getFont(FontFactory.COURIER, 20f);
 		fontRincianIdStok.setStyle("bold");
 		Font fontUmum = FontFactory.getFont(FontFactory.TIMES, 12f);
@@ -161,7 +163,7 @@ public class ReportGenerator {
 		PdfPTable pt = new PdfPTable(5);
 		pt.setTotalWidth(new float[] { 300, 300, 300, 300, 300 });
 
-		for (ProductFlow ao : aliranObatRepository.findByTransaction(t)) {
+		for (ProductFlow ao : productFlowRepository.findByTransaction(t)) {
 			PdfPTable pt_item = new PdfPTable(1);
 			pt_item.setTotalWidth(new float[] { 300 });
 
@@ -201,31 +203,20 @@ public class ReportGenerator {
 
 		doc.close();
 
-		System.out.println("Done");
+		 
 
-		File f = null;
-		if (Desktop.isDesktopSupported()) {
-			f = new File(filename);
-			System.out.println(f.exists());
-			if (f.canRead()) {
-				System.out.println("DONE");
-				System.out.println(f.getName());
-				System.out.println(f.getAbsolutePath());
-				/*
-				 * try { Desktop.getDesktop().open(f); } catch (IOException e) { // TODO
-				 * Auto-generated catch block e.printStackTrace(); }
-				 */
-				return f.getName();
-			}
-
-		}
-
-		return null;
+		return doc;
 
 	}
 
-	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os,
-			HttpServletRequest httpServletRequest) throws Exception {
+	/**
+	 * generate LPLPO
+	 * @param webRequest
+	 * @param os
+	 * @param httpServletRequest
+	 * @throws Exception
+	 */
+	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest) throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Filter filter = webRequest.getFilter();
 		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
@@ -243,10 +234,12 @@ public class ReportGenerator {
 		Map<Long, Integer> mappedProductIdAndStartingStock = new HashMap<>();
 		progressService.sendProgress(10, httpServletRequest);
 
+		Map<Long, Integer> mappedStocks = inventoryService.getProductsStockAtDate(products, location, prevDate);
+		progressService.sendProgress(25, httpServletRequest);
 		for (Product product : products) {
-			int startingStock = inventoryService.getProductStockAtDate(product, location, prevDate);
+			int startingStock = mappedStocks.get(product.getId());
 			mappedProductIdAndStartingStock.put(product.getId(), startingStock);
-			progressService.sendProgress(1, products.size(), 50, httpServletRequest);
+			progressService.sendProgress(1, products.size(), 25, httpServletRequest);
 		}
 
 		ProductRequestSheetGenerator generator = new ProductRequestSheetGenerator(webRequest, products,
@@ -256,16 +249,7 @@ public class ReportGenerator {
 		generator.generateReport(os);
 
 	}
-
-	public boolean transactionExist(String kodetransaksi, List<Transaction> list) {
-		for (Transaction t : list) {
-			if (t.getCode().equals(kodetransaksi)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
+	
 	public XSSFWorkbook getStockOpnameReport(WebRequest webRequest, HttpServletRequest httpServletRequest)
 			throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
@@ -289,10 +273,10 @@ public class ReportGenerator {
 		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location,lastDayOfYear);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> incomingStocksBetweenDate = inventoryService.getIncomingProductsBetweenDate(products,location, lastDayOfYear, selectedDate);
+		Map<Long, Integer> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDate(products,location, lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> usedCountBetweenDate = inventoryService.getUsedProductsBetweenDate(products, location,lastDayOfYear, selectedDate);
+		Map<Long, Integer> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDate(products, location,lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 
 		for (Product product : products) {

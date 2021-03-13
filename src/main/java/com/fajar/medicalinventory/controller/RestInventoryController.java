@@ -44,13 +44,13 @@ public class RestInventoryController extends BaseController {
 	@PostMapping(value = "/availableproducts/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse gettransactionbycode(@PathVariable String code, @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
 		log.info("availableproducts {} at {} ", code, webRequest.getHealthcenter().getName());
-		return inventoryService.getAvailableProducts(code, webRequest);
+		return inventoryService.getAvailableProductStocks(code, webRequest);
 	}
 	@PostMapping(value = "/getproducts", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse getproductsAtLocation(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
 		log.info("getproducts   at {} ", webRequest.getHealthcenter().getName());
-		return inventoryService.getProducts( webRequest, httpRequest);
+		return inventoryService.getProductStocks( webRequest, httpRequest);
 	}
 	
 	@PostMapping("/recalculatestock") 

@@ -108,8 +108,8 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		XSSFRow xssfRow = getRow(currentRow);
 
 		xssfRow.createCell(2).setCellValue("Total");
-		xssfRow.createCell(7).setCellValue(Double.valueOf(totalCount));
-		xssfRow.createCell(9).setCellValue(Double.valueOf(totalPrice));
+		xssfRow.createCell(8).setCellValue(Double.valueOf(totalCount));
+		xssfRow.createCell(10).setCellValue(totalPrice);
 
 		return xwb;
 

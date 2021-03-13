@@ -26,9 +26,8 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 	private final Transaction transaction;
 	private final HealthCenter mainLocation;
 	
-	public TransactionReceiptGenerator(Transaction transaction, HealthCenter mainLocation, ProgressNotifier progressNotifier) {
+	public TransactionReceiptGenerator(Transaction transaction, HealthCenter mainLocation ) {
 		this.transaction = transaction;
-		this.progressNotifier = progressNotifier;
 		this.mainLocation = mainLocation;
 	}
 	
@@ -138,7 +137,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		pt.addCell(hargaSatuanHead);
 		pt.addCell(totalHargaItemHead);
 		
-		progressNotifier.notify(10, 10, 10);
+		notifyProgress(10, 10, 10);
 		
 		for (ProductFlow ao : transaction. getProductFlows()) {
 			String Namaobat = ao. getProduct().getName();
@@ -182,7 +181,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			total = total + ao.getCount();
 			// System.out.println("total " + total);
 			i++;
-			progressNotifier.notify(1, transaction. getProductFlows().size(), 50);
+			notifyProgress(1, transaction. getProductFlows().size(), 50);
 		}
 		PdfPCell kosong = new PdfPCell(new Phrase("", fontJudulTabel));
 		PdfPCell labelTotal = new PdfPCell(new Phrase("total", fontJudulTabel));

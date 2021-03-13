@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.service.inventory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,19 +11,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.math3.ode.events.FilterType;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.fajar.medicalinventory.constants.FilterFlag;
-import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.InventoryData;
 import com.fajar.medicalinventory.dto.ProductInventory;
@@ -66,7 +55,8 @@ public class InventoryService {
 	@Autowired
 	private StockAdjusterService stockAdjusterService;
 
-	public WebResponse getAvailableProducts(String code, WebRequest webRequest) {
+	public WebResponse getAvailableProductStocks(String code, WebRequest webRequest) {
+		log.info("get Available Product Stocks {}", code);
 		HealthCenter healthCenter = healthCenterRepository.findTop1ByCode(webRequest.getHealthcenter().getCode());
 		if (null == healthCenter) {
 			throw new DataNotFoundException("Health center not found");
@@ -90,7 +80,7 @@ public class InventoryService {
 		return response;
 	}
 
-	public WebResponse getProducts(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public WebResponse getProductStocks(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		if (!webRequest.getFilter().isAllFlag()) {
 			healthCenterMasterService.checkLocationRecord(webRequest.getHealthcenter().toEntity());
 		}
@@ -248,7 +238,7 @@ public class InventoryService {
 	 */
 	public Map<Long, Integer> getProductsStockAtDate(List<Product> products, HealthCenter location, Date date) {
 		boolean isMasterLocation = healthCenterMasterService.isMasterHealthCenter(location);
-		Map<Long, Integer> result = getMapPopulatedWithKey(products);
+		Map<Long, Integer> result = ProductUsageService.getMapPopulatedWithKey(products);
 		
 		List<Object[]> tptalSupplied;
 		List<Object[]> totalUsed;
@@ -329,69 +319,6 @@ public class InventoryService {
 		return response;
 	}
 
-	public int getIncomingProductBetweenDate(Product product, HealthCenter location, Date date1, Date date2) {
-		BigInteger result;
-		if (healthCenterMasterService.isMasterHealthCenter(location)) {
-			result= productFlowRepository.getTotalIncomingProductFromSupplierBetweenDate(product.getId(), date1, date2);
-		} else {
-			result = productFlowRepository.getTotalIncomingProductAtBranchWarehouseBetweenDate(product.getId(), date1, date2, location.getId()); 
-		}
-		return result == null ? 0 : result.intValue();
-	}
-
-	public int getUsedProductBetweenDate(Product product, HealthCenter location, Date date1, Date date2) {
-		BigInteger result;
-		if (healthCenterMasterService.isMasterHealthCenter(location)) {
-			result= productFlowRepository.getTotalUsedProductToCustomerOrBranchWarehouseBetweenDate(product.getId(), date1, date2, location.getId());
-		} else {
-			result = productFlowRepository.getTotalUsedProductToCustomerBetweenDate(product.getId(), date1, date2, location.getId()); 
-		}
-		return result == null ? 0 : result.intValue();
-	}
-	public Map<Long, Integer> getUsedProductsBetweenDate(List<Product> products, HealthCenter location, Date date1, Date date2) {
-		Map<Long, Integer> result = getMapPopulatedWithKey(products);
-		
-		final List<Object[]> quantities;
-		if (healthCenterMasterService.isMasterHealthCenter(location)) {
-			quantities= productFlowRepository.getTotalUsedProductsToCustomerOrBranchWarehouseBetweenDate(products, date1, date2, location.getId());
-		} else {
-			quantities = productFlowRepository.getTotalUsedProductsToCustomerBetweenDate(products, date1, date2, location.getId()); 
-		}
-		for (Object[] objects : quantities) {
-			Long productId = Long.parseLong(objects[0].toString());
-			Integer count = Integer.parseInt(objects[1].toString());
-			result.put(productId, count);
-		}
-		return result;
-	}
-	private Map<Long, Integer> getMapPopulatedWithKey(List<Product> products) {
-		Map<Long, Integer> result = new HashMap<>();
-		if (null== products || products.isEmpty()) {
-			result.put(-1L, 0);
-			return result;
-		}
-		
-		products.forEach(p->{
-			result.put(p.getId(), 0);
-		});
-		return result;
-	}
-
-	public Map<Long, Integer> getIncomingProductsBetweenDate(List<Product> products, HealthCenter location,
-			Date date1, Date date2) {
-		Map<Long, Integer> result = getMapPopulatedWithKey(products);
-		final List<Object[]> quantities;
-		if (healthCenterMasterService.isMasterHealthCenter(location)) {
-			quantities = productFlowRepository.getTotalIncomingProductsFromSupplierBetweenDate(products, date1, date2);
-		} else {
-			quantities = productFlowRepository.getTotalIncomingProductsAtBranchWarehouseBetweenDate(products, date1, date2, location.getId()); 
-		}
-		for (Object[] objects : quantities) {
-			Long productId = Long.parseLong(objects[0].toString());
-			Integer count = Integer.parseInt(objects[1].toString());
-			result.put(productId, count);
-		}
-		return result;
-	}
+	
 
 }
