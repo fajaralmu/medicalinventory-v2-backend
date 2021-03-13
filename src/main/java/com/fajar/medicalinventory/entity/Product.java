@@ -80,7 +80,7 @@ public class Product extends BaseEntity<ProductModel> implements MultipleImageMo
 	private Integer count;
 	@Transient
 	@JsonIgnore
-	private Integer price;
+	private Double price;
 
 	public void addCount(int count2) {
 		if (count == null)

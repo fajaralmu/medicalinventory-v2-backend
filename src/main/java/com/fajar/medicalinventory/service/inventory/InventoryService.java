@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.service.transaction;
+package com.fajar.medicalinventory.service.inventory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class InventoryService {
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
-	private SessionFactory sessionFactory;
+	private StockAdjusterService stockAdjusterService;
 
 	public WebResponse getAvailableProducts(String code, WebRequest webRequest) {
 		HealthCenter healthCenter = healthCenterRepository.findTop1ByCode(webRequest.getHealthcenter().getCode());
@@ -190,9 +190,9 @@ public class InventoryService {
 			totalItems = productFlowRepository.getTotalItemsAllLocation(expDaysWithin(filter));
 		} else {
 			if (isMasterHealthCenter) {
-				totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(expDaysWithin(filter));
+				totalItems = productFlowRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
 			} else {
-				totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(),
+				totalItems = productFlowRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
 						expDaysWithin(filter));
 			}
 		}
@@ -227,54 +227,21 @@ public class InventoryService {
 		BigInteger totalUsed;
 		if (isMasterLocation) {
 			tptalSupplied = productFlowRepository.getTotalIncomingProductFromSupplier(product.getId(), date);
+			totalUsed = productFlowRepository.getTotalUsedProductToCustomerOrBranchWarehouseAtDate(product.getId(), date, location.getId());
 		} else {
 			tptalSupplied = productFlowRepository.getTotalIncomingProductAtBranchWarehouse(product.getId(), date,
 					location.getId());
+			totalUsed = productFlowRepository.getTotalUsedProductToCustomerAtDate(product.getId(), date, location.getId());
 		}
 
-		totalUsed = productFlowRepository.getTotalUsedProductToCustomer(product.getId(), date, location.getId());
+		
 		int stock = (tptalSupplied == null ? 0 : tptalSupplied.intValue())
 				- (totalUsed == null ? 0 : totalUsed.intValue());
 		return stock;
 	}
 
 	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
-		Transaction tx = null;
-		Session session = sessionFactory.openSession();
-		try {
-
-			tx = session.beginTransaction();
-
-			Map<Long, ProductFlow> productFlowMap = getSupplyFlowReseted(session);
-			progressService.sendProgress(10, httpServletRequest);
-
-			List productUsedFlows = getDistributedFlow(session);
-			progressService.sendProgress(10, httpServletRequest);
-
-			for (Object object : productUsedFlows) {
-				ProductFlow pf = (ProductFlow) object;
-				Long refId = pf.getReferenceProductFlow().getId();
-				productFlowMap.get(refId).addUsedCount(pf.getCount());
-				pf.setExpDate();
-				session.merge(pf);
-				progressService.sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
-			}
-			for (Long id : productFlowMap.keySet()) {
-				session.merge(productFlowMap.get(id));
-
-				progressService.sendProgress(1, productFlowMap.keySet().size(), 35, httpServletRequest);
-			}
-			tx.commit();
-			progressService.sendProgress(10, httpServletRequest);
-		} catch (Exception e) {
-			if (tx != null) {
-				tx.rollback();
-			}
-		} finally {
-			session.close();
-			progressService.sendComplete(httpServletRequest);
-		}
-		return new WebResponse();
+		 return stockAdjusterService.adjustStock(httpServletRequest);
 	}
 
 	private List<ProductInventory> getExpiringProductsData(List<HealthCenter> locations, Integer remainingDays,
@@ -284,9 +251,9 @@ public class InventoryService {
 		for (HealthCenter location : locations) {
 			BigInteger totalItems;
 			if (healthCenterMasterService.isMasterHealthCenter(location)) {
-				totalItems = productFlowRepository.getTotalItemsAtMasterWarehouse(remainingDays);
+				totalItems = productFlowRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
 			} else {
-				totalItems = productFlowRepository.getTotalItemsAtBranchWarehouse(location.getId(), remainingDays);
+				totalItems = productFlowRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
 			}
 
 			ProductInventory inventory = new ProductInventory();
@@ -319,27 +286,24 @@ public class InventoryService {
 		return response;
 	}
 
-	private List getDistributedFlow(Session session) {
-		Criteria criteriaUsed = session.createCriteria(ProductFlow.class);
-		criteriaUsed.add(Restrictions.isNotNull("referenceProductFlow"));
-		List productUsedFlows = criteriaUsed.list();
-		return productUsedFlows;
+	public int getIncomingProductBetweenDate(Product product, HealthCenter location, Date date1, Date date2) {
+		BigInteger result;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			result= productFlowRepository.getTotalIncomingProductFromSupplierBetweenDate(product.getId(), date1, date2);
+		} else {
+			result = productFlowRepository.getTotalIncomingProductAtBranchWarehouseBetweenDate(product.getId(), date1, date2, location.getId()); 
+		}
+		return result == null ? 0 : result.intValue();
 	}
 
-	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
-		Query query = session.createQuery(
-				"select pf from ProductFlow pf left join pf.transaction tx " + " where tx.type = ? or tx.type = ? ");
-
-		query.setString(0, TransactionType.TRANS_IN.toString());
-		query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
-		List productSupplyFlows = query.list();
-		Map<Long, ProductFlow> productFlowMap = new HashMap<>();
-		for (Object productSupplyFlow : productSupplyFlows) {
-			ProductFlow pf = (ProductFlow) productSupplyFlow;
-			pf.resetUsedCount();
-			productFlowMap.put(pf.getId(), pf);
+	public int getUsedProductBetweenDate(Product product, HealthCenter location, Date date1, Date date2) {
+		BigInteger result;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			result= productFlowRepository.getTotalUsedProductToCustomerOrBranchWarehouseBetweenDate(product.getId(), date1, date2, location.getId());
+		} else {
+			result = productFlowRepository.getTotalUsedProductToCustomerBetweenDate(product.getId(), date1, date2, location.getId()); 
 		}
-		return productFlowMap;
+		return result == null ? 0 : result.intValue();
 	}
 
 }

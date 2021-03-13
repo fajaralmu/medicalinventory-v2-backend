@@ -370,9 +370,7 @@ public class DateUtil {
 	
 	public static void main(String[] args) {
 		Date d = new Date();
-		System.out.println(clock00Midnight(d));
-		System.out.println(clock24Midnight(d));
-		System.out.println(afterToday(clock24Midnight(d)));
+		System.out.println(lastDayOfYear(2020));
 	}
 
 	public static boolean isSameDayAsNow(Date d) {
@@ -383,6 +381,13 @@ public class DateUtil {
 		 
 		return clock24Midnight(new Date()).compareTo(expiredDateWithin)<0;
 	}
+
+	public static Date lastDayOfYear(int year) {
+		Date date = getDate(year, 11, 31);
+		return clock24Midnight(date);
+	}
+	
+	
 	
 	
 }

@@ -4,11 +4,9 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.Filter;
+import com.fajar.medicalinventory.dto.ProductStock;
 import com.fajar.medicalinventory.dto.WebRequest;
-import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
@@ -33,12 +31,12 @@ import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.repository.TransactionRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
-import com.fajar.medicalinventory.service.transaction.InventoryService;
+import com.fajar.medicalinventory.service.inventory.InventoryService;
 import com.fajar.medicalinventory.util.DateUtil;
+import com.fajar.medicalinventory.util.MapUtil;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
@@ -92,7 +90,7 @@ public class ReportGenerator {
 		return new ProgressNotifier() {
 
 			@Override
-			public void nofity(int progress, int maxProgress, double percent) {
+			public void notify(int progress, int maxProgress, double percent) {
 				progressService.sendProgress(progress, maxProgress, percent, httpServletRequest);
 
 			}
@@ -103,7 +101,7 @@ public class ReportGenerator {
 		if (transactions.size() == 0)
 			return transactions;
 		List<ProductFlow> productFlows = aliranObatRepository.findByTransactionIn(transactions);
-		List<Transaction> result = new ArrayList<>();
+		 
 		Map<Long, Transaction> transactionMap = new HashMap<>();
 		for (Transaction transaction : transactions) {
 			transactionMap.put(transaction.getId(), transaction);
@@ -114,15 +112,11 @@ public class ReportGenerator {
 			if (null == transactionMap.get(trxId))
 				continue;
 			transactionMap.get(trxId).addProductFlow(productFlow);
-
-		}
-		for (Long id : transactionMap.keySet()) {
-			result.add(transactionMap.get(id));
-		}
-		return result;
+		} 
+		return MapUtil.mapValuesToList(transactionMap);
 	}
 
-	public void transactionNote(String code, HttpServletRequest httpServletRequest, OutputStream os)
+	public void transactionReceipt(String code, HttpServletRequest httpServletRequest, OutputStream os)
 			throws  Exception {
 		 
 		Transaction t = transactionRepository.findByCode(code);
@@ -276,26 +270,37 @@ public class ReportGenerator {
 			throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Date d = DateUtil.getDate(webRequest.getFilter());
-		List<Product> listObat = (List<Product>) productRepository.findAll();
+		List<Product> products = (List<Product>) productRepository.findAll();
+		List<ProductStock> stockModels = new LinkedList<>();
 		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(d);
-		Map<Long, Long> mappedPrice = parseMap(mappedPricesAndIDs);
+		Map<Long, Double> mappedPrice = parseProductPriceMap(mappedPricesAndIDs);
 
-		log.info("products: {}", listObat.size());
+		log.info("products: {}", products.size());
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		progressService.sendProgress(10, httpServletRequest);
-
-		for (Product product : listObat) {
+		
+		//prev year date
+		int prevYear = webRequest.getFilter().getYear() - 1;
+		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
+		
+		for (Product product : products) {
 			log.info("get stock info for: {}", product.getName());
-			Long price = mappedPrice.get(product.getId());
-			int count = inventoryService.getProductStockAtDate(product, location, d);
-			product.setCount(count);
-			product.setPrice(price.intValue());
-
-			progressService.sendProgress(1, listObat.size(), 80, httpServletRequest);
+			Double price = mappedPrice.get(product.getId());
+			
+			int productStockInTheBeginningOfYear = inventoryService.getProductStockAtDate(product, location, lastDayOfYear);
+			int incomingCount = inventoryService.getIncomingProductBetweenDate(product, location, lastDayOfYear, d);
+			int usedCount = inventoryService.getUsedProductBetweenDate(product, location, lastDayOfYear, d);
+			int productStockAtSelectedDate = inventoryService.getProductStockAtDate(product, location, d);
+			
+			product.setPrice(price);
+			
+			ProductStock stockModel = new ProductStock(product.toModel(), incomingCount, usedCount, productStockAtSelectedDate, productStockInTheBeginningOfYear);
+			stockModels.add(stockModel);
+			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
 		}
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		try {
-			StockOpnameGenerator generator = new StockOpnameGenerator(location, listObat, d);
+			StockOpnameGenerator generator = new StockOpnameGenerator(location, stockModels, d);
 			XSSFWorkbook wb = generator.generateReport();
 			progressService.sendProgress(10, httpServletRequest);
 
@@ -307,14 +312,14 @@ public class ReportGenerator {
 		}
 	}
 
-	private Map<Long, Long> parseMap(List<Object[]> list) {
+	private Map<Long, Double> parseProductPriceMap(List<Object[]> list) {
 
-		Map<Long, Long> map = new HashMap<>();
+		Map<Long, Double> map = new HashMap<>();
 		for (Object[] object : list) {
 			if (object[0] == null)
 				continue;
 			Long id = Long.valueOf(object[0].toString());
-			Long price = object[1] == null ? 0L : Long.valueOf(object[1].toString());
+			Double price = object[1] == null ? 0L : Double.valueOf(object[1].toString());
 			map.put(id, price);
 		}
 		return map;

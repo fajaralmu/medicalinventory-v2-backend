@@ -15,7 +15,7 @@ import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
-import com.fajar.medicalinventory.service.transaction.InventoryService;
+import com.fajar.medicalinventory.service.inventory.InventoryService;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -16,7 +16,7 @@ import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.LogProxyFactory;
-import com.fajar.medicalinventory.service.transaction.InventoryService;
+import com.fajar.medicalinventory.service.inventory.InventoryService;
 import com.fajar.medicalinventory.service.transaction.ProductStatisticService;
 
 import lombok.extern.slf4j.Slf4j;

@@ -30,13 +30,11 @@ public class MapUtil {
 		return result;
 	}
 	 
-	public static <T> List<T> mapValuesToList(Map<?, T> map) {
-		List<T> result = new LinkedList<T>();
-
-		for (Object key : map.keySet()) {
+	public static <K, V> List<V> mapValuesToList(Map<K, V> map) {
+		List<V> result = new LinkedList<V>();
+		for (K key : map.keySet()) {
 			result.add(map.get(key));
 		}
-
 		return result;
 	}
 	/*

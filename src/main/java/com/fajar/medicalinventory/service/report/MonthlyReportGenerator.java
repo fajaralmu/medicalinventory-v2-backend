@@ -1,15 +1,12 @@
 package com.fajar.medicalinventory.service.report;
 
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT;
-import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.poi.hssf.util.CellRangeAddress;
@@ -26,20 +23,18 @@ import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
-import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
-public class MonthlyReportGenerator {
-	private final XSSFWorkbook xwb;
+public class MonthlyReportGenerator extends BaseReportGenerator {
+
 	private final Map<Integer, List<Transaction>> transactionMapped;
 	private final List<Transaction> transactionsOneMonth;
 	private final int month, year;
 	private final List<Product> allProducts;
-	private final List<HealthCenter> locations; 
+	private final List<HealthCenter> locations;
 	private final XSSFCellStyle productNameStyle;
 	private final XSSFCellStyle regularStyle;
-	final ProgressNotifier progressNotifier;
 
 	public MonthlyReportGenerator(Filter filter, List<Transaction> transactionsOneMonth, List<Product> products,
 			List<HealthCenter> locations, ProgressNotifier progressNotifier) {
@@ -50,12 +45,12 @@ public class MonthlyReportGenerator {
 		this.transactionMapped = mapTransactionByDay(transactionsOneMonth);
 		this.allProducts = products;
 		this.locations = locations;
-		this.productNameStyle = createProductNameStyle(xwb);
-		this.regularStyle = createRegularStyle(xwb);
+		this.productNameStyle = createProductNameStyle();
+		this.regularStyle = createRegularStyle();
 		this.progressNotifier = progressNotifier;
-		
+
 		allProducts.forEach(p -> {
-			p.setCount(0); 
+			p.setCount(0);
 		});
 
 	}
@@ -72,16 +67,16 @@ public class MonthlyReportGenerator {
 		return map;
 	}
 
-	public XSSFWorkbook generateReport( ) { 
+	public XSSFWorkbook generateReport() {
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
 		mainLoop: for (Integer day = 1; day <= 31; day++) {
-			List<Product> productsPerDay = (List<Product>) EntityUtil.cloneSerializable((Serializable)allProducts);
+			List<Product> productsPerDay = (List<Product>) EntityUtil.cloneSerializable((Serializable) allProducts);
 			int allProductCountDaily = 0;
 			// JUDUL TABEL//
 			XSSFSheet sheet = xwb.createSheet(day.toString());
-			createProductNameCells(sheet.createRow(3), sheet);  
-			 
+			createProductNameCells(sheet.createRow(3), sheet);
+
 			Integer number = 1;
 			int row = 4;
 			List<Transaction> transactions = transactionMapped.get(day) == null ? new ArrayList<>()
@@ -91,8 +86,7 @@ public class MonthlyReportGenerator {
 			 */
 			loop: for (Transaction transaction : transactions) {
 
-				if (!transaction.getType().equals(TransactionType.TRANS_OUT)
-						|| transaction.getCustomer() == null) {
+				if (!transaction.getType().equals(TransactionType.TRANS_OUT) || transaction.getCustomer() == null) {
 					continue loop;
 				}
 
@@ -100,7 +94,8 @@ public class MonthlyReportGenerator {
 				XSSFCell[] customerConsumptionCells = new XSSFCell[4 + productCount()];
 
 				customerConsumptionCells[0] = createCellWithString(cunsumptionRow, 2, String.valueOf(number));
-				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3, transaction.getCustomer().getName());
+				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3,
+						transaction.getCustomer().getName());
 				customerConsumptionCells[2] = createCellWithString(cunsumptionRow, 4,
 						transaction.getHealthCenterLocation().getName());
 				sheet.autoSizeColumn(3);
@@ -121,15 +116,16 @@ public class MonthlyReportGenerator {
 					int productCount = transaction.getProductCount(product);
 					product.addCount(productCount);
 					if (productCount > 0) {
-						customerConsumptionCells[idxObat] = createCellWithNumber(cunsumptionRow, consumptionColumn, (double) productCount);
+						customerConsumptionCells[idxObat] = createCellWithNumber(cunsumptionRow, consumptionColumn,
+								(double) productCount);
 					}
-				
+
 				}
 				number++;
 				row++;
 				setRegularStyle(customerConsumptionCells);
 			}
-			
+
 			/**
 			 * total consumption
 			 */
@@ -140,12 +136,12 @@ public class MonthlyReportGenerator {
 			summaryCells[1] = summaryRow.createCell(3);
 			summaryCells[2] = summaryRow.createCell(4);
 			summaryCells[3] = summaryRow.createCell(5);
- 
+
 			int columnProductPerDay = 6;
 			int idxTotal = 5;
 			for (Product o : productsPerDay) {
 				idxTotal++;
-				 
+
 				summaryCells[idxTotal] = summaryRow.createCell(columnProductPerDay);
 				summaryCells[idxTotal].setCellValue(o.getCount());
 				columnProductPerDay++;
@@ -155,7 +151,7 @@ public class MonthlyReportGenerator {
 
 			setRegularStyle(summaryCells);
 
-			progressNotifier.nofity(1, 31, 50);
+			notifyProgress(1, 31, 50);
 		}
 		/**************** END DAILY CONSUMPTION ***********************/
 
@@ -177,16 +173,16 @@ public class MonthlyReportGenerator {
 		return result;
 	}
 
-	private void writeConsumptionByLocations( ) {
+	private void writeConsumptionByLocations() {
 
 		/**************** BEGIN SUMMARY ***********************/
 		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + month);
 		XSSFRow titleRow = xsheetpkm.createRow(3);
 		createSummaryTableHeader(xsheetpkm, titleRow);
 		writeProductNames(titleRow);
- 
+
 		int column = 5, locationRowNum = 4;
-		progressNotifier.nofity(10,10,10);
+		notifyProgress(10, 10, 10);
 
 		// ************************SHEET TERAKHIR***********************//
 		List<Product> productsTotal = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
@@ -226,19 +222,19 @@ public class MonthlyReportGenerator {
 					}
 				}
 			}
-			rowDataCells[2] = createCellWithNumber(locationRow, 4, (double) totalProductsPerLocation); 
+			rowDataCells[2] = createCellWithNumber(locationRow, 4, (double) totalProductsPerLocation);
 			column = 5;
 			locationRowNum++;
 			setRegularStyle(rowDataCells);
 
-			progressNotifier.nofity(1, locations.size(), 30);
+			notifyProgress(1, locations.size(), 30);
 		}
 
 		/**
 		 * summary
 		 */
 		writeAccumulationForSummarySheet(xsheetpkm, locationRowNum, productsTotal);
-		 
+
 	}
 
 	private void writeAccumulationForSummarySheet(XSSFSheet xsheetpkm, int locationRowNum,
@@ -248,18 +244,18 @@ public class MonthlyReportGenerator {
 		XSSFRow summaryRow = xsheetpkm.createRow(locationRowNum);
 		XSSFCell[] summaryCells = new XSSFCell[3 + productCount()];
 		summaryCells[0] = createCellWithString(summaryRow, 3, "Total");
-		
+
 		for (int i = 0; i < productsTotal.size(); i++) {
 			double value = (double) productsTotal.get(i).getCount();
 			summaryCells[i + 2] = createCellWithNumber(summaryRow, column, value);
 			column++;
-			totalProductsAllLocation+= value;
+			totalProductsAllLocation += value;
 		}
-		
+
 		summaryCells[1] = createCellWithNumber(summaryRow, 4, (double) totalProductsAllLocation);
 
 		setRegularStyle(summaryCells);
-		
+
 	}
 
 	private int getCountProduct(Product product, List<Transaction> transactions) {
@@ -290,7 +286,7 @@ public class MonthlyReportGenerator {
 		}
 	}
 
-	private int productCount() { 
+	private int productCount() {
 		return allProducts.size();
 	}
 
@@ -359,7 +355,7 @@ public class MonthlyReportGenerator {
 		}
 	}
 
-	private XSSFCellStyle createProductNameStyle(XSSFWorkbook xwb) {
+	private XSSFCellStyle createProductNameStyle() {
 		XSSFCellStyle style = xwb.createCellStyle();
 		style.setRotation((short) 90);
 		style.setWrapText(true);
@@ -370,9 +366,8 @@ public class MonthlyReportGenerator {
 		return style;
 	}
 
-	private XSSFCellStyle createRegularStyle(XSSFWorkbook xwb) {
+	private XSSFCellStyle createRegularStyle() {
 		XSSFCellStyle regularStyle = xwb.createCellStyle();
-		;
 
 		regularStyle.setBorderBottom(BorderStyle.THIN);
 		regularStyle.setBorderTop(BorderStyle.THIN);

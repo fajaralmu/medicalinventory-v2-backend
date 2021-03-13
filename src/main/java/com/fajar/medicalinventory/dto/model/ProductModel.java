@@ -54,7 +54,7 @@ public class ProductModel extends BaseModel<Product>{
 //	@JsonIgnore
 	private Integer count;
 	@JsonIgnore
-	private Integer price;
+	private Double price;
 	
 	
 	public static void main(String[] args) {

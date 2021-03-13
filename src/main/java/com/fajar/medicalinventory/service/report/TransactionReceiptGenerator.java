@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.service.report;
 
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.Customer;
@@ -22,9 +21,8 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-public class TransactionReceiptGenerator {
+public class TransactionReceiptGenerator extends BaseReportGenerator{
 	
-	private ProgressNotifier progressNotifier;
 	private final Transaction transaction;
 	private final HealthCenter mainLocation;
 	
@@ -34,11 +32,7 @@ public class TransactionReceiptGenerator {
 		this.mainLocation = mainLocation;
 	}
 	
-	SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-	public String dateToString(Date d) {
-		return sdfDateTime.format(d);
-
-	}
+	
 	
 	public void generateReport(OutputStream os) throws  Exception {
 		HealthCenter location = this.mainLocation;
@@ -144,7 +138,7 @@ public class TransactionReceiptGenerator {
 		pt.addCell(hargaSatuanHead);
 		pt.addCell(totalHargaItemHead);
 		
-		progressNotifier.nofity(10, 10, 10);
+		progressNotifier.notify(10, 10, 10);
 		
 		for (ProductFlow ao : transaction. getProductFlows()) {
 			String Namaobat = ao. getProduct().getName();
@@ -188,7 +182,7 @@ public class TransactionReceiptGenerator {
 			total = total + ao.getCount();
 			// System.out.println("total " + total);
 			i++;
-			progressNotifier.nofity(1, transaction. getProductFlows().size(), 50);
+			progressNotifier.notify(1, transaction. getProductFlows().size(), 50);
 		}
 		PdfPCell kosong = new PdfPCell(new Phrase("", fontJudulTabel));
 		PdfPCell labelTotal = new PdfPCell(new Phrase("total", fontJudulTabel));

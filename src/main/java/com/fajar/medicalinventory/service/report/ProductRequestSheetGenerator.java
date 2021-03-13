@@ -27,16 +27,12 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-public class ProductRequestSheetGenerator {
+public class ProductRequestSheetGenerator extends BaseReportGenerator{
 	private WritableWorkbook wb;
 	private final HealthCenter location;
 	private final Filter filter;
 	private List<Product> products;
-	private ProgressNotifier progressNotifier;
-	public void setProgressNotifier(ProgressNotifier progressNotifier) {
-		this.progressNotifier = progressNotifier;
-	}
-
+	 
 	private boolean isMasterHealthCenter;
 	public void setMasterHealthCenter(boolean isMasterHealthCenter) {
 		this.isMasterHealthCenter = isMasterHealthCenter;
@@ -116,7 +112,7 @@ public class ProductRequestSheetGenerator {
 			row++;
 
 			if (null != progressNotifier) {
-				progressNotifier.nofity(1, products.size(), 40);
+				notifyProgress(1, products.size(), 40);
 			}
 		}
 

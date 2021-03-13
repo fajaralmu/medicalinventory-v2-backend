@@ -243,25 +243,61 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 
 	public List<ProductFlow> findByTransactionIn(List<Transaction> transactions);
 
+	
+	////////// INCOMING PRODUCT COUNT //////////
+	//from Supplier
 	@Query("select sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p " + 
 			"where tx.type = 'TRANS_IN' and p.id=?1 and tx.transactionDate <= ?2")
 	public BigInteger getTotalIncomingProductFromSupplier(long productId, Date date);  
+	@Query("select sum(pf.count)  from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p " + 
+			"where tx.type = 'TRANS_IN' and p.id=?1 and tx.transactionDate >= ?2 and tx.transactionDate <= ?3")
+	public BigInteger getTotalIncomingProductFromSupplierBetweenDate(long productId, Date date1, Date date2); 
+	
+	//from main warehouse
 	@Query("select   sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p "
 			+ "left join tx.healthCenterDestination destination " + 
 			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p.id=?1 and tx.transactionDate <= ?2 and destination.id = ?3")
 	public BigInteger getTotalIncomingProductAtBranchWarehouse(long productId, Date date, long locationId);
+	@Query("select   sum(pf.count)  from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterDestination destination " + 
+			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p.id=?1 and tx.transactionDate <= ?2 and tx.transactionDate <= ?3 and destination.id = ?4")
+	public BigInteger getTotalIncomingProductAtBranchWarehouseBetweenDate(long productId, Date date1, Date date2, long locationId);
 	
+	/////// USED PRODUCT COUNT //////
+	//to Customer
 	@Query("select sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
 			+ "left join pf.product p "
 			+ "left join tx.healthCenterLocation location " + 
 			"where tx.type = 'TRANS_OUT' and p.id=?1 and tx.transactionDate <= ?2 and location.id = ?3")
-	public BigInteger getTotalUsedProductToCustomer(Long productId, Date date, Long locationId);
-	
+	public BigInteger getTotalUsedProductToCustomerAtDate(Long productId, Date date, Long locationId);
+	@Query("select sum(pf.count)  from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterLocation location " + 
+			"where tx.type = 'TRANS_OUT' and p.id=?1 and tx.transactionDate >= ?1 and tx.transactionDate <= ?2 and location.id = ?4")
+	public BigInteger getTotalUsedProductToCustomerBetweenDate(Long productId, Date date1, Date date2, Long locationId);
+	//to Customer or Warehouse
+	@Query("select sum(pf.count)  from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterLocation location " + 
+			"where (tx.type = 'TRANS_OUT' or tx.type='TRANS_OUT_TO_WAREHOUSE') and p.id=?1 and tx.transactionDate >= ?2 and tx.transactionDate <= ?3 and location.id = ?4")
+	public BigInteger getTotalUsedProductToCustomerOrBranchWarehouseBetweenDate(Long productId, Date date, Date date2, Long locationId);
+	@Query("select sum(pf.count)  from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterLocation location " + 
+			"where (tx.type = 'TRANS_OUT' or tx.type='TRANS_OUT_TO_WAREHOUSE') and p.id=?1 and tx.transactionDate <= ?2 and location.id = ?3")
+	public BigInteger getTotalUsedProductToCustomerOrBranchWarehouseAtDate(Long productId, Date date, Long locationId);
 	//////////////// Total Items //////////////////
 	/**
 	 * TOTAL Items At Branch Warehouse
@@ -287,7 +323,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " and pf.expiredDate between ?2 " 
 			+ " and ?3 ")
 	public BigInteger getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(Long locationId, Date expBefore, Date expAfter);
-	default BigInteger getTotalItemsAtBranchWarehouse(long locationId, Integer expDaysWithin) {
+	default BigInteger getTotalItemsWillExpireAtBranchWarehouse(long locationId, Integer expDaysWithin) {
 		if (null != expDaysWithin) {
 			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
 			if (expDaysWithin > 0) {
@@ -356,7 +392,7 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ " and pf.expiredDate > ?2"
 			+ " and (pf.count-pf.usedCount) > 0")
 	public BigInteger getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter(Date before, Date after);
-	default BigInteger getTotalItemsAtMasterWarehouse(Integer expDaysWithin) {
+	default BigInteger getTotalItemsWillExpireAtMasterWarehouse(Integer expDaysWithin) {
 		if (null != expDaysWithin) {
 			Date expiredDateWithin = DateUtil.plusDay(new Date(), expDaysWithin+1);
 			if ( expDaysWithin > 0) {

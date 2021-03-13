@@ -1,5 +1,16 @@
 package com.fajar.medicalinventory.service.report;
 
 public interface ProgressNotifier {
-  void nofity(int progress, int maxProgress, double percent);
+	void notify(int progress, int maxProgress, double percent);
+
+	static ProgressNotifier empty() {
+		return new ProgressNotifier() {
+
+			@Override
+			public void notify(int progress, int maxProgress, double percent) {
+				// TODO Auto-generated method stub
+
+			}
+		};
+	}
 }

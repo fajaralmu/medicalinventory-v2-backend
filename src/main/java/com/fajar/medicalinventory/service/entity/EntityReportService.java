@@ -15,6 +15,7 @@ import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.report.CustomWorkbook;
 import com.fajar.medicalinventory.service.report.EntityReportBuilder;
+import com.fajar.medicalinventory.service.report.ProgressNotifier;
 import com.fajar.medicalinventory.util.EntityPropertyBuilder;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class EntityReportService {
 //		ReportData reportData = ReportData.builder().entities(entities).entityProperty(entityProperty).requestId(requestId).build(); 
 	
 		EntityReportBuilder reportBuilder = new EntityReportBuilder( entityProperty, entities, requestId);
-		reportBuilder.setProgressService(progressService);
+		reportBuilder.setProgressNotifier(notifier(httpRequest));
 		
 		progressService.sendProgress(1, 1, 10, false, httpRequest);
 
@@ -48,6 +49,18 @@ public class EntityReportService {
 		log.info("Entity Report generated");
 
 		return file;
+	}
+	
+	private ProgressNotifier notifier(final HttpServletRequest httpServletRequest) {
+
+		return new ProgressNotifier() {
+
+			@Override
+			public void notify(int progress, int maxProgress, double percent) {
+				progressService.sendProgress(progress, maxProgress, percent, httpServletRequest);
+
+			}
+		};
 	}
 
 }
