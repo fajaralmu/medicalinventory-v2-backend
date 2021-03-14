@@ -32,6 +32,8 @@ import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
+import com.fajar.medicalinventory.service.entity.MasterDataService;
+import com.fajar.medicalinventory.service.entity.MasterDataService.EntityResult;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.MapUtil;
 
@@ -49,6 +51,8 @@ public class ProductStatisticService {
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
 	private CalculationUtil calculationUtil;
+	@Autowired
+	private MasterDataService masterDataService;
 
 	public WebResponse getProductUsageByCode(String productCode, WebRequest webRequest,
 			HttpServletRequest httpServletRequest) {
@@ -151,13 +155,10 @@ public class ProductStatisticService {
 		if (startDate.after(endDate)) {
 			throw new ApplicationException("invalid period");
 		}
-
-		List<Product> products = productRepository
-				.findByOrderByName(PageRequest.of(filter.getPage(), filter.getLimit()));
-		progressService.sendProgress(15, httpServletRequest);
-
-		BigInteger totalData = productRepository.countAll();
-		progressService.sendProgress(15, httpServletRequest);
+		EntityResult<Product> filtered = masterDataService.filterEntities(filter, Product.class);
+		List<Product> products = filtered.getEntities(); 
+		int totalData = filtered.getCount();
+		progressService.sendProgress(30, httpServletRequest);
 
 		List<ProductFlow> productFlows = productFlowRepository
 				.getByTransactionTypeAndDateBetweenAndProducts(TransactionType.TRANS_OUT, startDate, endDate, products);
@@ -168,7 +169,7 @@ public class ProductStatisticService {
 
 		WebResponse response = new WebResponse();
 		response.setEntities(mappedProduct);
-		response.setTotalData(totalData == null ? 0 : totalData.intValue());
+		response.setTotalData(totalData);
 		return response;
 	}
 

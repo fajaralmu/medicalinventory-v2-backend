@@ -139,7 +139,7 @@ public class MasterDataService {
 		}
 	}
 
-	public <T extends BaseEntity> EntityResult filterEntities(Filter filter, Class<T> entityClass) {
+	public <T extends BaseEntity> EntityResult<T> filterEntities(Filter filter, Class<T> entityClass) {
 		final List<T> entities = new ArrayList<>();
 		final Map<String, Long> count = new HashMap<>();
 		DatabaseProcessor filterDatabaseProcessor = customRepository.createDatabaseProcessor(); 
@@ -154,9 +154,12 @@ public class MasterDataService {
 			count.put("value", 0L);
 			e.printStackTrace();
 		}
-		 
-		return EntityResult.builder().entities(CollectionUtil.convertList(entities))
-				.count(count.get("value").intValue()).build();
+		EntityResult<T> result = new EntityResult<>();
+		result.setEntities(entities);
+		result.setCount(count.get("value").intValue());
+		return result ; 
+//		return EntityResult.builder().entities(CollectionUtil.convertList(entities))
+//				.count(count.get("value").intValue()).build();
 	}
 
 	/**
@@ -187,12 +190,12 @@ public class MasterDataService {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public static class EntityResult implements Serializable {
+	public static class EntityResult<T extends BaseEntity> implements Serializable {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 7627112916142073122L;
-		List<BaseEntity> entities;
+		List<T> entities;
 		int count;
 	}
  
