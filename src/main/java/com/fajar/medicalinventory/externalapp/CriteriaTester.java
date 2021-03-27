@@ -34,7 +34,21 @@ public class CriteriaTester {
 	static ObjectMapper mapper = new ObjectMapper();
 	static List<Class<?>> managedEntities = new ArrayList<>();
 
-	public static void main (String[] args) throws Exception {
+	public static void main(String[] args) {
+		String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
+				+ " left join pf.transaction tx "
+				+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
+				+ " and tx.healthCenterDestination.id = ? "
+				+ " and (pf.count-pf.usedCount) > 0";
+//		Session session = getSession();
+		setSession();
+		org.hibernate.Query q = testSession.createQuery(queryString);
+		q.setParameter(0, 1442L);
+		Object result = q.uniqueResult();
+		System.out.println("RESULT: "+result);
+	}
+	
+	public static void main222 (String[] args) throws Exception {
 
 		setSession();
 

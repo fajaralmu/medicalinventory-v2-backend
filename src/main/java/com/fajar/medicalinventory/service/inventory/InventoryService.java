@@ -30,6 +30,7 @@ import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
+import com.fajar.medicalinventory.repository.ProductStockRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
@@ -42,6 +43,8 @@ public class InventoryService {
 
 	@Autowired
 	private ProductFlowRepository productFlowRepository;
+	@Autowired
+	private ProductStockRepository productStockRepository;
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -95,28 +98,7 @@ public class InventoryService {
 			products = productRepository.getAvailableProducts(isMasterHealthCenter, filter, location.getId());
 		}
 
-		List<ProductStock> productStocks = new ArrayList<ProductStock>();
-//		for (int i = 0; i < products.size(); i++) {
-//			Product product = products.get(i);
-//			List<ProductFlow> productFlows;
-//			if (filter.isAllFlag()) {
-//				productFlows = productFlowRepository.findAvailableStocksAllLocation(product.getId(),
-//						expDaysWithin(filter));
-//			} else {
-//				if (isMasterHealthCenter) {
-//					productFlows = productFlowRepository.findAvailableStocksAtMainWareHouse(product.getId(),
-//							expDaysWithin(filter));
-//
-//				} else {
-//					productFlows = productFlowRepository.findAvailableStocksAtBranchWareHouse(location.getId(),
-//							product.getId(), expDaysWithin(filter));
-//
-//				}
-//			}
-//			ProductStock productStock = new ProductStock(product.toModel(), productFlows);
-//			productStocks.add(productStock);
-//			progressService.sendProgress(1, products.size(), 80, httpServletRequest);
-//		}
+		List<ProductStock> productStocks = new ArrayList<ProductStock>(); 
 		
 		if (products.size() > 0) {
 			List<ProductFlow> allProductFlows; 
@@ -177,12 +159,12 @@ public class InventoryService {
 	private BigInteger getTotalProductStockRecord(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
 		BigInteger totalItems;
 		if (filter.isAllFlag()) {
-			totalItems = productFlowRepository.getTotalItemsAllLocation(expDaysWithin(filter));
+			totalItems = productStockRepository.getTotalItemsAllLocation(expDaysWithin(filter));
 		} else {
 			if (isMasterHealthCenter) {
-				totalItems = productFlowRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
+				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
 			} else {
-				totalItems = productFlowRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
+				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
 						expDaysWithin(filter));
 			}
 		}
@@ -284,9 +266,9 @@ public class InventoryService {
 		for (HealthCenter location : locations) {
 			BigInteger totalItems;
 			if (healthCenterMasterService.isMasterHealthCenter(location)) {
-				totalItems = productFlowRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
+				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
 			} else {
-				totalItems = productFlowRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
+				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
 			}
 
 			ProductInventory inventory = new ProductInventory();

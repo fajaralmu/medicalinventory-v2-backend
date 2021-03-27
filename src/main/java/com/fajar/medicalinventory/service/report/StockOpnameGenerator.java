@@ -2,7 +2,9 @@ package com.fajar.medicalinventory.service.report;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -25,6 +27,7 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 	private List<ProductStock> productStocks;
 	private Date date;
 	private Integer year;
+	private Map<Long, Double> mappedBeginningStockPrice = new HashMap<>();
 
 	public StockOpnameGenerator(HealthCenter location, List<ProductStock> productStocks, Date date) {
 		xwb = new XSSFWorkbook();
@@ -32,7 +35,9 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		this.date = date;
 		this.productStocks = productStocks;
 	}
-
+	public void setMappedBeginningStockPrice(Map<Long, Double> mappedBeginningStockPrice) {
+		this.mappedBeginningStockPrice = mappedBeginningStockPrice;
+	}
 	private void validateRow(int row) {
 		if (sheet.getRow(row) == null) {
 			sheet.createRow(row);

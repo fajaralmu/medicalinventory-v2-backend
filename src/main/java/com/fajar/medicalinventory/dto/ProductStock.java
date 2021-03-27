@@ -33,7 +33,7 @@ public class ProductStock implements Serializable {
 	private Integer previousStock = 0;
 	
 	 
-	public ProductStock(ProductModel model, int totalIncoming, int totalUsed, int totalStock, int prevStock) {
+	public ProductStock(ProductModel model, int prevStock, int totalIncoming, int totalUsed, int totalStock) {
 		this.product = model;
 		this.totalIncomingCount = totalIncoming;
 		this.totalUsedCount = totalUsed;

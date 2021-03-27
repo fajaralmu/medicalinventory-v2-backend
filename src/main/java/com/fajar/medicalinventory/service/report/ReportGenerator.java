@@ -254,18 +254,22 @@ public class ReportGenerator {
 			throws Exception {
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Date selectedDate = DateUtil.getDate(webRequest.getFilter());
+		// prev year date
+		int prevYear = webRequest.getFilter().getYear() - 1;
+		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
+				
 		List<Product> products = (List<Product>) productRepository.findAll();
 		List<ProductStock> stockModels = new LinkedList<>();
 		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(selectedDate);
+		List<Object[]> mappedPricesAndIDsAtBeginningYear = productRepository.getMappedPriceAndProductIdsAt(lastDayOfYear);
 		Map<Long, Double> mappedPrice = parseProductPriceMap(mappedPricesAndIDs);
+		Map<Long, Double> mappedPriceAtBeginningYear = parseProductPriceMap(mappedPricesAndIDsAtBeginningYear);
 
 		log.info("products: {}", products.size());
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		progressService.sendProgress(10, httpServletRequest);
 
-		// prev year date
-		int prevYear = webRequest.getFilter().getYear() - 1;
-		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
+		
 		int taskProp = 16;
 		Map<Long, Integer> productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
@@ -290,8 +294,8 @@ public class ReportGenerator {
 
 			product.setPrice(price);
 
-			ProductStock stockModel = new ProductStock(product.toModel(), incomingCount, usedCount,
-					productStockAtSelectedDate, productStockInTheBeginningOfYear);
+			ProductStock stockModel = new ProductStock(product.toModel(), productStockInTheBeginningOfYear,
+					incomingCount, usedCount, productStockAtSelectedDate);
 			stockModels.add(stockModel);
 
 		}
@@ -299,6 +303,7 @@ public class ReportGenerator {
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		try {
 			StockOpnameGenerator generator = new StockOpnameGenerator(location, stockModels, selectedDate);
+			generator.setMappedBeginningStockPrice(mappedPriceAtBeginningYear);
 			generator.setYear(webRequest.getFilter().getYear());
 			XSSFWorkbook wb = generator.generateReport();
 			progressService.sendProgress(10, httpServletRequest);
