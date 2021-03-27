@@ -1,4 +1,4 @@
-package com.fajar.medicalinventory.repository;
+package com.fajar.medicalinventory.service.inventory;
 
 import static com.fajar.medicalinventory.util.DateUtil.clock00Midnight;
 import static com.fajar.medicalinventory.util.DateUtil.clock24Midnight;
@@ -15,25 +15,9 @@ import org.springframework.stereotype.Service;
 import com.fajar.medicalinventory.util.DateUtil;
 
 @Service
-public class ProductStockRepository {
+public class ProductStockWillExpiredRepository extends CommonRepository{
 	
-	@Autowired
-	private SessionFactory sessionFactory;
 	
-	private Session getSession() {
-		return sessionFactory.openSession();
-	}
-	private BigInteger bigint(Object result) {
-		if (null == result) {
-			return BigInteger.ZERO;
-		}
-		return BigInteger.valueOf(Long.valueOf(result.toString()));
-	}
-	private Query getQuery(String queryString) {
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
-		return q;
-	}
 	
 	////////////////Total Items //////////////////
 	/**

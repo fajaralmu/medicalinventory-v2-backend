@@ -3,7 +3,6 @@ package com.fajar.medicalinventory.service.inventory;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,6 @@ import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.HealthCenterRepository;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
-import com.fajar.medicalinventory.repository.ProductStockRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
@@ -44,7 +42,7 @@ public class InventoryService {
 	@Autowired
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
-	private ProductStockRepository productStockRepository;
+	private ProductStockWillExpiredRepository productStockWillExpiredRepository;
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -159,12 +157,12 @@ public class InventoryService {
 	private BigInteger getTotalProductStockRecord(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
 		BigInteger totalItems;
 		if (filter.isAllFlag()) {
-			totalItems = productStockRepository.getTotalItemsAllLocation(expDaysWithin(filter));
+			totalItems = productStockWillExpiredRepository.getTotalItemsAllLocation(expDaysWithin(filter));
 		} else {
 			if (isMasterHealthCenter) {
-				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
+				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
 			} else {
-				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
+				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
 						expDaysWithin(filter));
 			}
 		}
@@ -266,9 +264,9 @@ public class InventoryService {
 		for (HealthCenter location : locations) {
 			BigInteger totalItems;
 			if (healthCenterMasterService.isMasterHealthCenter(location)) {
-				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
+				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
 			} else {
-				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
+				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
 			}
 
 			ProductInventory inventory = new ProductInventory();
