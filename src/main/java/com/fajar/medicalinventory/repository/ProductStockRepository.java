@@ -6,6 +6,7 @@ import static com.fajar.medicalinventory.util.DateUtil.clock24Midnight;
 import java.math.BigInteger;
 import java.util.Date;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,48 +29,51 @@ public class ProductStockRepository {
 		}
 		return BigInteger.valueOf(Long.valueOf(result.toString()));
 	}
+	private Query getQuery(String queryString) {
+		Session session = getSession();
+		org.hibernate.Query q = session.createQuery(queryString);
+		return q;
+	}
 	
 	////////////////Total Items //////////////////
 	/**
 	* TOTAL Items At Branch Warehouse
 	*/
 	 
-	public BigInteger getTotalItemsAtBranchWarehouse(Long locationId) {
+	private BigInteger getTotalItemsAtBranchWarehouse(Long locationId) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
 				+ " and tx.healthCenterDestination.id = ? "
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		 
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, locationId);
 		Object result = q.uniqueResult();
 		return bigint(result);
 	}
 	 
-	public BigInteger getTotalItemsAtBranchWarehouseAndExpDateBefore(Long locationId, Date expBefore) {
+	private BigInteger getTotalItemsAtBranchWarehouseAndExpDateBefore(Long locationId, Date expBefore) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
 				+ " and tx.healthCenterDestination.id = ? "
 				+ " and (pf.count-pf.usedCount) > 0 "
 				+ " and pf.expiredDate < ?  ";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, locationId);
 		q.setParameter(1, expBefore);
 		Object result = q.uniqueResult();
 		return bigint(result);
 	}
-	public BigInteger getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(Long locationId, Date expBefore, Date expAfter) {
+	private BigInteger getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(Long locationId, Date expBefore, Date expAfter) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
 				+ " and tx.healthCenterDestination.id = ?  "
 				+ " and (pf.count-pf.usedCount) > 0 "
 				+ " and pf.expiredDate between ? and ?  ";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, locationId);
 		q.setParameter(1, expBefore);
 		q.setParameter(2, expAfter);
@@ -92,38 +96,35 @@ public class ProductStockRepository {
 	}
 
 
-	public BigInteger getTotalItemsAllLocation() {
+	private BigInteger getTotalItemsAllLocation() {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE') "
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		return bigint(q.uniqueResult());
 	}
 	
-	public BigInteger getTotalItemsAllLocationAndExpDateBeforeAndAfter(Date before, Date after) {
+	private BigInteger getTotalItemsAllLocationAndExpDateBeforeAndAfter(Date before, Date after) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx  "
 				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE') "
 				+ " and pf.expiredDate < ? and pf.expiredDate > ? "
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, before);
 		q.setParameter(1, after);
 		Object result = q.uniqueResult();
 		return bigint(result);
 	}
  
-	public BigInteger getTotalItemsAllLocationAndExpDateBefore(Date expiredDateWithin ) {
+	private BigInteger getTotalItemsAllLocationAndExpDateBefore(Date expiredDateWithin ) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE') "
 				+ " and pf.expiredDate < ? " 
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, expiredDateWithin);
 		return bigint(q.uniqueResult());
 	}
@@ -142,36 +143,33 @@ public class ProductStockRepository {
 	/**
 	* TOTAL Items At Main Warehouse
 	*/
-	public BigInteger getTotalItemsAtMasterWarehouse() {
+	private BigInteger getTotalItemsAtMasterWarehouse() {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_IN' "
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		return bigint(q.uniqueResult());
 	}
 	
-	public BigInteger getTotalItemsAtMasterWarehouseAndExpDateBefore(Date expiredDateWithin ) {
+	private BigInteger getTotalItemsAtMasterWarehouseAndExpDateBefore(Date expiredDateWithin ) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_IN' "
 				+ " and pf.expiredDate < ? " 
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, expiredDateWithin);
 		return bigint(q.uniqueResult());
 	}
 	
-	public BigInteger getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter(Date before, Date after) {
+	private BigInteger getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter(Date before, Date after) {
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_IN' "
 				+ " and pf.expiredDate < ? and pf.expiredDate > ? "
 				+ " and (pf.count-pf.usedCount) > 0";
-		Session session = getSession();
-		org.hibernate.Query q = session.createQuery(queryString);
+		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, before);
 		q.setParameter(1, after);
 		return bigint(q.uniqueResult());
