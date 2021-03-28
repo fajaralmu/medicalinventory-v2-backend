@@ -45,7 +45,7 @@ public class StockAdjusterService {
 				ProductFlow pf = (ProductFlow) object;
 				Long refId = pf.getReferenceProductFlow().getId();
 				productFlowMap.get(refId).addUsedCount(pf.getCount());
-				pf.setExpDate();
+				pf.copyFromReferenceFlow();
 				session.merge(pf);
 				progressService.sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
 			}

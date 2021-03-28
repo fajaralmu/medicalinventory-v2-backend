@@ -58,16 +58,20 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		labels.add(new Label(3, 3, "Nama"));
 		labels.add(new Label(4, 3, "Satuan"));
 		labels.add(new Label(5, 3, "Stok Awal Tahun "+year));
-		labels.add(new Label(6, 3, "Pemasukan "+year));
-		labels.add(new Label(7, 3, "Penggunaan "));
-		labels.add(new Label(8, 3, "Sisa Stok"));
-		labels.add(new Label(9, 3, "Harga Satuan per "+dateString));
-		labels.add(new Label(10, 3, "Harga Total"));
+		labels.add(new Label(6, 3, "Harga @"));
+		labels.add(new Label(7, 3, "Harga"));
+		labels.add(new Label(8, 3, "Pemasukan "+year));
+		labels.add(new Label(9, 3, "Harga"));
+		labels.add(new Label(10, 3, "Penggunaan "+year));
+		labels.add(new Label(11, 3, "Harga"));
+		labels.add(new Label(12, 3, "Sisa Stok"));
+		labels.add(new Label(13, 3, "Harga Satuan per "+dateString));
+		labels.add(new Label(14, 3, "Harga Total"));
 		labels.add(new Label(2, 1, "STOK OPNAME " + dateString));
 		labels.add(new Label(2, 2, location.getName().toUpperCase()));
 
-		sheet.addMergedRegion(new CellRangeAddress(1, 1, 2, 10));
-		sheet.addMergedRegion(new CellRangeAddress(2, 2, 2, 10));
+		sheet.addMergedRegion(new CellRangeAddress(1, 1, 2, 14));
+		sheet.addMergedRegion(new CellRangeAddress(2, 2, 2, 14));
 
 		for (int i = 0; i < labels.size(); i++) {
 			Label label = labels.get(i);
@@ -88,15 +92,26 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 			
 			List<jxl.write.Number> labelobat  = new ArrayList<>();
 			labelobat.add( new jxl.write.Number(2, currentRow, number));
+			//prev stock beginning of year
+			Double prevPrice = mappedBeginningStockPrice.get(ob.getId());
 			labelobat.add(new jxl.write.Number(5, currentRow, stock.getPreviousStock()));
-			labelobat.add( new jxl.write.Number(6, currentRow, stock.getTotalIncomingCount()));
-			labelobat.add( new jxl.write.Number(7, currentRow, stock.getTotalUsedCount()));
-			labelobat.add(new jxl.write.Number(8, currentRow, stock.getTotalStock()));
-			labelobat.add(new jxl.write.Number(9, currentRow, ob.getPrice()));
+			labelobat.add(new jxl.write.Number(6, currentRow, prevPrice));
+			labelobat.add(new jxl.write.Number(7, currentRow, (stock.getPreviousStock() * prevPrice)));
 			
-			Double total = ob.getPrice() * stock.getTotalStock();
-			labelobat.add( new jxl.write.Number(10, currentRow, total));
-			totalPrice += total;
+			//incoming
+			labelobat.add( new jxl.write.Number(8, currentRow, stock.getTotalIncomingCount()));
+			labelobat.add( new jxl.write.Number(9, currentRow, stock.getIncomingPrice()));
+
+			//usage
+			labelobat.add( new jxl.write.Number(10, currentRow, stock.getTotalUsedCount()));
+			labelobat.add( new jxl.write.Number(11, currentRow, stock.getUsedPrice()));
+			
+			labelobat.add(new jxl.write.Number(12, currentRow, stock.getTotalStock()));
+			labelobat.add(new jxl.write.Number(13, currentRow, ob.getPrice()));
+			
+			Double stockPrice = ob.getPrice() * stock.getTotalStock();
+			labelobat.add( new jxl.write.Number(14, currentRow, stockPrice));
+			totalPrice += stockPrice;
 			totalCount += stock.getTotalStock();
 
 			xssfRow.createCell(3).setCellValue(ob.getName()+"("+ob.getCode()+")");
@@ -113,8 +128,8 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		XSSFRow xssfRow = getRow(currentRow);
 
 		xssfRow.createCell(2).setCellValue("Total");
-		xssfRow.createCell(8).setCellValue(Double.valueOf(totalCount));
-		xssfRow.createCell(10).setCellValue(totalPrice);
+		xssfRow.createCell(13).setCellValue(Double.valueOf(totalCount));
+		xssfRow.createCell(14).setCellValue(totalPrice);
 
 		return xwb;
 

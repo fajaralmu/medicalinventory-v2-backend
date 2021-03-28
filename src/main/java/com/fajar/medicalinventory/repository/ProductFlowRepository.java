@@ -268,6 +268,13 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			"where tx.type = 'TRANS_IN' and p in ?1 and tx.transactionDate >= ?2 and tx.transactionDate <= ?3 group by p.id")
 	public List<Object[]> getTotalIncomingProductsFromSupplierBetweenDate(List<Product> products, Date date1, Date date2); 
 	
+	@Query("select pf from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p " + 
+			"where tx.type = 'TRANS_IN' and p in ?1 and tx.transactionDate >= ?2 and tx.transactionDate <= ?3 ")
+	public List<ProductFlow> getIncomingProductsFromSupplierBetweenDate(List<Product> products, Date date1, Date date2); 
+	
+	
 	//FROM Main Warehouse
 	@Query("select   sum(pf.count)  from ProductFlow pf "  
 			+ "left join  pf.transaction tx "
@@ -294,6 +301,12 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ "left join tx.healthCenterDestination destination " + 
 			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p in ?1 and tx.transactionDate <= ?2 and tx.transactionDate <= ?3 and destination.id = ?4 group by p.id")
 	public List<Object[]> getTotalIncomingProductsAtBranchWarehouseBetweenDate(List<Product> products, Date date1, Date date2, long locationId);
+	@Query("select  pf from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterDestination destination " + 
+			"where tx.type = 'TRANS_OUT_TO_WAREHOUSE' and p in ?1 and tx.transactionDate <= ?2 and tx.transactionDate <= ?3 and destination.id = ?4 ")
+	public List<ProductFlow> getIncomingProductsAtBranchWarehouseBetweenDate(List<Product> products, Date date1, Date date2, long locationId);
 	
 	/////// USED PRODUCT COUNT //////
 	//to Customer
@@ -322,6 +335,12 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			+ "left join tx.healthCenterLocation location " + 
 			"where tx.type = 'TRANS_OUT' and p in ?1 and tx.transactionDate >= ?1 and tx.transactionDate <= ?2 and location.id = ?4 group by p.id")
 	public List<Object[]> getTotalUsedProductsToCustomerBetweenDate(List<Product> products, Date date1, Date date2, Long locationId);
+	@Query("select pf from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterLocation location " + 
+			"where tx.type = 'TRANS_OUT' and p in ?1 and tx.transactionDate >= ?1 and tx.transactionDate <= ?2 and location.id = ?4 group by p.id")
+	public List<ProductFlow> getUsedProductsToCustomerBetweenDate(List<Product> products, Date date1, Date date2, Long locationId);
 	
 	
 	//to Customer or Warehouse
@@ -352,6 +371,13 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 			"where (tx.type = 'TRANS_OUT' or tx.type='TRANS_OUT_TO_WAREHOUSE') and p in ?1 and tx.transactionDate <= ?2 and location.id = ?3 "
 			+ "group by p.id")
 	public List<Object[]> getTotalUsedProductsToCustomerOrBranchWarehouseAtDate(List<Product> products, Date date, Long locationId);
+	@Query("select pf from ProductFlow pf "  
+			+ "left join  pf.transaction tx "
+			+ "left join pf.product p "
+			+ "left join tx.healthCenterLocation location " + 
+			"where (tx.type = 'TRANS_OUT' or tx.type='TRANS_OUT_TO_WAREHOUSE') and p in ?1 and tx.transactionDate >= ?2 and tx.transactionDate <= ?3 and location.id = ?4 "
+			+ " ")
+	public List<ProductFlow> getUsedProductsToCustomerOrBranchWarehouseBetweenDate(List<Product> products, Date date, Date date2, Long locationId);
 	
 	
 

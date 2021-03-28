@@ -122,12 +122,13 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	/**
 	 * make the expDate same as referenceProductFlow.expDate
 	 */
-	public void setExpDate() {
+	public void copyFromReferenceFlow() {
 		if (null == referenceProductFlow) {
 			return;
 		}
 		setExpiredDate(referenceProductFlow.getExpiredDate());
 		setGeneric(referenceProductFlow.isGeneric());
+		setPrice(referenceProductFlow.getPrice());
 	}
 
 
@@ -135,9 +136,8 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		if (null != referenceFlow && null != referenceFlow.getProduct()) {
 			setProduct(referenceFlow.getProduct());
 		}
-		this.setGeneric(referenceFlow.isGeneric());
 		this.referenceProductFlow = referenceFlow;
-		this.setExpDate();
+		this.copyFromReferenceFlow();
 	}
 	
 	@JsonIgnore
@@ -168,6 +168,16 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		if (null == transaction) return 0;
 		Date date = transaction.getTransactionDate();
 		return DateUtil.getCalendarYear(date);
+	}
+
+
+	public static double sumQtyAndPrice(List<ProductFlow> list) {
+		double result = 0;
+		for (ProductFlow productFlow : list) {
+			double priceAndCount = productFlow.getPrice() * productFlow.getCount();
+			result += priceAndCount;
+		}
+		return result;
 	}
  
 }

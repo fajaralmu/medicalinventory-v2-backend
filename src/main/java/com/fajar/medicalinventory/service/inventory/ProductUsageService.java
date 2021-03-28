@@ -1,6 +1,7 @@
 package com.fajar.medicalinventory.service.inventory;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.Product;
+import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 
@@ -57,6 +59,21 @@ public class ProductUsageService {
 		}
 		return result;
 	}
+	public Map<Long, List<ProductFlow>> getUsedProductsBetweenDatev2(List<Product> products, HealthCenter location, Date date1, Date date2) {
+		Map<Long, List<ProductFlow>> result = getMapPopulatedWithKeyv2(products);
+		
+		final List<ProductFlow> quantities;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			quantities= productFlowRepository.getUsedProductsToCustomerOrBranchWarehouseBetweenDate(products, date1, date2, location.getId());
+		} else {
+			quantities = productFlowRepository.getUsedProductsToCustomerBetweenDate(products, date1, date2, location.getId()); 
+		}
+		for (ProductFlow productFlow : quantities) {
+			Long productId = productFlow.getProduct().getId();
+			result.get(productId).add(productFlow);
+		}
+		return result;
+	}
 	public static Map<Long, Integer> getMapPopulatedWithKey(List<Product> products) {
 		Map<Long, Integer> result = new HashMap<>();
 		if (null== products || products.isEmpty()) {
@@ -69,6 +86,19 @@ public class ProductUsageService {
 		});
 		return result;
 	}
+	public static Map<Long, List<ProductFlow>> getMapPopulatedWithKeyv2(List<Product> products) {
+		Map<Long,  List<ProductFlow>> result = new HashMap<>();
+		if (null== products || products.isEmpty()) {
+			result.put(-1L, new ArrayList<>());
+			return result;
+		}
+		
+		products.forEach(p->{
+			result.put(p.getId(), new ArrayList<>());
+		});
+		return result;
+	}
+
 
 	public Map<Long, Integer> getIncomingProductsBetweenDate(List<Product> products, HealthCenter location,
 			Date date1, Date date2) {
@@ -83,6 +113,21 @@ public class ProductUsageService {
 			Long productId = Long.parseLong(objects[0].toString());
 			Integer count = Integer.parseInt(objects[1].toString());
 			result.put(productId, count);
+		}
+		return result;
+	}
+	public Map<Long, List<ProductFlow>> getIncomingProductsBetweenDatev2(List<Product> products, HealthCenter location,
+			Date date1, Date date2) {
+		Map<Long, List<ProductFlow>> result = getMapPopulatedWithKeyv2(products);
+		final List<ProductFlow> quantities;
+		if (healthCenterMasterService.isMasterHealthCenter(location)) {
+			quantities = productFlowRepository.getIncomingProductsFromSupplierBetweenDate(products, date1, date2);
+		} else {
+			quantities = productFlowRepository.getIncomingProductsAtBranchWarehouseBetweenDate(products, date1, date2, location.getId()); 
+		}
+		for (ProductFlow productFlow : quantities) {
+			Long productId = productFlow.getProduct().getId();
+			result.get(productId).add(productFlow);
 		}
 		return result;
 	}

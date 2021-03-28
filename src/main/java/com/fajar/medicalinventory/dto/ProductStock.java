@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Builder.Default;
 
 @Data 
 @NoArgsConstructor 
@@ -33,6 +32,10 @@ public class ProductStock implements Serializable {
 	private Integer previousStock = 0;
 	
 	 
+	//report stuff
+	private double incomingPrice;
+	private double usedPrice;
+	
 	public ProductStock(ProductModel model, int prevStock, int totalIncoming, int totalUsed, int totalStock) {
 		this.product = model;
 		this.totalIncomingCount = totalIncoming;

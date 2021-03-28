@@ -277,25 +277,36 @@ public class ReportGenerator {
 		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location,lastDayOfYear);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDate(products,location, lastDayOfYear, selectedDate);
+		 
+		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products,location, lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDate(products, location,lastDayOfYear, selectedDate);
+		 
+		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location,lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 
 		for (Product product : products) {
 			log.info("get stock info for: {}", product.getName());
-			Double price = mappedPrice.get(product.getId());
+			Long productId = product.getId();
+			Double price = mappedPrice.get(productId);
 
-			int productStockInTheBeginningOfYear = remainingStocksAtYear.get(product.getId());
-			int incomingCount = incomingStocksBetweenDate.get(product.getId());
-			int usedCount = usedCountBetweenDate.get(product.getId());
-			int productStockAtSelectedDate = productStocks.get(product.getId());
+			int productStockInTheBeginningOfYear = remainingStocksAtYear.get(productId);
+			
+			int incomingCount = ProductFlow.sumQtyCount(incomingStocksBetweenDate.get(productId));
+			double incomingPrice = ProductFlow.sumQtyAndPrice(incomingStocksBetweenDate.get(productId));
+			
+			int usedCount = ProductFlow.sumQtyCount(usedCountBetweenDate.get(productId));
+			double usedPrice = ProductFlow.sumQtyAndPrice(usedCountBetweenDate.get(productId));
+			
+			int productStockAtSelectedDate = productStocks.get(productId);
 
 			product.setPrice(price);
 
 			ProductStock stockModel = new ProductStock(product.toModel(), productStockInTheBeginningOfYear,
 					incomingCount, usedCount, productStockAtSelectedDate);
+			stockModel.setIncomingPrice(incomingPrice);
+			stockModel.setUsedPrice(usedPrice);
+			
 			stockModels.add(stockModel);
 
 		}
