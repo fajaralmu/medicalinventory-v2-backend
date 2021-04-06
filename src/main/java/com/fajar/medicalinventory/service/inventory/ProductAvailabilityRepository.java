@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -73,17 +72,17 @@ public class ProductAvailabilityRepository extends CommonRepository {
 	}
 	
 	@Override
-	protected Criteria commonStockCriteria(Long locationId) {
+	protected CriteriaWrapper commonStockCriteria(Long locationId) {
 		 
-		Criteria c = super.commonStockCriteria(locationId);
-		c.setProjection(null);
-		return c;
+		CriteriaWrapper wrapper = super.commonStockCriteria(locationId);
+		wrapper.getCriteria().setProjection(null);
+		return wrapper;
 	}
 
 	private BigInteger countNotEmptyProductInMasterWareHouseWithExpDaysBeforeAfter(int expDayDiffBefore,
 			int expDayDiffAfter) {
-		Criteria criteria = commonStockCriteria(null, TransactionType.TRANS_IN);
-		
+		CriteriaWrapper criteriaWrapper =  commonStockCriteria(null, TransactionType.TRANS_IN);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Restrictions.sqlRestriction("extract(day from expired_date - current_timestamp) < ?",
 				expDayDiffBefore, IntegerType.INSTANCE));
 		criteria.add(Restrictions.sqlRestriction("extract(day from expired_date - current_timestamp) > ?",
@@ -93,35 +92,41 @@ public class ProductAvailabilityRepository extends CommonRepository {
 
 		List result = criteria.list();
 		BigInteger count = BigInteger.valueOf(result.size());
+		criteriaWrapper.close();
 		return count;
 	}
 
 	private BigInteger countNotEmptyProductInMasterWareHouse() {
  
-		Criteria criteria = commonStockCriteria(null, TransactionType.TRANS_IN);
+		CriteriaWrapper criteriaWrapper =  commonStockCriteria(null, TransactionType.TRANS_IN);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
 		criteria.setProjection(Projections.distinct(Projections.property("product.id")));
 
 		List result = criteria.list();
 		BigInteger count = BigInteger.valueOf(result.size());
+		criteriaWrapper.close();
 		return count;
 	}
 	
 	private BigInteger countNotEmptyProductInSpecifiedWareHouse(Long locationId) {
 		 
-		Criteria criteria = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		CriteriaWrapper criteriaWrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
 		criteria.setProjection(Projections.distinct(Projections.property("product.id")));
 		
 		List result = criteria.list(); 
 		BigInteger count = BigInteger.valueOf(result.size()); 
+		criteriaWrapper.close();
 		return count;
 		
 	}
 	private BigInteger countNotEmptyProductInSpecifiedWareHouseWithExpDaysBeforeAfter(Long locationId, Integer expiredDaysDiffBefore, Integer expDayDiffAfter) {
 		 
 		
-		Criteria criteria = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		CriteriaWrapper criteriaWrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Restrictions.sqlRestriction(" extract(day from this_.expired_date - current_timestamp) between ? and ?",
 				new Object[]{expDayDiffAfter, expiredDaysDiffBefore}, new Type[] {IntegerType.INSTANCE, IntegerType.INSTANCE}));
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
@@ -130,12 +135,15 @@ public class ProductAvailabilityRepository extends CommonRepository {
 		criteria.addOrder(Order.asc("product.id"));
 		List  result = criteria.list();
 		BigInteger count = BigInteger.valueOf(result.size()); 
+		
+		criteriaWrapper.close();
 		return count;
 	}
 	
 	private BigInteger countNotEmptyProductAllLocationWithExpDaysBeforeAfter(Integer expDayDiffBefore, Integer expDayDiffAfter) {
 		 
-		Criteria criteria = commonStockCriteria(null, TransactionType.TRANS_OUT_TO_WAREHOUSE, TransactionType.TRANS_IN);
+		CriteriaWrapper criteriaWrapper = commonStockCriteria(null, TransactionType.TRANS_OUT_TO_WAREHOUSE, TransactionType.TRANS_IN);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Restrictions.sqlRestriction(" extract(day from this_.expired_date - current_timestamp) between ? and ?",
 				new Object[]{expDayDiffAfter, expDayDiffBefore}, new Type[] {IntegerType.INSTANCE, IntegerType.INSTANCE}));
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
@@ -143,17 +151,21 @@ public class ProductAvailabilityRepository extends CommonRepository {
 		List  result = criteria.list();
 		
 		BigInteger count = BigInteger.valueOf(result.size());
+		
+		criteriaWrapper.close();
 		return count;
 	}
 	
 	private BigInteger countNotEmptyProductAllLocation() {
 		
-		Criteria criteria = commonStockCriteria(null, TransactionType.TRANS_OUT_TO_WAREHOUSE, TransactionType.TRANS_IN);
+		CriteriaWrapper criteriaWrapper = commonStockCriteria(null, TransactionType.TRANS_OUT_TO_WAREHOUSE, TransactionType.TRANS_IN);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
 		criteria.setProjection(Projections.distinct(Projections.property("product.id")));
 		List  result = criteria.list();
 		
 		BigInteger count = BigInteger.valueOf(result.size());
+		criteriaWrapper.close();
 		return count;
 	}
 	
@@ -163,25 +175,7 @@ public class ProductAvailabilityRepository extends CommonRepository {
 		return ownerCriteria;
 	}
 
-//	/**
-//	 * 
-//	 * @param isMasterHealthCenter
-//	 * @param expDaysWithin
-//	 * @return
-//	 */
-//	public BigInteger countNontEmptyProductAllLocation(boolean isMasterHealthCenter,
-//			Integer expDaysWithin ) {
-//		BigInteger totalData;
-//		boolean withExpDateFilter = expDaysWithin != null;
-//		if (withExpDateFilter) {
-//			int expDatAfter = expDaysWithin   > 0 ? 0 : MIN_VALUE;
-//			totalData = countNotEmptyProductAllLocationWithExpDaysBeforeAfter(expDaysWithin + 1, expDatAfter);
-//			 
-//		} else {
-//			totalData = countNotEmptyProductAllLocation();
-//		}
-//		return totalData;
-//	}
+ 
 //
 //	public List<Product> getAvailableProducts(boolean isMasterHealthCenter, Filter filter, Long locationId) {
 //		final boolean ignoreEmptyValue = filter.isIgnoreEmptyValue();

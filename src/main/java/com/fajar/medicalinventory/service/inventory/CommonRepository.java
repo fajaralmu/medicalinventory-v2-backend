@@ -41,8 +41,10 @@ public class CommonRepository {
 			return BigInteger.ZERO;
 		}
 	}
-	protected BigInteger bigintResult(Criteria criteria) {
-		return bigint(criteria.uniqueResult());
+	protected BigInteger bigintResult(CriteriaWrapper criteriaWrapper) {
+		BigInteger result = bigint(criteriaWrapper.getCriteria().uniqueResult());
+		criteriaWrapper.close();
+		return result;
 	}
 	protected Query getQuery(String queryString) {
 		Session session = getSession();
@@ -50,21 +52,25 @@ public class CommonRepository {
 		return q;
 	}
 	
-	protected Criteria getCriteria(Class<? extends BaseEntity> _class) {
+	protected CriteriaWrapper getCriteria(Class<? extends BaseEntity> _class) {
 		Session session = getSession();
-		return  session.createCriteria(_class);
+		Criteria c = session.createCriteria(_class);
+	
+		return new CriteriaWrapper(session, c);
 	}
-	protected Criteria commonStockCriteria(@Nullable Long locationId, TransactionType ... transactionTypes) {
-		Criteria criteria = commonStockCriteria(locationId);
+	protected CriteriaWrapper commonStockCriteria(@Nullable Long locationId, TransactionType ... transactionTypes) {
+		CriteriaWrapper criteriaWrapper = commonStockCriteria(locationId);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		Criterion[] typeRestrictions = new Criterion[transactionTypes.length];
 		for (int i = 0; i < typeRestrictions.length; i++) {
 			typeRestrictions[i] = Restrictions.eq("transaction.type", transactionTypes[i]);
 		}
 		criteria.add(Restrictions.or(typeRestrictions));
-		return criteria;
+		return criteriaWrapper;
 	}
-	protected Criteria commonStockCriteria(@Nullable Long locationId) {
-		Criteria criteria = getCriteria(ProductFlow.class);
+	protected CriteriaWrapper commonStockCriteria(@Nullable Long locationId) {
+		CriteriaWrapper criteriaWrapper = getCriteria(ProductFlow.class);
+		Criteria criteria = criteriaWrapper.getCriteria();
 		criteria.createAlias("transaction", "transaction");
 		if (null != locationId) {
 			criteria.add(Restrictions.eq("transaction.healthCenterDestination.id", locationId));
@@ -73,6 +79,6 @@ public class CommonRepository {
 		Type[] type = {new BigIntegerType()};
 		criteria.setProjection(Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
 		
-		return criteria;
+		return criteriaWrapper;
 	}
 }

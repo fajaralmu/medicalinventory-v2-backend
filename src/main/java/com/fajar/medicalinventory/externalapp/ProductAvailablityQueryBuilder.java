@@ -1,7 +1,6 @@
 package com.fajar.medicalinventory.externalapp;
 
 import java.math.BigInteger;
-import java.security.acl.Owner;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -12,7 +11,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.BigIntegerType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.Type;
 
