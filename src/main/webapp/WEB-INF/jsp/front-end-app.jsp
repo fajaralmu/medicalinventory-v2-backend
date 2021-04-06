@@ -15,12 +15,14 @@
       name="description"
       content="Web site created using create-react-app"
     />
-    <link rel="stylesheet" href="<c:url value="/res/react_resources/resources/css/bootstrap.min.css"/>" />
-    <link rel="stylesheet" href="<c:url value="/res/react_resources/resources/fa/css/all.css"/>" />
+    
+    <link rel="stylesheet" type="text/css" href="<c:url value="/res/fa/css/all.css" />" />
+	<link rel="stylesheet" href="<c:url value="/res/css/bootstrap/bootstrap.min.css" />" />
+	
+	<script src="<c:url value="/res/js/jquery-3.3.1.slim.min.js" />"></script>
+	<script src="<c:url value="/res/js/bootstrap/bootstrap.min.js"  />"></script>
+
     <link rel="stylesheet" href="<c:url value="/res/react_resources/resources/css/app.css"/>" />
-    <script src="<c:url value="/res/react_resources/resources/js/jquery-3.3.1.slim.min.js"/>"></script>
-    <script src="<c:url value="/res/react_resources/resources/js/popper.min.js"/>"></script>
-    <script src="<c:url value="/res/react_resources/resources/js/bootstrap.min.js"/>"></script>
     <link rel="apple-touch-icon" href="<c:url value="/res/react_resources/logo192.png"/>" />
     <link rel="manifest" href="<c:url value="/res/react_resources/manifest.json"/>" />
     <title>Medical Inventory</title>
