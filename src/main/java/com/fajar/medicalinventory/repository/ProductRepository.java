@@ -1,7 +1,5 @@
 package com.fajar.medicalinventory.repository;
 
-import static java.lang.Integer.MIN_VALUE;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,108 +90,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	Product findTop1ByCode(String code);
 
-	/**
-	 * ========================== product count =========================
-	 */
-
+	
 	@Query("select count(p) from Product p")
 	BigInteger countAll();
-	// COUNT ALL LOCATION
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from  product p "
-			+ " left join product_flow pf on pf.product_id =  p.id "
-			+ " left join transaction tx on pf.transaction_id = tx.id where "
-			+ " (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE') "
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) < ?1"
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) > ?2"
-			+ " and  (pf.count- pf.used_count) > 0)  c  ")
-	BigInteger countNotEmptyProductAllLocationWithExpDaysBeforeAfter(Integer expDayDiffBefore, Integer expDayDiffAfter);
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from  product p "
-			+ " left join product_flow pf on pf.product_id =  p.id "
-			+ " left join transaction tx on pf.transaction_id = tx.id"
-			+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE')  and (pf.count- pf.used_count) > 0)  c")
-	BigInteger countNotEmptyProductAllLocation();
-		
-	// COUNT AT Main warehouse
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from  product p "
-			+ " left join product_flow pf on pf.product_id =  p.id "
-			+ " left join transaction tx on pf.transaction_id = tx.id"
-			+ " where tx.type = 'TRANS_IN' and (pf.count- pf.used_count) > 0)  c")
-	BigInteger countNotEmptyProductInMasterWareHouse();
-
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from  product p "
-			+ " left join product_flow pf on pf.product_id =  p.id "
-			+ " left join transaction tx on pf.transaction_id = tx.id where tx.type = 'TRANS_IN' "
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) < ?1"
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) > ?2"
-			+ " and  (pf.count- pf.used_count) > 0)  c  ")
-	BigInteger countNotEmptyProductInMasterWareHouseWithExpDaysBeforeAfter(Integer expDayDiffBefore, Integer expDayDiffAfter);
-
-	// COUNT AT Branch warehouse
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from "
-			+ " product p  left join product_flow pf on p.id = pf.product_id "
-			+ " left join  transaction tx on tx.id = pf.transaction_id  where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
-			+ " and tx.health_center_destination_id = ?1 and (pf.count- pf.used_count) > 0)  c")
-	BigInteger countNotEmptyProductInSpecifiedWareHouse(Long location);
-
-	@Query(nativeQuery = true, value = "select count(c) from (select distinct(p.id) from "
-			+ " product p  left join product_flow pf on p.id = pf.product_id "
-			+ " left join  transaction tx on tx.id = pf.transaction_id  where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
-			+ " and tx.health_center_destination_id = ?1 "
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) <  ?2 "
-			+ " and DATE_PART('day', AGE(pf.expired_date, current_timestamp)) >  ?3 "
-			+ " and (pf.count- pf.used_count) > 0)  c ")
-	BigInteger countNotEmptyProductInSpecifiedWareHouseWithExpDaysBeforeAfter(Long locationId, Integer expiredDaysDiffBefore, Integer expDayDiffAfter);
-
-	/**
-	 * 
-	 * @param isMasterHealthCenter
-	 * @param expDaysWithin
-	 * @param locationId
-	 * @return
-	 */
-	default BigInteger countNontEmptyProduct(boolean isMasterHealthCenter ,
-			@Nullable Integer expDaysWithin, Long locationId) {
-		BigInteger totalData;
-		boolean withExpDateFilter = expDaysWithin != null;
-		int expDatAfter = expDaysWithin !=null && expDaysWithin  > 0 ? 0 : MIN_VALUE;
-		if (isMasterHealthCenter) {
-			if (withExpDateFilter) {
-				totalData = countNotEmptyProductInMasterWareHouseWithExpDaysBeforeAfter(expDaysWithin + 1, expDatAfter);
-				 
-			} else {
-				totalData = countNotEmptyProductInMasterWareHouse();
-			}
-		} else {
-			if (withExpDateFilter) {
-					totalData = countNotEmptyProductInSpecifiedWareHouseWithExpDaysBeforeAfter(locationId,
-						expDaysWithin + 1, expDatAfter); 
-			} else {
-				totalData = countNotEmptyProductInSpecifiedWareHouse(locationId);
-			}
-		}
-		 
-		return totalData;
-	}
+	 
 	
-	/**
-	 * 
-	 * @param isMasterHealthCenter
-	 * @param expDaysWithin
-	 * @return
-	 */
-	default BigInteger countNontEmptyProductAllLocation(boolean isMasterHealthCenter,
-			Integer expDaysWithin ) {
-		BigInteger totalData;
-		boolean withExpDateFilter = expDaysWithin != null;
-		if (withExpDateFilter) {
-			int expDatAfter = expDaysWithin   > 0 ? 0 : MIN_VALUE;
-			totalData = countNotEmptyProductAllLocationWithExpDaysBeforeAfter(expDaysWithin + 1, expDatAfter);
-			 
-		} else {
-			totalData = countNotEmptyProductAllLocation();
-		}
-		return totalData;
-	}
 
 	default List<Product> getAvailableProducts(boolean isMasterHealthCenter, Filter filter, Long locationId) {
 		final boolean ignoreEmptyValue = filter.isIgnoreEmptyValue();

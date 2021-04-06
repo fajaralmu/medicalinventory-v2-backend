@@ -10,6 +10,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.BigIntegerType;
+import org.hibernate.type.IntegerType;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -32,7 +33,13 @@ public class CommonRepository {
 		if (null == result) {
 			return BigInteger.ZERO;
 		}
-		return BigInteger.valueOf(Long.valueOf(result.toString()));
+		try {
+			return BigInteger.valueOf(Long.valueOf(result.toString()));
+		} catch (Exception e) {
+			System.out.println("ERROR PARSING NUMBER: "+result);
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 	protected BigInteger bigintResult(Criteria criteria) {
 		return bigint(criteria.uniqueResult());
@@ -45,29 +52,25 @@ public class CommonRepository {
 	
 	protected Criteria getCriteria(Class<? extends BaseEntity> _class) {
 		Session session = getSession();
-		return  session.createCriteria(ProductFlow.class);
+		return  session.createCriteria(_class);
 	}
-	protected Criteria commonGetStockCriteria(@Nullable Long locationId, TransactionType ... transactionTypes) {
-		Criteria criteria = commonGetStockCriteria(locationId);
+	protected Criteria commonStockCriteria(@Nullable Long locationId, TransactionType ... transactionTypes) {
+		Criteria criteria = commonStockCriteria(locationId);
 		Criterion[] typeRestrictions = new Criterion[transactionTypes.length];
 		for (int i = 0; i < typeRestrictions.length; i++) {
 			typeRestrictions[i] = Restrictions.eq("transaction.type", transactionTypes[i]);
 		}
-		criteria.add(Restrictions.or(
-			typeRestrictions 
-		));
+		criteria.add(Restrictions.or(typeRestrictions));
 		return criteria;
 	}
-	protected Criteria commonGetStockCriteria(@Nullable Long locationId) {
+	protected Criteria commonStockCriteria(@Nullable Long locationId) {
 		Criteria criteria = getCriteria(ProductFlow.class);
 		criteria.createAlias("transaction", "transaction");
 		if (null != locationId) {
 			criteria.add(Restrictions.eq("transaction.healthCenterDestination.id", locationId));
 		}
-		criteria.add(Restrictions.sqlRestriction("(count - used_count) > 0"));
-		Type[] type = new Type[] {
-				new BigIntegerType()
-		};
+		criteria.add(Restrictions.sqlRestriction("(count - used_count) > ?", 0 , IntegerType.INSTANCE));
+		Type[] type = {new BigIntegerType()};
 		criteria.setProjection(Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
 		
 		return criteria;

@@ -55,6 +55,8 @@ public class InventoryService {
 	private ProgressService progressService;
 	@Autowired
 	private StockAdjusterService stockAdjusterService;
+	@Autowired
+	private ProductAvailabilityRepository productAvailabilityRepository;
 
 	public WebResponse getAvailableProductStocks(String code, WebRequest webRequest) {
 		log.info("get Available Product Stocks {}", code);
@@ -173,10 +175,10 @@ public class InventoryService {
 		final BigInteger totalData;
 		if (filter.isIgnoreEmptyValue()) {
 			if (filter.isAllFlag()) {
-				totalData = productRepository.countNontEmptyProductAllLocation(isMasterHealthCenter,
+				totalData = productAvailabilityRepository.countNontEmptyProductAllLocation(isMasterHealthCenter,
 						expDaysWithin(filter));
 			} else {
-				totalData = productRepository.countNontEmptyProduct(isMasterHealthCenter, expDaysWithin(filter),
+				totalData = productAvailabilityRepository.countNontEmptyProduct(isMasterHealthCenter, expDaysWithin(filter),
 						location.getId());
 			}
 		} else {
