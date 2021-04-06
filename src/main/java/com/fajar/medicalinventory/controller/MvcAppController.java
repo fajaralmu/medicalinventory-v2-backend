@@ -35,5 +35,9 @@ public class MvcAppController extends BaseController{
 	public String profile(Model model, HttpServletRequest request, HttpServletResponse response)  { 
 		return basePage;
 	}
+	@RequestMapping(value = { "/main"})
+	public String application(Model model, HttpServletRequest request, HttpServletResponse response)  { 
+		return "front-end-app";
+	}
 
 }
