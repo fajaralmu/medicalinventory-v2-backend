@@ -130,7 +130,7 @@
         t();
       })([]);
     </script>
-    <script src="<c:url value="/res/react_resources/static/js/2.a4fddafe.chunk.js"/>"></script>
-    <script src="<c:url value="/res/react_resources/static/js/main.6196a5eb.chunk.js"/>"></script>
+    <script src="<c:url value="/res/react_resources/static/js/2.f1ff6c2d.chunk.js"/>"></script>
+    <script src="<c:url value="/res/react_resources/static/js/main.a25f8124.chunk.js"/>"></script>
   </body>
 </html>

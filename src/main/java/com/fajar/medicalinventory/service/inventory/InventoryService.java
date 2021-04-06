@@ -42,7 +42,7 @@ public class InventoryService {
 	@Autowired
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
-	private ProductStockWillExpiredRepository productStockWillExpiredRepository;
+	private ProductStockRepositoryv2 productStockRepository;
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -157,12 +157,12 @@ public class InventoryService {
 	private BigInteger getTotalProductStockRecord(boolean isMasterHealthCenter, Filter filter, HealthCenter location) {
 		BigInteger totalItems;
 		if (filter.isAllFlag()) {
-			totalItems = productStockWillExpiredRepository.getTotalItemsAllLocation(expDaysWithin(filter));
+			totalItems = productStockRepository.getTotalItemsAllLocation(expDaysWithin(filter));
 		} else {
 			if (isMasterHealthCenter) {
-				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
+				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(expDaysWithin(filter));
 			} else {
-				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
+				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(),
 						expDaysWithin(filter));
 			}
 		}
@@ -264,9 +264,9 @@ public class InventoryService {
 		for (HealthCenter location : locations) {
 			BigInteger totalItems;
 			if (healthCenterMasterService.isMasterHealthCenter(location)) {
-				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
+				totalItems = productStockRepository.getTotalItemsWillExpireAtMasterWarehouse(remainingDays);
 			} else {
-				totalItems = productStockWillExpiredRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
+				totalItems = productStockRepository.getTotalItemsWillExpireAtBranchWarehouse(location.getId(), remainingDays);
 			}
 
 			ProductInventory inventory = new ProductInventory();

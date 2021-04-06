@@ -6,15 +6,18 @@ import static com.fajar.medicalinventory.util.DateUtil.clock24Midnight;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.util.DateUtil;
 
+/**
+ * Deprecated !
+ * replaced with ProductStockRepositoryv2
+ * @author Republic Of Gamers
+ *
+ */
 @Service
+@Deprecated
 public class ProductStockWillExpiredRepository extends CommonRepository{
 	
 	
@@ -93,7 +96,7 @@ public class ProductStockWillExpiredRepository extends CommonRepository{
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx  "
 				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE') "
-				+ " and pf.expiredDate < ? and pf.expiredDate > ? "
+				+ " and pf.expiredDate between ? and ?  "
 				+ " and (pf.count-pf.usedCount) > 0";
 		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, before);
@@ -151,7 +154,7 @@ public class ProductStockWillExpiredRepository extends CommonRepository{
 		final String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_IN' "
-				+ " and pf.expiredDate < ? and pf.expiredDate > ? "
+				+ " and pf.expiredDate between ? and ?  "
 				+ " and (pf.count-pf.usedCount) > 0";
 		org.hibernate.Query q = getQuery(queryString);
 		q.setParameter(0, before);
