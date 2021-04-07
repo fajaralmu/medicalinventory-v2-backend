@@ -18,7 +18,7 @@ import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.Product;
 import com.fajar.medicalinventory.entity.ProductFlow;
 
-public class ProductAvailablityQueryBuilder {
+public class ProductAvailablityCountQueryBuilder {
 
 	static long branch_id = 24L;
 	static Session session;

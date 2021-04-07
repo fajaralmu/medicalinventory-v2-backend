@@ -9,7 +9,9 @@ import static org.hibernate.criterion.Restrictions.lt;
 import java.math.BigInteger;
 import java.util.Date;
 
-import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.type.BigIntegerType;
+import org.hibernate.type.Type;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,16 @@ import com.fajar.medicalinventory.util.DateUtil;
 public class ProductStockRepositoryv2 extends CommonRepository {
 
 	private static final String FIELD_EXP_DATE = "expiredDate";
+	
+	@Override
+	protected CriteriaWrapper commonStockCriteria(Long locationId) {
+		
+		CriteriaWrapper wrapper = super.commonStockCriteria(locationId);
+		Type[] type = {new BigIntegerType()};
+		wrapper.getCriteria().setProjection(Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
+		
+		return wrapper;
+	}
 
 	////////////////// BRANCH WAREHOUSE ///////////////////
 

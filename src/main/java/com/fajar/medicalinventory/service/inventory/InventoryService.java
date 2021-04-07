@@ -93,9 +93,9 @@ public class InventoryService {
 		final List<Product> products;
 
 		if (filter.isAllFlag()) {
-			products = productRepository.getAvailableProductsAllLocation(filter);
+			products = productAvailabilityRepository.getAvailableProductsAllLocation(filter);
 		} else {
-			products = productRepository.getAvailableProducts(isMasterHealthCenter, filter, location.getId());
+			products = productAvailabilityRepository.getAvailableProducts(isMasterHealthCenter, filter, location.getId());
 		}
 
 		List<ProductStock> productStocks = new ArrayList<ProductStock>(); 

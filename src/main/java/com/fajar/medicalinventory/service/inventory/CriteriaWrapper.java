@@ -19,7 +19,7 @@ public class CriteriaWrapper {
 	public Criteria getCriteria() {
 		return criteria;
 	}
-	public void close() {
+	public void closeSession() {
 		session.close();
 	}
 }

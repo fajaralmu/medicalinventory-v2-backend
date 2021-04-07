@@ -43,7 +43,7 @@ public class CommonRepository {
 	}
 	protected BigInteger bigintResult(CriteriaWrapper criteriaWrapper) {
 		BigInteger result = bigint(criteriaWrapper.getCriteria().uniqueResult());
-		criteriaWrapper.close();
+		criteriaWrapper.closeSession();
 		return result;
 	}
 	protected Query getQuery(String queryString) {
@@ -76,8 +76,6 @@ public class CommonRepository {
 			criteria.add(Restrictions.eq("transaction.healthCenterDestination.id", locationId));
 		}
 		criteria.add(Restrictions.sqlRestriction("(count - used_count) > ?", 0 , IntegerType.INSTANCE));
-		Type[] type = {new BigIntegerType()};
-		criteria.setProjection(Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
 		
 		return criteriaWrapper;
 	}
