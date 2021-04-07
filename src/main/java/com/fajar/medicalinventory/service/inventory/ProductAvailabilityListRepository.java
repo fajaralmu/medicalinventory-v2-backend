@@ -25,10 +25,10 @@ import com.fajar.medicalinventory.util.DateUtil;
 
 @Service
 public class ProductAvailabilityListRepository extends CommonRepository {
-	
+
 	@Autowired
 	private ProductRepository productRepository;
-	
+
 	public List<Product> getAvailableProducts(boolean isMasterHealthCenter, Filter filter, Long locationId) {
 		final boolean ignoreEmptyValue = filter.isIgnoreEmptyValue();
 		final Integer expDaysWithin = filter.isFilterExpDate() ? filter.getDay() : null;
@@ -37,7 +37,7 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 
 		if (ignoreEmptyValue) {
 			boolean withExpDateFilter = expDaysWithin != null;
-			Date expiredDateWithin = withExpDateFilter ? DateUtil.plusDay(new Date(), expDaysWithin  ) : null;
+			Date expiredDateWithin = withExpDateFilter ? DateUtil.plusDay(new Date(), expDaysWithin) : null;
 			if (isMasterHealthCenter) {
 				products = findNotEmptyProductAtMasterWarehouse(expiredDateWithin, pageable);
 			} else {
@@ -55,7 +55,8 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 		if (expiredDateWithin != null) {
 			boolean afterToday = DateUtil.afterToday(expiredDateWithin);
 			if (afterToday) {
-				findNotEmptyProductInSpecifiedWarehouseWithExpDateBeforeAfter(locationId, expiredDateWithin, new Date(), pageable);
+				findNotEmptyProductInSpecifiedWarehouseWithExpDateBeforeAfter(locationId, expiredDateWithin, new Date(),
+						pageable);
 			}
 			return findNotEmptyProductInSpecifiedWarehouseWithExpDateBefore(locationId, expiredDateWithin, pageable);
 		} else {
@@ -74,6 +75,7 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 			return findNotEmptyProductInMasterWarehouse(pageable);
 		}
 	}
+
 	public List<Product> findNotEmptyProductAtAllLocation(@Nullable Date expiredDateWithin, PageRequest pageable) {
 		if (expiredDateWithin != null) {
 			boolean afterToday = DateUtil.afterToday(expiredDateWithin);
@@ -94,16 +96,15 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 
 		if (ignoreEmptyValue) {
 			boolean withExpDateFilter = expDaysWithin != null;
-			Date expiredDateWithin = withExpDateFilter ? DateUtil.plusDay(new Date(), expDaysWithin  ) : null;
+			Date expiredDateWithin = withExpDateFilter ? DateUtil.plusDay(new Date(), expDaysWithin) : null;
 			products = findNotEmptyProductAtAllLocation(expiredDateWithin, pageable);
-			 
+
 		} else {
 			products = productRepository.findByOrderByName(pageable);
 		}
-		return products ;
-	} 
-	
-	
+		return products;
+	}
+
 	////////////////////////////////////////////////////
 
 	@Override
@@ -124,17 +125,20 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 
 	///////////////// BRANCH ///////////////////
 
- 
 	private List<Product> findNotEmptyProductInSpecifiedWarehouse(Long locationId, Pageable of) {
 
-		CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		try (CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
 
-		Criteria criteria = wrapper.getCriteria();
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
 
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		return products;
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	static void setLimitOffset(Criteria criteria, Pageable of) {
@@ -146,101 +150,140 @@ public class ProductAvailabilityListRepository extends CommonRepository {
 	private List<Product> findNotEmptyProductInSpecifiedWarehouseWithExpDateBefore(Long locationId, Date expDateBefore,
 			Pageable of) {
 
-		CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.lt("expiredDate", expDateBefore));
+		try (CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.lt("expiredDate", expDateBefore));
 
-		setLimitOffset(criteria, of);
+			setLimitOffset(criteria, of);
 
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		return products;
+			List<Product> products = extractProducts(wrapper);
+
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	private List<Product> findNotEmptyProductInSpecifiedWarehouseWithExpDateBeforeAfter(Long locationId,
 			Date expDateBefore, Date expDateAfter, Pageable of) {
 
-		CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
+		try (CriteriaWrapper wrapper = commonStockCriteria(locationId, TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
 
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		System.out.println(products);
-		return products;
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
+
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 
 	}
 
 	/////////////// MASTER /////////////////////
-	 
 
 	private List<Product> findNotEmptyProductInMasterWarehouse(Pageable of) {
 
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN);
-		setLimitOffset(wrapper.getCriteria(), of);
-		List<Product> products = extractProducts(wrapper);
-		System.out.println(products);
-		return products;
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN)) {
+			setLimitOffset(wrapper.getCriteria(), of);
+			List<Product> products = extractProducts(wrapper);
+
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	private List<Product> findNotEmptyProductInMasterWarehouseWithExpDateBefore(Date expDateBefore, Pageable of) {
 
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.lt("expiredDate", expDateBefore));
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		return products;
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.lt("expiredDate", expDateBefore));
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	private List<Product> findNotEmptyProductInMasterWarehouseWithExpDateBeforeAfter(Date expDateBefore,
 			Date expDateAfter, Pageable of) {
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		return products;
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
-	////////////////////// ALL LOCATION ////////////////// 
-	 
+	////////////////////// ALL LOCATION //////////////////
+
 	private List<Product> findNotEmptyProductAllLocation(Pageable of) {
-		 
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN, TransactionType.TRANS_OUT_TO_WAREHOUSE);
-		Criteria criteria = wrapper.getCriteria();
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		return products;
+
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN,
+				TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
+
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
-	
+
 	private List<Product> findNotEmptyProductAllLocationWithExpDateBefore(Date expDateBefore, Pageable of) {
-		 
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN, TransactionType.TRANS_OUT_TO_WAREHOUSE);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.lt("expiredDate", expDateBefore));
-		setLimitOffset(criteria, of);
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		return products;
+
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN,
+				TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.lt("expiredDate", expDateBefore));
+			setLimitOffset(criteria, of);
+			List<Product> products = extractProducts(wrapper);
+
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
-	
+
 	private List<Product> findNotEmptyProductAllLocationWithExpDateBeforeAfter(Date expDateBefore, Date expDateAfter,
 			Pageable of) {
-		 
-		CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN, TransactionType.TRANS_OUT_TO_WAREHOUSE);
-		Criteria criteria = wrapper.getCriteria();
-		criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
-		setLimitOffset(criteria, of);
 
-		List<Product> products = extractProducts(wrapper);
-		wrapper.closeSession();
-		return products;
+		try (CriteriaWrapper wrapper = commonStockCriteria(null, TransactionType.TRANS_IN,
+				TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Criteria criteria = wrapper.getCriteria();
+			criteria.add(Restrictions.between("expiredDate", expDateAfter, expDateBefore));
+			setLimitOffset(criteria, of);
+
+			List<Product> products = extractProducts(wrapper);
+			return products;
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
-	
 	////////////////////////////////////////////////
 
 	private List<Product> extractProducts(CriteriaWrapper wrapper) {

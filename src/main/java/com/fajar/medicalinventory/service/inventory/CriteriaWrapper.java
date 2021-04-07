@@ -3,7 +3,7 @@ package com.fajar.medicalinventory.service.inventory;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 
-public class CriteriaWrapper {
+public class CriteriaWrapper implements AutoCloseable  {
 
 	final Session session;
 	final Criteria criteria;
@@ -18,8 +18,11 @@ public class CriteriaWrapper {
 	}
 	public Criteria getCriteria() {
 		return criteria;
-	}
-	public void closeSession() {
+	} 
+
+	@Override
+	public void close() throws Exception {
+		 
 		session.close();
 	}
 }

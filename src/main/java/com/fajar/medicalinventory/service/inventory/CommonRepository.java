@@ -43,7 +43,6 @@ public class CommonRepository {
 	}
 	protected BigInteger bigintResult(CriteriaWrapper criteriaWrapper) {
 		BigInteger result = bigint(criteriaWrapper.getCriteria().uniqueResult());
-		criteriaWrapper.closeSession();
 		return result;
 	}
 	protected Query getQuery(String queryString) {

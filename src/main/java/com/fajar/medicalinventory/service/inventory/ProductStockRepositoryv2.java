@@ -22,14 +22,15 @@ import com.fajar.medicalinventory.util.DateUtil;
 public class ProductStockRepositoryv2 extends CommonRepository {
 
 	private static final String FIELD_EXP_DATE = "expiredDate";
-	
+
 	@Override
 	protected CriteriaWrapper commonStockCriteria(Long locationId) {
-		
+
 		CriteriaWrapper wrapper = super.commonStockCriteria(locationId);
-		Type[] type = {new BigIntegerType()};
-		wrapper.getCriteria().setProjection(Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
-		
+		Type[] type = { new BigIntegerType() };
+		wrapper.getCriteria().setProjection(
+				Projections.sqlProjection("sum(count - used_count) as stock", new String[] { "stock" }, type));
+
 		return wrapper;
 	}
 
@@ -55,25 +56,37 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 
 	private BigInteger getTotalItemsAtBranchWarehouse(long locationId) {
 
-		CriteriaWrapper criteria = getTotalItemsAtBranchCriteria(locationId);
-		return bigintResult(criteria);
+		try (CriteriaWrapper criteria = getTotalItemsAtBranchCriteria(locationId)) {
+			return bigintResult(criteria);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAtBranchWarehouseAndExpDateBefore(long locationId, Date expBefore) {
 
-		CriteriaWrapper wrapper = getTotalItemsAtBranchCriteria(locationId);
-		wrapper.getCriteria().add(lt(FIELD_EXP_DATE, expBefore));
-
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAtBranchCriteria(locationId)) {
+			wrapper.getCriteria().add(lt(FIELD_EXP_DATE, expBefore));
+			return bigintResult(wrapper);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAtBranchWarehouseAndExpDateBeforeAfter(Long locationId, Date expBefore,
 			Date expAfter) {
 
-		CriteriaWrapper wrapper = getTotalItemsAtBranchCriteria(locationId);
-		wrapper.getCriteria().add(between(FIELD_EXP_DATE, expBefore, expAfter));
-
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAtBranchCriteria(locationId)) {
+			wrapper.getCriteria().add(between(FIELD_EXP_DATE, expBefore, expAfter));
+			return bigintResult(wrapper);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	////////////////// ALL WAREHOUSE ///////////////////
@@ -97,22 +110,34 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 
 	private BigInteger getTotalItemsAllLocation() {
 
-		CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria();
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria()) {
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAllLocationAndExpDateBeforeAndAfter(Date before, Date after) {
 
-		CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria();
-		wrapper.getCriteria().add(between(FIELD_EXP_DATE, before, after));
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria()) {
+			wrapper.getCriteria().add(between(FIELD_EXP_DATE, before, after));
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAllLocationAndExpDateBefore(Date before) {
 
-		CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria();
-		wrapper.getCriteria().add(lt(FIELD_EXP_DATE, before));
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAllLocationCriteria()) {
+			wrapper.getCriteria().add(lt(FIELD_EXP_DATE, before));
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	////////////////// MASTER WAREHOUSE ///////////////////
@@ -135,22 +160,34 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 
 	private BigInteger getTotalItemsAtMasterWarehouse() {
 
-		CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria();
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria()) {
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAtMasterWarehouseAndExpDateBefore(Date before) {
 
-		CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria();
-		wrapper.getCriteria().add(lt(FIELD_EXP_DATE, before));
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria()) {
+			wrapper.getCriteria().add(lt(FIELD_EXP_DATE, before));
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 	}
 
 	private BigInteger getTotalItemsAtMasterWarehouseAndExpDateBeforeAndAfter(Date before, Date after) {
 
-		CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria();
-		wrapper.getCriteria().add(between(FIELD_EXP_DATE, before, after));
-		return bigintResult(wrapper);
+		try (CriteriaWrapper wrapper = getTotalItemsAtMasterCriteria()) {
+			wrapper.getCriteria().add(between(FIELD_EXP_DATE, before, after));
+			return bigintResult(wrapper);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return BigInteger.ZERO;
+		}
 
 	}
 }
