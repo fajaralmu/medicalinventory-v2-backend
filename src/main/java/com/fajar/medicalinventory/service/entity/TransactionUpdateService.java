@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
@@ -30,27 +31,46 @@ public class TransactionUpdateService extends BaseEntityUpdateService<Transactio
 			throws Exception {
 		Transaction record = entityRepository.findById(Transaction.class, object.getId());
 		Assert.notNull(record, "Record not found");
-		
+		validateType(record.getType(), object);
 		modify(object, record);
-		
+
 		return entityRepository.save(record);
-		
+
 	}
-	
+
+	private static void validateType(TransactionType type, Transaction object) {
+		
+		if (type.equals(TransactionType.TRANS_IN)) {
+			Assert.notNull(object.getSupplier(), "Supplier not found for TRANS_IN");
+			object.setCustomer(null);
+			object.setHealthCenterDestination(null);
+		}
+		if (type.equals(TransactionType.TRANS_OUT)) {
+			Assert.notNull(object.getCustomer(), "Customer not found for TRANS_OUT");
+			object.setSupplier(null);
+			object.setHealthCenterDestination(null);
+		}
+		if (type.equals(TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Assert.notNull(object.getHealthCenterDestination(), "HealthCenterDestination not found");
+			object.setSupplier(null);
+			object.setCustomer(null);
+		}
+
+	}
+
 	private static void modify(Transaction source, Transaction target) throws Exception {
-		EntityUtil.copyProperties(source, target, true, 
-				"transactionDate", "description");//, "customer", "supplier");
-		  
-		
+		EntityUtil.copyProperties(source, target, true,
+				"transactionDate", "description", "customer", "supplier", "healthCenterDestination");
+
 	}
-	
+
 	public static void main(String[] args) throws Exception {
-		User u =User.builder().displayName("FAJAR AM").username("FAJAR").build();
-		User u2 =User.builder().displayName("FAJAR AM v2").username("FAJAR_v2").build();
+		User u = User.builder().displayName("FAJAR AM").username("FAJAR").build();
+		User u2 = User.builder().displayName("FAJAR AM v2").username("FAJAR_v2").build();
 		EntityUtil.copyProperties(u2, u, true, "username");
 		System.out.println(u);
 	}
-	
+
 	@Override
 	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
 		throw new NotImplementedException("Not Allowed");
@@ -61,7 +81,7 @@ public class TransactionUpdateService extends BaseEntityUpdateService<Transactio
 		if (null == objects || objects.size() == 0) {
 			return;
 		}
-		
+
 		Map<Long, List<ProductFlow>> mappedProductFlow = new HashMap<Long, List<ProductFlow>>();
 		List<ProductFlow> productFlows = productFlowRepository.findByTransactionIn(objects);
 		for (ProductFlow productFlow : productFlows) {

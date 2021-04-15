@@ -48,7 +48,7 @@ public class TransactionModel extends BaseModel<Transaction> {
 	@FormField(type = FieldType.FIELD_TYPE_DATETIME)
 	@Default
 	private Date transactionDate = new Date();
-	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
+	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String description;
 	@FormField(editable = false, filterable = false)
 	@Getter(value = AccessLevel.NONE)
@@ -59,11 +59,11 @@ public class TransactionModel extends BaseModel<Transaction> {
 	@FormField(optionItemName = "displayName", editable = false)
 	@Getter(value = AccessLevel.NONE)
 	private UserModel user;
-	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", required = false)
 	private SupplierModel supplier;
-	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", required = false)
 	private CustomerModel customer;
-	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", required = false)
 	private HealthCenterModel healthCenterDestination;
 
 	/**
