@@ -7,14 +7,17 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
-import com.fajar.medicalinventory.exception.ApplicationException;
+import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
+import com.fajar.medicalinventory.util.EntityUtil;
 
 @Service
 public class TransactionUpdateService extends BaseEntityUpdateService<Transaction> {
@@ -23,13 +26,34 @@ public class TransactionUpdateService extends BaseEntityUpdateService<Transactio
 	private ProductFlowRepository productFlowRepository;
 
 	@Override
-	public Transaction saveEntity(Transaction baseEntity, boolean newRecord, HttpServletRequest httpServletRequest)
+	public Transaction saveEntity(Transaction object, boolean newRecord, HttpServletRequest httpServletRequest)
 			throws Exception {
-		throw new ApplicationException("Not Allowed");
+		Transaction record = entityRepository.findById(Transaction.class, object.getId());
+		Assert.notNull(record, "Record not found");
+		
+		modify(object, record);
+		
+		return entityRepository.save(record);
+		
 	}
+	
+	private static void modify(Transaction source, Transaction target) throws Exception {
+		EntityUtil.copyProperties(source, target, true, 
+				"transactionDate", "description");//, "customer", "supplier");
+		  
+		
+	}
+	
+	public static void main(String[] args) throws Exception {
+		User u =User.builder().displayName("FAJAR AM").username("FAJAR").build();
+		User u2 =User.builder().displayName("FAJAR AM v2").username("FAJAR_v2").build();
+		EntityUtil.copyProperties(u2, u, true, "username");
+		System.out.println(u);
+	}
+	
 	@Override
 	public WebResponse deleteEntity(Long id, Class _class, HttpServletRequest httpServletRequest) throws Exception {
-		throw new ApplicationException("Not Allowed");
+		throw new NotImplementedException("Not Allowed");
 	}
 
 	@Override

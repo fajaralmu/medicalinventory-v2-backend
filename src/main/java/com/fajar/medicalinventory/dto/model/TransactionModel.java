@@ -31,19 +31,19 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@Dto(editable = false, updateService = "transactionUpdateService", value= "Transaksi")
+@Dto(deletable = false, editable = true, creatable = false, updateService = "transactionUpdateService", value = "Transaksi")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Slf4j
-public class TransactionModel extends BaseModel<Transaction>{
+public class TransactionModel extends BaseModel<Transaction> {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1055517081803635273L;
-	@FormField
+	@FormField(editable = false)
 	private String code;
 	@FormField(type = FieldType.FIELD_TYPE_DATETIME)
 	@Default
@@ -51,25 +51,25 @@ public class TransactionModel extends BaseModel<Transaction>{
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA)
 	private String description;
 	@FormField(editable = false, filterable = false)
-	@Getter(value=AccessLevel.NONE)
+	@Getter(value = AccessLevel.NONE)
 	private int productCount;
 
-	@FormField
+	@FormField(editable = false)
 	private TransactionType type;
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(optionItemName = "displayName", editable = false)
 	@Getter(value = AccessLevel.NONE)
 	private UserModel user;
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
 	private SupplierModel supplier;
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
 	private CustomerModel customer;
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
 	private HealthCenterModel healthCenterDestination;
-	
+
 	/**
 	 * health center where transaction is performed
 	 */
-	@FormField(type = FieldType.FIELD_TYPE_FIXED_LIST, optionItemName = "name")
+	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
 	private HealthCenterModel healthCenterLocation;
 
 	@Default
@@ -78,24 +78,26 @@ public class TransactionModel extends BaseModel<Transaction>{
 	@Override
 	public Transaction toEntity() {
 		Transaction entity = new Transaction();
-		productFlows.forEach(p-> {
+		productFlows.forEach(p -> {
 			entity.addProductFlow(p.toEntity());
 		});
 		return copy(entity, "productFlows");
 	}
+
 	public void addProductFlow(ProductFlowModel productFlow) {
 		productFlows.add(productFlow);
 	}
-	
+
 	public int getProductCount() {
-		if (null == productFlows) return 0;
+		if (null == productFlows)
+			return 0;
 		int count = 0;
 		for (ProductFlowModel productFlow : productFlows) {
-			count+=productFlow.getCount();
+			count += productFlow.getCount();
 		}
 		return count;
 	}
-	 
+
 	public UserModel getUser() {
 		user.setPassword(null);
 		user.setAuthorities(null);

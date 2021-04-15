@@ -44,7 +44,9 @@ public class UserModel extends BaseModel<User>{
 		
 		User user = super.toEntity();
 		Set<Authority> _authorities = new HashSet<Authority>();
-		this.authorities.forEach(a->{_authorities.add(a.toEntity());});
+		if (this.authorities !=null) {
+			this.authorities.forEach(a->_authorities.add(a.toEntity()));
+		}
 		user.setAuthorities(_authorities );
 		return user;
 	}

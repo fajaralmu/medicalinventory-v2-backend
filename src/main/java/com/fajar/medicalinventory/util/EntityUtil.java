@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.springframework.util.Assert;
 
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.entity.BaseEntity; 
@@ -379,6 +380,23 @@ public class EntityUtil {
 		}
 		
 		return false;
+	}
+	
+	public static <T> void copyProperties(T source, T target, boolean ignoreNull, String ...propertiesToCopy) throws  Exception {
+		Assert.notNull(source, "Source must not be null");
+		Assert.notNull(target, "Target must not be null");
+		System.out.println("propertiesToCopy: "+ String.join(",", propertiesToCopy));
+		Class<T> _class = (Class<T>) source.getClass();
+		for (String name : propertiesToCopy) {
+			
+			Field field = EntityUtil.getDeclaredField(_class, name);
+			Object sourceValue = field.get(source);
+			field.setAccessible(true);
+			if (ignoreNull && sourceValue != null) {
+				field.set(target, sourceValue);
+			}
+					
+		}
 	}
 
 }
