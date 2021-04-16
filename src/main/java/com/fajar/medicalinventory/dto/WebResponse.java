@@ -38,7 +38,7 @@ public class WebResponse implements Serializable {
 	private static final long serialVersionUID = -8345271799535134609L;
 	@Builder.Default
 	private Date date = new Date();
-	private UserModel user;
+	private UserModel user; 
 	@Builder.Default
 	private String code = "00";
 	@Builder.Default
@@ -87,6 +87,11 @@ public class WebResponse implements Serializable {
 		this.entities = CollectionUtil.convertList(entities);
 	}
 	 
+	public long getId() {
+		return Thread.currentThread().getId();
+	}
+	
+	//////////////////// statics ///////////////////
 	
 	public static WebResponse failedResponse() {
 		return new WebResponse("01", "INVALID REQUEST");
