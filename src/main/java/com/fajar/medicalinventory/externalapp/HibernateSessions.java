@@ -39,26 +39,7 @@ public class HibernateSessions {
 		}
 		return returnClasses;
 	}
-
-	private static Properties additionalProperties() {
-
-		String dialect = "org.hibernate.dialect.MySQLDialect";
-		String ddlAuto = "update";
-
-		Properties properties = new Properties();
-		properties.setProperty("hibernate.dialect", dialect);
-		properties.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/goodshopv2");
-		properties.setProperty("hibernate.connection.username", "root");
-		properties.setProperty("hibernate.connection.password", "");
-
-		properties.setProperty("hibernate.connection.driver_class", com.mysql.jdbc.Driver.class.getCanonicalName());
-		properties.setProperty("hibernate.current_session_context_class", "thread");
-		properties.setProperty("hibernate.show_sql", "true");
-		properties.setProperty("hibernate.connection.pool_size", "1");
-		properties.setProperty("hbm2ddl.auto", ddlAuto);
-
-		return properties;
-	}
+ 
 
 	private static Properties additionalPropertiesPostgresOffline() {
 

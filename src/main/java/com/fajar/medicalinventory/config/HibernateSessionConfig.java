@@ -73,7 +73,7 @@ public class HibernateSessionConfig {
 		String dialect = entityManagerFactoryBean.getProperties().get("hibernate.dialect").toString();
 		String ddlAuto = entityManagerFactoryBean.getProperties().get("hibernate.hbm2ddl.auto").toString();
 		String use_jdbc_metadata_defaults = entityManagerFactoryBean.getProperties().get("hibernate.temp.use_jdbc_metadata_defaults").toString();
-		Class<? extends Driver> driverClass = com.mysql.jdbc.Driver.class;
+		Class<? extends Driver> driverClass = org.postgresql.Driver.class;// com.mysql.jdbc.Driver.class;
 		try {
 			String connectionUrl =(driverManagerDataSource.getConnection().getMetaData().getURL());
 			log.info("CONNECTION URL: {}", connectionUrl);

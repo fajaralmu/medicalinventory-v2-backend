@@ -55,6 +55,7 @@ public class TransactionUpdateService extends BaseEntityUpdateService<Transactio
 			object.setSupplier(null);
 			object.setCustomer(null);
 		}
+		 
 
 	}
 
