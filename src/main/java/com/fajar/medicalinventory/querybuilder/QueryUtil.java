@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.dto.KeyValue;
+import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.EntityUtil;
 
@@ -32,8 +33,19 @@ public class QueryUtil {
 	//placeholders
 	public static final String SQL_RAW_DATE_FILTER = " ${MODE}(`${TABLE_NAME}`.`${COLUMN_NAME}`) = ${VALUE} ";
 	 
-	public static Field getFieldByName(String name, List<Field> fields) {
-		return EntityUtil.getObjectFromListByFieldName("name", name, fields);
+	public static Field getFieldByName(String name, List<Field> entityFields, Class<? extends BaseEntity> entityClass) {
+		System.out.println("will get field by key: "+name);
+		Field field = EntityUtil.getObjectFromListByFieldName("name", name, entityFields);
+		if (field == null) { 
+			Field modelField = BaseEntity.getModelField(name, entityClass);
+			if (modelField != null) {
+				FormField formField = modelField.getAnnotation(FormField.class);
+				if (null != formField && formField.entityField().trim().isEmpty() == false) {
+					return EntityUtil.getDeclaredField(entityClass, formField.entityField());
+				}
+			}
+		}
+		return field;
 	}
  
 	public static String getColumnName(Field field) {
@@ -55,7 +67,7 @@ public class QueryUtil {
 	 * @return
 	 */
 	public static KeyValue<String, String> checkIfJoinColumn(String currentKey, Field relativeToEntityClass, Field field, boolean actualColumnName) {
-		 
+		
 		String multiKeyColumnName = getMultiKeyColumnName(currentKey);
 		KeyValue<String, String> keyValue = new KeyValue<>();
 		boolean isMultiKey 	= null != multiKeyColumnName; 
@@ -73,7 +85,7 @@ public class QueryUtil {
 					joinTableName = getTableName(relativeToEntityClass.getType()); 
 					keyValue.setMultiKey(isMultiKey);
 				}else {
-					referenceFieldName = getOptionItemName(field);
+					referenceFieldName = getOptionItemName(currentKey, field);
 				}
 
 				Field 	referenceEntityField 	= getDeclaredField(fieldClass, referenceFieldName);
@@ -118,9 +130,9 @@ public class QueryUtil {
 		}
 	} 
 
-	private static String getOptionItemName(Field field) {
+	private static String getOptionItemName(String modelFieldKey, Field field) {
 		 
-		Field modelField = BaseEntity.getModelField(field);
+		Field modelField = BaseEntity.getModelField(modelFieldKey, field.getDeclaringClass());
 		if (null == modelField) {
 			System.out.println("modelField "+field.getName()+" IS NULL ");
 		}
@@ -163,6 +175,44 @@ public class QueryUtil {
 		}
 		
 		return joinColumns;
+	}
+	public static  <T extends BaseModel> List<QueryField> getJoinColumnFieldsByBaseModel(Class<T> _class){
+		List<QueryField> joinColumns = new ArrayList<>();
+		Class entityClass = BaseModel.getEntityClass(_class);
+		List<Field> fields = EntityUtil.getDeclaredFields(_class);
+		for (int i = 0; i < fields.size(); i++) {
+			final Field modelField = fields.get(i);
+			
+			FormField formField = modelField.getAnnotation(FormField.class);
+			if(null != formField && null != formField.optionItemName() &&  modelField.getType().getSuperclass()!=null && modelField.getType().getSuperclass().equals(BaseModel.class)) {
+				
+				Field entityField = getEntityField(modelField, entityClass);
+				if (null == entityField) {
+					continue;
+				}
+				entityField.setAccessible(true);
+				QueryField queryField = QueryField.builder().entityField(entityField).modelField(modelField).build();
+				if (formField.entityField().trim().isEmpty() == false) {
+					queryField.setOtherName(formField.entityField());
+				}
+				joinColumns.add(queryField );
+			}
+		}
+		
+		return joinColumns;
+	}
+
+	private static Field getEntityField(Field modelField, Class entityClass) {
+		FormField formField = modelField.getAnnotation(FormField.class);
+		if (null == formField) return null;
+		 
+		Field entityField = BaseModel.getEntityField(modelField);
+		if (null == entityField) {
+			if (!formField.entityField().trim().isEmpty()) {
+				entityField = EntityUtil.getDeclaredField(entityClass, formField.entityField());
+			}
+		}
+		return entityField;
 	}
 
 }

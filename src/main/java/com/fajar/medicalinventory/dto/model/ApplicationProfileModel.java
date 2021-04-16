@@ -51,7 +51,9 @@ public class ApplicationProfileModel extends BaseModel<ApplicationProfile>  {
 	private String pageIcon;
 	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultBackground.BMP")
 	private String backgroundUrl;
-	@FormField(type = FieldType.FIELD_TYPE_PLAIN_LIST, hasPreview = true, previewLink = "fa-preview" , required = false, defaultValue = "home")
+	@FormField(type = FieldType.FIELD_TYPE_PLAIN_LIST, hasPreview = true, 
+//			previewLink = "fa-preview" , 
+			required = false, defaultValue = "home")
 	private FontAwesomeIcon footerIconClass; 
 	
 	@FormField(type = FieldType.FIELD_TYPE_COLOR, required = false, defaultValue = "#1e1e1e")

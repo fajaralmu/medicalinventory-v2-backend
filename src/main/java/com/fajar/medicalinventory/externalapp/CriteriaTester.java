@@ -6,18 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.Entity;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.fajar.medicalinventory.dto.Filter;
-import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.querybuilder.CriteriaBuilder;
@@ -34,7 +31,7 @@ public class CriteriaTester {
 	static ObjectMapper mapper = new ObjectMapper();
 	static List<Class<?>> managedEntities = new ArrayList<>();
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		String queryString = "select sum(pf.count-pf.usedCount) from ProductFlow pf "
 				+ " left join pf.transaction tx "
 				+ " where tx.type = 'TRANS_OUT_TO_WAREHOUSE' "
@@ -48,7 +45,7 @@ public class CriteriaTester {
 		System.out.println("RESULT: "+result);
 	}
 	
-	public static void main222 (String[] args) throws Exception {
+	public static void main (String[] args) throws Exception {
 
 		setSession();
 
@@ -59,9 +56,10 @@ public class CriteriaTester {
 //		fieldsFilter.put("referenceProductFlow", "6013");
 //		fieldsFilter.put("product.id", "1");
 //		fieldsFilter.put("product", "1");
-		fieldsFilter.put("expiredDate-year", "2020");
+		fieldsFilter.put("transaction", "2020");
+		fieldsFilter.put("transaction2", "2020");
 //		fieldsFilter.put("count", "0");
-		Filter filter = Filter.builder().exacts(false). fieldsFilter(fieldsFilter ).build();
+		Filter filter = Filter.builder().orderBy("transaction2").exacts(true).limit(10). fieldsFilter(fieldsFilter ).build();
 		CriteriaBuilder cb = new CriteriaBuilder(testSession, ProductFlow.class,  filter );
 		Criteria criteria = cb.createCriteria();
 	try {
@@ -197,45 +195,5 @@ public class CriteriaTester {
 		return returnClasses;
 	} 
 
-	private static Properties additionalPropertiesPostgresOffline() {
-
-		String dialect = "org.hibernate.dialect.PostgreSQLDialect";
-		String ddlAuto = "update";
-
-		Properties properties = new Properties();
-		properties.setProperty("hibernate.dialect", dialect);
-		properties.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/universal_commerce");
-		properties.setProperty("hibernate.connection.username", "postgres");
-		properties.setProperty("hibernate.connection.password", "root");
-
-		properties.setProperty("hibernate.connection.driver_class", org.postgresql.Driver.class.getCanonicalName());
-		properties.setProperty("hibernate.current_session_context_class", "thread");
-		properties.setProperty("hibernate.show_sql", "true");
-		properties.setProperty("hibernate.connection.pool_size", "1");
-		properties.setProperty("hbm2ddl.auto", ddlAuto);
-
-		return properties;
-	}
-
-	private static Properties additionalPropertiesPostgres() {
-
-		String dialect = "org.hibernate.dialect.PostgreSQLDialect";
-		String ddlAuto = "update";
-
-		Properties properties = new Properties();
-		properties.setProperty("hibernate.dialect", dialect);
-		properties.setProperty("hibernate.connection.url",
-				"jdbc:postgresql://ec2-54-157-12-250.compute-1.amazonaws.com:5432/d1eu0qub2adiiv");
-		properties.setProperty("hibernate.connection.username", "veqlrgwoojdelw");
-		properties.setProperty("hibernate.connection.password",
-				"d8b34a7856fb4ed5e56d082db5a62dd3b527dd848e95ce1e6a3652001a04f7fe");
-
-		properties.setProperty("hibernate.connection.driver_class", org.postgresql.Driver.class.getCanonicalName());
-		properties.setProperty("hibernate.current_session_context_class", "thread");
-		properties.setProperty("hibernate.show_sql", "true");
-		properties.setProperty("hibernate.connection.pool_size", "1");
-		properties.setProperty("hbm2ddl.auto", ddlAuto);
-		properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
-		return properties;
-	}
+	 
 }

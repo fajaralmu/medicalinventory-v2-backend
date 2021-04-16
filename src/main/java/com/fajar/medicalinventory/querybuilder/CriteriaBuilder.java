@@ -24,6 +24,7 @@ import org.hibernate.sql.JoinType;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.dto.Filter;
 import com.fajar.medicalinventory.dto.KeyValue;
+import com.fajar.medicalinventory.dto.model.ProductFlowModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.EntityUtil;
 
@@ -42,6 +43,7 @@ public class CriteriaBuilder {
 	private final Criteria criteria;
 	private final Map<String, Object> fieldsFilter;
 	private final Map<String, Integer> aliases = new HashMap<>();
+	private final Map<String, String> aliasesOtherNames = new HashMap<>();
 	private final List<Field> entityDeclaredFields;
 
 	private static final String THIS = "this";
@@ -59,6 +61,10 @@ public class CriteriaBuilder {
 		log.info("=======CriteriaBuilder Field Filters: {}", fieldsFilter);
 	}
 
+	private Field getFieldByKeyName(String name) {
+		return getFieldByName(name, entityDeclaredFields, entityClass);
+	}
+	
 	/**
 	 * 
 	 * @param keyName raw path name
@@ -74,7 +80,7 @@ public class CriteriaBuilder {
 		 
 		if (multiKey) {
 			System.out.println("multiKey: "+multiKey+" "+keyName);
-			Field foreignField = EntityUtil.getDeclaredField(entityClass, keyName.split("\\.")[0]);
+			Field foreignField = getFieldByKeyName(keyName.split("\\.")[0]);
 			field = EntityUtil.getDeclaredField(foreignField.getType(), keyName.split("\\.")[1]);
 			
 			if (field.getAnnotation(Transient.class)!=null) return null;
@@ -82,7 +88,7 @@ public class CriteriaBuilder {
 			String alias = getAlias(foreignField.getName()) + "." + QueryUtil.getColumnName(field);
 			return Restrictions.sqlRestriction(alias + "='" + fieldValue + "'");
 		} else {
-			field = EntityUtil.getDeclaredField(entityClass, keyName);
+			field = getFieldByKeyName(keyName);// EntityUtil.getDeclaredField(entityClass, keyName);
 			
 			if (field==null||field.getAnnotation(Transient.class)!=null) return null;
 			
@@ -132,12 +138,19 @@ public class CriteriaBuilder {
 		return fieldValue;
 	}
 
+	private void setCurrentAlias(String aliasName, String path) {
+		setCurrentAlias(aliasName, path, null);
+	}
 	/**
 	 * 
 	 * @param aliasName must match fieldName of entityClass
 	 */
-	private void setCurrentAlias(String aliasName) {
-		 
+	private void setCurrentAlias(String aliasName, String path, String otherName) {
+		if (null != otherName) {
+			aliasesOtherNames.put(aliasName, otherName);
+			return;
+		}
+//		 System.out.println("setCurrentAlias: "+aliasName);
 		if (null == aliasName || aliases.get(aliasName) != null)
 			return;
 
@@ -145,18 +158,19 @@ public class CriteriaBuilder {
 			// this.currentAlias = "this_";
 		} else {
 
-			Field correspondingField = EntityUtil.getDeclaredField(entityClass, aliasName);
+			Field correspondingField = EntityUtil.getDeclaredField(entityClass, path);
 			if (null == correspondingField) {
 				return;
 			}
 			aliases.put(aliasName, joinIndex);
-			criteria.createAlias(entityClass.getSimpleName() + "." + aliasName, aliasName, JoinType.LEFT_OUTER_JOIN);
+			criteria.createAlias(entityClass.getSimpleName() + "." + path, aliasName, JoinType.LEFT_OUTER_JOIN);
 			if (aliasName.length() > 10) {
 				aliasName = aliasName.substring(0, 10);
 			}
 
 			// this.currentAlias = aliasName.toLowerCase() + joinIndex + '_';
-
+			System.out.println("______________"+aliases);
+			System.out.println();
 			joinIndex++;
 		}
 	}
@@ -165,7 +179,13 @@ public class CriteriaBuilder {
 		if (THIS.equals(aliasName) || aliasName.toLowerCase().equals(entityClass.getSimpleName().toLowerCase())) {
 			return "this_";
 		}
-		String tableName = aliasName;
+		String pathName;
+		if (aliasesOtherNames.get(aliasName) != null) {
+			pathName = aliasesOtherNames.get(aliasName);
+		} else {
+			pathName = aliasName;
+		}
+		String tableName = pathName;
 		if (aliasName.length() > 10) {
 			tableName = aliasName.substring(0, 10);
 		}
@@ -173,11 +193,32 @@ public class CriteriaBuilder {
 	}
 
 	private void setJoinColumnAliases() {
-		List<Field> joinColumns = QueryUtil.getJoinColumnFields(entityClass);
+		List<QueryField> joinColumns = QueryUtil.getJoinColumnFieldsByBaseModel(getModelClass());
+//		List<Field> joinColumns = QueryUtil.getJoinColumnFields(entityClass);
 		for (int i = 0; i < joinColumns.size(); i++) {
-			setCurrentAlias(joinColumns.get(i).getName());
+			QueryField queryField =joinColumns.get(i);
+			String alias = queryField.getModelField().getName();
+			String path = queryField.getEntityField().getName();
+			setCurrentAlias(alias, path, queryField.getOtherName());
 		}
 
+	}
+//	private void setJoinColumnAliases() {
+//		List<QueryField> joinColumns = QueryUtil.getJoinColumnFieldsByBaseModel(getModelClass());
+////		List<Field> joinColumns = QueryUtil.getJoinColumnFields(entityClass);
+//		for (int i = 0; i < joinColumns.size(); i++) {
+//			QueryField queryField =joinColumns.get(i);
+//			setCurrentAlias(joinColumns.get(i).getName());
+//		}
+//
+//	}
+	
+	public static void main(String[] args) {
+		List<QueryField> joinColumns = QueryUtil.getJoinColumnFieldsByBaseModel(ProductFlowModel.class);
+		for (int i = 0; i < joinColumns.size(); i++) {
+			QueryField q = joinColumns.get(i);
+			System.out.println(q.getEntityField().getName()+" - "+q.getModelField().getName() );
+		}
 	}
 
 	public Criteria createRowCountCriteria() {
@@ -194,10 +235,10 @@ public class CriteriaBuilder {
 	private Criteria createCriteria(boolean onlyRowCount) {
 
 		String entityName = entityClass.getSimpleName();
-		setCurrentAlias(THIS);
+		setCurrentAlias(THIS, null);
 
 		for (final String rawKey : fieldsFilter.keySet()) {
-			setCurrentAlias(THIS);
+			setCurrentAlias(THIS, null);
 
 			log.info("##" + rawKey + ":" + fieldsFilter.get(rawKey));
 			if (fieldsFilter.get(rawKey) == null)
@@ -220,11 +261,12 @@ public class CriteriaBuilder {
 				fieldRelativeToEntityClass = getDeclaredField(entityClass, rawKey.split("\\.")[0]);
 				field = getDeclaredField(fieldRelativeToEntityClass.getType(), rawKey.split("\\.")[1]);
 			} else {
-				field = fieldRelativeToEntityClass = getFieldByName(currentKey, entityDeclaredFields);
+				field = fieldRelativeToEntityClass = getFieldByKeyName(currentKey);
 			}
 
 			if (field == null) {
 				log.warn("Field Not Found :" + currentKey + " !");
+				System.err.println("Field Not Found :" + currentKey + " !");
 				continue;
 			}
 
@@ -289,7 +331,7 @@ public class CriteriaBuilder {
 		if (null != orderBy) {
 
 			Order order;
-			if (filter.getOrderType().toLowerCase().equals("desc")) {
+			if (filter.getOrderType()!=null && filter.getOrderType().toLowerCase().equals("desc")) {
 				order = Order.desc(orderBy);
 			} else {
 				order = Order.asc(orderBy);
@@ -302,7 +344,8 @@ public class CriteriaBuilder {
 
 	private String extractOrderByKey(Filter filter) {
 		String orderBy = filter.getOrderBy();
-		Field field = EntityUtil.getDeclaredField(entityClass, orderBy);
+		Field field = getFieldByKeyName(orderBy);
+		 
 		if (null == field) {
 			log.info("{} is not {} field", orderBy, entityClass);
 			return null;
@@ -312,8 +355,8 @@ public class CriteriaBuilder {
 			return null;
 		}
 		if (field.getAnnotation(JoinColumn.class) != null) {
-			Class modelClass = BaseEntity.getModelClass(entityClass);
-			Field modelField = EntityUtil.getDeclaredField(modelClass, field.getName());
+			Class modelClass = getModelClass();
+			Field modelField = EntityUtil.getDeclaredField(modelClass, orderBy);
 			if (null == modelField) {
 				log.info("model field : {} NOT FOUND", field.getName());
 				return null;
@@ -325,9 +368,17 @@ public class CriteriaBuilder {
 			}
 			String foreginFieldName = formField.optionItemName();
 			Field foreignField = EntityUtil.getDeclaredField(field.getType(), foreginFieldName);
-			return orderBy+"."+foreginFieldName;
+			String orderProperty = field.getName()+"."+foreginFieldName;
+			System.out.println("----------------orderProperty: "+orderProperty);
+			return orderProperty;
 		}
+		
 		return orderBy;
+	}
+
+	private Class getModelClass() {
+		 
+		return BaseEntity.getModelClass(entityClass);
 	}
 
 	private Criterion restrictionLike(final String fieldName, Class<?> _class, Object value) {

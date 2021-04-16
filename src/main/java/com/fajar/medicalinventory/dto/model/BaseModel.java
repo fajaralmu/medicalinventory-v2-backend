@@ -132,4 +132,10 @@ public abstract class BaseModel<E extends BaseEntity> implements Serializable {
 		return models;
 	}
 
+	public static Field getEntityField(Field field) {
+		Class<? extends BaseModel> _modelClass = (Class<? extends BaseModel>) field.getDeclaringClass();
+		Class<?> entityClass = getEntityClass(_modelClass);
+		return EntityUtil.getDeclaredField(entityClass, field.getName());
+	}
+
 }

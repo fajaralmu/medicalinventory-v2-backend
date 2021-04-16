@@ -245,4 +245,11 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		Field modelField = EntityUtil.getDeclaredField(modelClass, entityField.getName());
 		return modelField;
 	}
+	public static Field getModelField(String fieldName, Class entityClass) { 
+		Class modelClass = BaseEntity.getModelClass(entityClass);
+		if (null == modelClass)
+			return null;
+		Field modelField = EntityUtil.getDeclaredField(modelClass, fieldName);
+		return modelField;
+	}
 }

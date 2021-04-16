@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -38,8 +39,12 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private static final long serialVersionUID = 8839593046741372229L;
 
 //	@JsonIgnor
-	@FormField(optionItemName = "code", editable = false) 
+	@FormField(optionItemName = "code", editable = false)
+	@Setter(value=AccessLevel.NONE)
+	@Getter(value=AccessLevel.NONE)
 	private TransactionModel transaction;
+	@FormField(optionItemName = "type", entityField="transaction", editable = false) 
+	private TransactionModel transaction2;
 
 	@FormField(optionItemName = "name", editable = false)
 	private ProductModel product;
@@ -65,9 +70,24 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	
 	private String stockLocation;
 	 
- 	
+ 	public String getType() {
+ 		try {
+ 			return transaction.getType().toString();
+ 		} catch (Exception e) {
+ 			return null;
+		}
+	}
 	public int getStock() { 
 		return count - usedCount;
+	}
+	
+	public void setTransaction(TransactionModel transaction) {
+		this.transaction = transaction;
+		this.transaction2 = transaction;
+	}
+	public TransactionModel getTransaction() {
+		this.transaction2 = transaction;
+		return transaction;
 	}
 	
 	/**

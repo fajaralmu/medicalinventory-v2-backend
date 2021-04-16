@@ -237,9 +237,9 @@ public class EntityElement implements Serializable {
 			
 
 			setHasPreview(formField.hasPreview());
-			if(isHasPreview()) {
-				setPreviewLink(formField.previewLink());
-			}
+//			if(isHasPreview()) {
+//				setPreviewLink(formField.previewLink());
+//			}
 			
 		} catch (Exception e1) {
 			e1.printStackTrace();
