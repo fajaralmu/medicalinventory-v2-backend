@@ -38,23 +38,25 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	 */
 	private static final long serialVersionUID = 8839593046741372229L;
 
-//	@JsonIgnor
-	@FormField(optionItemName = "code", editable = false)
-	@Setter(value=AccessLevel.NONE)
-	@Getter(value=AccessLevel.NONE)
-	private TransactionModel transaction;
-	@FormField(optionItemName = "type", entityField="transaction", editable = false) 
-	private TransactionModel transaction2;
+ 
 
 	@FormField(optionItemName = "name", editable = false)
 	private ProductModel product;
 
+	@FormField(optionItemName = "code", editable = false)
+	@Setter(value=AccessLevel.NONE) @Getter(value=AccessLevel.NONE)
+	private TransactionModel transaction; 
+	@FormField(labelName = "Trans. Type", optionItemName = "type", entityField="transaction", editable = false) 
+	private TransactionModel transaction2;
+	
 	@FormField(type=FieldType.FIELD_TYPE_DATE)
 	private Date expiredDate;
 	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int count;
 	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int usedCount;
+
+	
 	
 	@Setter(value = AccessLevel.NONE)
 	@FormField(optionItemName = "id", editable = false) 

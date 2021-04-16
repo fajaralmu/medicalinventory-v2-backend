@@ -240,7 +240,7 @@ public class ProductAvailablityCountQueryBuilder {
 		String query = "select distinct(p.id) from  product p "
 				+ " left join product_flow pf on pf.product_id =  p.id "
 				+ " left join transaction tx on pf.transaction_id = tx.id"
-				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE')  and (pf.count- pf.used_count) > 0"
+				+ " where (tx.type = 'TRANS_IN' or tx.type = 'TRANS_OUT_TO_WAREHOUSE')  and (pf.count- pf.used_count) > 0 and p.name ilike '%ab%' "
 				+ " order by p.id";
 		Query q = getNativeQuery(query); 
 		List list1 = q.list();
@@ -250,7 +250,10 @@ public class ProductAvailablityCountQueryBuilder {
 		criteria.add(Restrictions.or(Restrictions.eq("transaction.type", TransactionType.TRANS_OUT_TO_WAREHOUSE), 
 				Restrictions.eq("transaction.type", TransactionType.TRANS_IN)));
 		criteria.add(Property.forName("product").in(productDetachedCriteria()));
+		criteria.createAlias("product", "product");
 		criteria.setProjection(Projections.distinct(Projections.property("product.id")));
+		
+		criteria.add(Restrictions.ilike("product.name", "%ab%"));
 //		criteria.setProjection(null);
 		criteria.addOrder(Order.asc("product.id"));
 		List  result = criteria.list();

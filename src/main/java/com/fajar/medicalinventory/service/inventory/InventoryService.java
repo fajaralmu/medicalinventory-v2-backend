@@ -176,13 +176,14 @@ public class InventoryService {
 		if (filter.isIgnoreEmptyValue()) {
 			if (filter.isAllFlag()) {
 				totalData = productAvailabilityRepository.countNontEmptyProductAllLocation(isMasterHealthCenter,
-						expDaysWithin(filter));
+						expDaysWithin(filter), filter);
 			} else {
 				totalData = productAvailabilityRepository.countNontEmptyProduct(isMasterHealthCenter, expDaysWithin(filter),
-						location.getId());
+						filter, location.getId());
 			}
 		} else {
-			totalData = productRepository.countAll();
+			String filterProductName = filter.getFieldsFilterValue("name")==null?"":filter.getFieldsFilterValue("name").toString();
+			totalData = productRepository.countWhereNameLowerCaseLike(filterProductName.toLowerCase());
 		}
 		return totalData == null ? BigInteger.ZERO : totalData;
 	}

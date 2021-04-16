@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
@@ -131,5 +132,14 @@ public class Filter implements Serializable {
 	public boolean isAllFlag() {
 		return FilterFlag.ALL.equals(getFlag());
 	}
+	public Object getFieldsFilterValue(String key) {
+		return getFieldsFilterSavely().get(key);
+	}
 
+	public Map<String, Object> getFieldsFilterSavely() {
+		if (null == fieldsFilter) {
+			return new LinkedHashMap<String, Object>();
+		}
+		return fieldsFilter;
+	}
 }

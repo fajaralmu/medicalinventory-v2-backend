@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -43,6 +44,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	
 	@Query("select count(p) from Product p")
-	BigInteger countAll(); 
+	BigInteger countAll();
+	@Query("select count(p) from Product p where lower(p.name) like %?1%")
+	BigInteger countWhereNameLowerCaseLike(String nameLowerCased);
+
+	@Query("select (p) from Product p where lower(p.name) like %?1% order by p.name")
+	List<Product> findByNameLowerCaseLikeOrderByName(String nameLowerCased, Pageable pageable); 
 
 }
