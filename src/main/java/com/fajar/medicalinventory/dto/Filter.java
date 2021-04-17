@@ -1,7 +1,6 @@
 package com.fajar.medicalinventory.dto;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -9,7 +8,6 @@ import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 
-import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.constants.FilterFlag;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,10 +17,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder.Default;
 
 @Data
 @Builder

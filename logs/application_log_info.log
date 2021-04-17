@@ -1,13 +1,1 @@
-16 Apr 2021 21:42:11 thread: main  INFO Version - HCANN000001: Hibernate Commons Annotations {4.0.5.Final}
-16 Apr 2021 21:42:11 thread: main  INFO Version - HHH000412: Hibernate Core {4.3.6.Final}
-16 Apr 2021 21:42:11 thread: main  INFO Environment - HHH000206: hibernate.properties not found
-16 Apr 2021 21:42:11 thread: main  INFO Environment - HHH000021: Bytecode provider name : javassist
-16 Apr 2021 21:42:11 thread: main  WARN DriverManagerConnectionProviderImpl - HHH000402: Using Hibernate built-in connection pool (not for production use!)
-16 Apr 2021 21:42:11 thread: main  INFO DriverManagerConnectionProviderImpl - HHH000401: using driver [org.postgresql.Driver] at URL [jdbc:postgresql://localhost:5432/medicalinventory]
-16 Apr 2021 21:42:11 thread: main  INFO DriverManagerConnectionProviderImpl - HHH000046: Connection properties: {user=postgres, password=root}
-16 Apr 2021 21:42:11 thread: main  INFO DriverManagerConnectionProviderImpl - HHH000006: Autocommit mode: false
-16 Apr 2021 21:42:11 thread: main  INFO DriverManagerConnectionProviderImpl - HHH000115: Hibernate connection pool size: 1 (min=1)
-16 Apr 2021 21:42:12 thread: main  INFO Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQLDialect
-16 Apr 2021 21:42:12 thread: main  INFO LobCreatorBuilder - HHH000422: Disabling contextual LOB creation as connection was null
-16 Apr 2021 21:42:13 thread: main  INFO TransactionFactoryInitiator - HHH000399: Using default transaction strategy (direct JDBC transactions)
-16 Apr 2021 21:42:13 thread: main  INFO ASTQueryTranslatorFactory - HHH000397: Using ASTQueryTranslatorFactory
+17 Apr 2021 11:41:57 thread: main  INFO DeploymentUtils - DONE

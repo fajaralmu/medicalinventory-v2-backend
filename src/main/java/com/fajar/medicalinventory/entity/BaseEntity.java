@@ -22,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import com.fajar.medicalinventory.annotation.BaseField;
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.annotation.Dto;
+import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.fajar.medicalinventory.exception.ApplicationException;
@@ -191,8 +192,14 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		return filtered;
 	}
 
-	void setObjectModel(M e) throws Exception {
-		Class<? extends BaseModel> entityClass = e.getClass();
+	/**
+	 * copy field having supperClass' type of baseEntity
+	 * 
+	 * @param e
+	 * @throws Exception
+	 */
+	protected void setObjectModel(M e) throws Exception {
+		Class<? extends BaseModel> modelClass = e.getClass();
 		Objects.requireNonNull(e);
 		List<Field> fields = getObjectModelField();
 		for (Field field : fields) {
@@ -200,13 +207,44 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 			if (null == value || false == (value instanceof BaseEntity))
 				continue;
 			String name = field.getName();
-			Field entityField = EntityUtil.getDeclaredField(entityClass, name);
-			if (null == entityField)
+			Field modelField = EntityUtil.getDeclaredField(modelClass, name);
+
+			if (null == modelField) {
+				
 				continue;
+			}
 
 			BaseModel finalValue = ((BaseEntity) value).toModel();
-			entityField.set(e, finalValue);
+			modelField.set(e, finalValue);
 		}
+		setFieldValuesHavingEntityFieldProp(e); 
+	}
+
+	private void setFieldValuesHavingEntityFieldProp(M model) throws IllegalArgumentException, IllegalAccessException { 
+		List<Field> modelFields = EntityUtil.getDeclaredFields(model.getClass());
+		for (Field modelField : modelFields) {
+			
+			FormField formField = modelField.getAnnotation(FormField.class);
+			if(!isSubClassOf(modelField.getType(), BaseModel.class) || null == formField) continue;
+			if (!formField.entityField().trim().isEmpty())
+			{
+				
+				Field entityField = EntityUtil.getDeclaredField(getClass(), formField.entityField().trim());
+				if (null != entityField && isSubClassOf(entityField.getType(), BaseEntity.class) ) {
+					Object value = entityField.get(this);
+					if (null != value) {
+						BaseModel finalValue = ((BaseEntity) value).toModel();
+						modelField.setAccessible(true);
+						modelField.set(model, finalValue);
+					}
+				}
+			}
+		}
+		 
+	}
+
+	private boolean isSubClassOf(Class _class1, Class _class) {
+		return _class1.getSuperclass()!=null && _class1.getSuperclass().equals(_class);
 	}
 
 	protected M copy(M e, String... ignoredProperties) {
@@ -245,7 +283,8 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		Field modelField = EntityUtil.getDeclaredField(modelClass, entityField.getName());
 		return modelField;
 	}
-	public static Field getModelField(String fieldName, Class entityClass) { 
+
+	public static Field getModelField(String fieldName, Class entityClass) {
 		Class modelClass = BaseEntity.getModelClass(entityClass);
 		if (null == modelClass)
 			return null;

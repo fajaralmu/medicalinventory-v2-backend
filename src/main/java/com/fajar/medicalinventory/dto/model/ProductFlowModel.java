@@ -44,7 +44,7 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private ProductModel product;
 
 	@FormField(optionItemName = "code", editable = false)
-	@Setter(value=AccessLevel.NONE) @Getter(value=AccessLevel.NONE)
+	 
 	private TransactionModel transaction; 
 	@FormField(labelName = "Trans. Type", optionItemName = "type", entityField="transaction", editable = false) 
 	private TransactionModel transaction2;
@@ -81,15 +81,6 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	}
 	public int getStock() { 
 		return count - usedCount;
-	}
-	
-	public void setTransaction(TransactionModel transaction) {
-		this.transaction = transaction;
-		this.transaction2 = transaction;
-	}
-	public TransactionModel getTransaction() {
-		this.transaction2 = transaction;
-		return transaction;
 	}
 	
 	/**

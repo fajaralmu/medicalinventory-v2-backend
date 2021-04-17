@@ -99,6 +99,7 @@ public class TransactionModel extends BaseModel<Transaction> {
 	}
 
 	public UserModel getUser() {
+		if (null == user) return null;
 		user.setPassword(null);
 		user.setAuthorities(null);
 		return user;

@@ -179,5 +179,12 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		}
 		return result;
 	}
+	
+	public static void main(String[] args) {
+		ProductFlow pf = ProductFlow.builder().transaction(Transaction.builder().code("123").build()).build();
+		ProductFlowModel model = pf.toModel();
+		System.out.println(model.getTransaction2());
+		
+	}
  
 }

@@ -21,7 +21,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.util.Assert;
 
 import com.fajar.medicalinventory.annotation.FormField;
-import com.fajar.medicalinventory.entity.BaseEntity; 
+import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.Transaction;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -99,6 +100,12 @@ public class EntityUtil {
 			return null;
 		}
 	}
+	
+	public static void main(String[] args) {
+		String fieldName= "id";
+		System.out.println(getDeclaredField(Transaction.class, fieldName));
+		System.out.println(getDeclaredFields(Transaction.class));
+	}
 
 	public static Field getDeclaredField(Class<?> clazz, String fieldName) {
 		try {
@@ -117,7 +124,7 @@ public class EntityUtil {
 			try {
 				//log.info("TRY ACCESS SUPERCLASS");
 
-				Field superClassField = clazz.getSuperclass().getDeclaredField(fieldName);
+				Field superClassField = getDeclaredField(clazz.getSuperclass(),fieldName);
 				superClassField.setAccessible(true);
 				return superClassField;
 			} catch (Exception e) {
@@ -161,7 +168,7 @@ public class EntityUtil {
 		}
 		if (includeSuper && clazz.getSuperclass() != null) {
 
-			Field[] parentFields = clazz.getSuperclass().getDeclaredFields();
+			List<Field> parentFields = getDeclaredFields(clazz.getSuperclass(), includeSuper, onlyColumnField);
 
 			loop2: for (Field field : parentFields) {
 				Object column = field.getAnnotation(Column.class);
