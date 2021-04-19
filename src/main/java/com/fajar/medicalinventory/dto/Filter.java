@@ -134,6 +134,7 @@ public class Filter implements Serializable {
 		return getFieldsFilterSavely().get(key);
 	}
 
+	@JsonIgnore
 	public Map<String, Object> getFieldsFilterSavely() {
 		if (null == fieldsFilter) {
 			return new LinkedHashMap<String, Object>();

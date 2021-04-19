@@ -37,16 +37,6 @@
 			ref="entityManagerFactory"></property>
 	</bean>
 
-	<!-- <bean id="sessionFactory" class="org.hibernate.internal.SessionFactoryImpl"/> -->
-<!-- <bean id="dataSource_OFFLINE_mysql"
-		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"
-			value="com.mysql.jdbc.Driver" />
-		<property name="url"
-			value="jdbc:mysql://localhost:3306/goodshopv2?autoReconnect=true" />
-		<property name="username" value="root" />
-		<property name="password" value="" />
-	</bean> -->
 	<!-- if you use postgres, change all "Like" query statement with "ILIKE" for not activating math case  -->
 	   <bean id="dataSource_postgres"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
