@@ -28,7 +28,7 @@ public class MyHandlerInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		log.info("[preHandle][" + request + "]" + "[" + request.getMethod() + "]");
+//		log.info("[preHandle][" + request + "]" + "[" + request.getMethod() + "]");
 
 		HandlerMethod handlerMethod = interceptorProcessor.getHandlerMethod(request);
 

@@ -40,7 +40,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		log.info("___________JWTAuthFilter____________{}", request.getRequestURI());
+		log.debug("___________JWTAuthFilter____________{}", request.getRequestURI());
 		if (request.getMethod().toLowerCase().equals("options")) {
 			setCorsHeaders(response);
 			return;
@@ -92,7 +92,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
 	private String parseJwt(HttpServletRequest request) {
 		String headerAuth = request.getHeader("Authorization");
-		log.info("headerAuth: {}", headerAuth);
+		log.debug("headerAuth: {}", headerAuth);
 		if (StringUtils.hasText(headerAuth) && headerAuth.startsWith(PREFIX)) {
 			return headerAuth.substring(PREFIX.length(), headerAuth.length());
 		}

@@ -71,6 +71,7 @@ public class HibernateSessionConfig {
 	private Properties additionalProperties() {
 
 		String dialect = entityManagerFactoryBean.getProperties().get("hibernate.dialect").toString();
+		String showSql = entityManagerFactoryBean.getProperties().get("hibernate.show_sql").toString();
 		String ddlAuto = entityManagerFactoryBean.getProperties().get("hibernate.hbm2ddl.auto").toString();
 		String use_jdbc_metadata_defaults = entityManagerFactoryBean.getProperties().get("hibernate.temp.use_jdbc_metadata_defaults").toString();
 		Class<? extends Driver> driverClass = org.postgresql.Driver.class;// com.mysql.jdbc.Driver.class;
@@ -95,7 +96,7 @@ public class HibernateSessionConfig {
 
 		properties.setProperty("hibernate.connection.driver_class", driverClass.getCanonicalName());
 		properties.setProperty("hibernate.current_session_context_class", "thread");
-		properties.setProperty("hibernate.show_sql", "true");
+		properties.setProperty("hibernate.show_sql", showSql);
 		properties.setProperty("hibernate.connection.pool_size", "1");
 		properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults",use_jdbc_metadata_defaults);
 		properties.setProperty("hbm2ddl.auto", ddlAuto);

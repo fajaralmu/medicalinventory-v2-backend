@@ -12,7 +12,7 @@ public class HttpRequestUtil {
 	public static String getPageRequestId(HttpServletRequest httpServletRequest) {
 		if (null == httpServletRequest) {return "";}
 		String pageRequest = httpServletRequest.getHeader(PAGE_REQUEST_ID);
-		log.info("Page request id: " + pageRequest);
+		log.trace("Page request id: " + pageRequest);
 		return pageRequest;
 	} 
 
