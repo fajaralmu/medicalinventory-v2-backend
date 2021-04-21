@@ -9,6 +9,7 @@
  
 	<http pattern="/res/**" security="none" />
 	<http pattern="/assets/**" security="none" />
+	<http pattern="/realtime-app/**" security="none" />
 	
 	<beans:bean id="userDetailsService" class="com.fajar.medicalinventory.config.security.UserDetailServiceImpl"/>
  	<beans:bean id="jwtAuthFilter" class="com.fajar.medicalinventory.config.security.JWTAuthFilter">
@@ -24,8 +25,7 @@
  	</beans:bean>
 	<http auto-config="true" >
 	 	<custom-filter before="PRE_AUTH_FILTER" ref="jwtAuthFilter"/>
-		<intercept-url pattern="/public/**" access="permitAll" /> 
-		 
+		<intercept-url pattern="/public/**" access="permitAll" />  
 		<intercept-url pattern="/app/**" method="POST"   access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		
 		<intercept-url pattern="/api/public/**" access="permitAll" /> 

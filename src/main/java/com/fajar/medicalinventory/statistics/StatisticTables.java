@@ -78,7 +78,7 @@ public class StatisticTables {
 					.three(db(properties[4])).four(db(properties[5])).five(db(properties[6])).six(db(properties[7]))
 					.seven(db(properties[8])).eight(db(properties[9])).nine(db(properties[10])).build();
 			zTabels.put(z, zProp);
-			System.out.println(zProp);
+			
 		}
 	}
 

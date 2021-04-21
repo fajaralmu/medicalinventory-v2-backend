@@ -57,7 +57,7 @@ public class TransactionService {
 		return response ;
 	}
 
-	public WebResponse performTransactionIN(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public synchronized WebResponse performTransactionIN(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
@@ -120,7 +120,7 @@ public class TransactionService {
 	}
 
 	
-	public WebResponse performDistribution(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public synchronized WebResponse performDistribution(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
