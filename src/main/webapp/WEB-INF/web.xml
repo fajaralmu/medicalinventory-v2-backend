@@ -26,15 +26,14 @@
 	</servlet>
 	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy
-		</filter-class>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<async-supported>true</async-supported> 
 	</filter>
 	
 	<filter>
 		<filter-name>apiFilter</filter-name>
 		<async-supported>true</async-supported>
-		<filter-class>com.fajar.medicalinventory.config.CustomFilter
-		</filter-class>
+		<filter-class>com.fajar.medicalinventory.config.CustomFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
@@ -51,9 +50,10 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener
-		</listener-class>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	
+	<!-- ERROR HANDLINGS -->
 	
 	<error-page>
 		 <exception-type>com.fajar.medicalinventory.exception.DataNotFoundException</exception-type>

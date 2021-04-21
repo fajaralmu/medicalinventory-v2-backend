@@ -17,12 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 public class DeploymentUtils {
 
 	static final String TARGET_DIRECTORY = "D:\\Development\\Fajar\\medicalinventory\\target\\";
-	static final String WEBAPPS_DIRECTORY = "D:\\Development\\XamppPhp74\\tomcat\\webapps\\";
+	static final String WEBAPPS_DIRECTORY = "E:\\123Program\\apache-tomcat-9.0.37\\webapps\\";
+//	static final String WEBAPPS_DIRECTORY = "D:\\Development\\XamppPhp74\\tomcat\\webapps\\";
 	static final String APP_NAME = "medicalinventory";
 	 
 	public static void main(String[] args) throws IOException {
 		deleteDeployed();
-		System.out.println("DELETE DEPLOYED");
+		
 		copyBuiltApp();
 		log.info("DONE");
 	}
@@ -39,6 +40,7 @@ public class DeploymentUtils {
 				out.write(buffer, 0, lengthRead);
 				out.flush();
 			}
+			System.out.println("COPIED new War File");
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -53,8 +55,10 @@ public class DeploymentUtils {
 			if (file.getName().equals(APP_NAME) || file.getName().equals(APP_NAME + ".war")) {
 				if (file.isDirectory()) {
 					FileUtils.deleteDirectory(file);
+					System.out.println("DELETE DEPLOYED Directory");
 				} else {
 					file.delete();
+					System.out.println("DELETE DEPLOYED War File");
 				}
 			}
 		}

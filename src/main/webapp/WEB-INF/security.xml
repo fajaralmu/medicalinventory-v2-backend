@@ -25,6 +25,7 @@
 	<http auto-config="true" >
 	 	<custom-filter before="PRE_AUTH_FILTER" ref="jwtAuthFilter"/>
 		<intercept-url pattern="/public/**" access="permitAll" /> 
+		 
 		<intercept-url pattern="/app/**" method="POST"   access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		
 		<intercept-url pattern="/api/public/**" access="permitAll" /> 

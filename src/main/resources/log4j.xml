@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration  
-	debug="true"
+<log4j:configuration   
+	debug="false"
     xmlns:log4j='http://jakarta.apache.org/log4j/'>
 
     <appender name="console" class="org.apache.log4j.ConsoleAppender">
@@ -13,7 +13,7 @@
 	<appender name="fileAppender" class="org.apache.log4j.RollingFileAppender">
 	    <param name="append" value="false" />
 	    <param name="file" value="./logs/application_log.log" />
-	    <param name="Threshold" value="DEBUG" />
+	    <param name="Threshold" value="TRACE" />
 	    <layout class="org.apache.log4j.PatternLayout">
 	        <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} thread: %t %5p %c{1} - %m%n" />
 	    </layout>
@@ -28,7 +28,7 @@
 	</appender>
 
     <root>
-        <level value="DEBUG" />
+        <level value="INFO" />
         <appender-ref ref="console" />
         <appender-ref ref="fileAppender" />
         <appender-ref ref="fileAppenderInfo" />
