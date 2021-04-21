@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.fajar.medicalinventory.dto.KeyValue;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.User;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,28 +20,31 @@ public class CollectionUtil {
 		List<T> list = new ArrayList<T>();
 		for (T t : array) {
 			list.add(t);
-		} 
-		
+		}
+
 		return list;
 
 	}
-	
-	public static <T> List<KeyValue<T, T>> listToKeyVal(List<T> list){
-		
-		List<KeyValue<T, T>> result = new ArrayList<KeyValue<T,T>>();
+
+	public static <T> List<KeyValue<T, T>> listToKeyVal(List<T> list) {
+
+		List<KeyValue<T, T>> result = new ArrayList<KeyValue<T, T>>();
 		for (T el : list) {
 			result.add((KeyValue<T, T>) KeyValue.builder().key(el).value(el).build());
 		}
-		return result ;
+		return result;
 	}
 
-	public static void main(String[] args) {
-
+	public static void main(String[] args) throws NoSuchFieldException, SecurityException {
+		Class c = User.class;
+		Field field = c.getDeclaredField("authorities");
+		Type[] types = getGenericTypes(field);
+		log.info("Types: {}", types);
 	}
 
 	public static <K, T> List<T> mapToList(Map<K, T> map) {
 		List<T> list = new ArrayList<T>();
-		if(null != map)
+		if (null != map)
 			for (K key : map.keySet()) {
 				list.add(map.get(key));
 			}
@@ -80,12 +84,12 @@ public class CollectionUtil {
 
 	public static <T> ArrayList<T> convertList(List<?> list) {
 		ArrayList<T> newList = new ArrayList<T>();
-		if(null == list) {
+		if (null == list) {
 			return newList;
 		}
 		for (Object object : list) {
 			try {
-				newList.add((T)(object));
+				newList.add((T) (object));
 			} catch (Exception e) {
 
 			}
@@ -125,20 +129,20 @@ public class CollectionUtil {
 	public static boolean isCollection(Class<?> o) {
 		return Collection.class.isAssignableFrom(o);
 	}
-	
+
 	public static Type[] getGenericTypes(Field field) {
 		ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		return actualTypeArguments;
 	}
-	
+
 	public static Field getIDFieldOfUnderlyingListType(Field field) {
-		 
+
 		Type[] actualTypeArguments = getGenericTypes(field);
 		Class<?> cls = (Class<?>) actualTypeArguments[0];
 		return EntityUtil.getIdFieldOfAnObject(cls);
 	}
-	
+
 	public static boolean isCollectionOfBaseEntity(Field field) {
 
 		if (Collection.class.isAssignableFrom(field.getType())) {
@@ -188,13 +192,11 @@ public class CollectionUtil {
 	}
 
 	static final List empty = new ArrayList<>();
-	
+
 	public static <T> List<T> emptyList() {
-		 
+
 		return empty;
 	}
-	
-
 
 	public static <T> List<T> reverse(List<T> arrayList) {
 		List<T> reversedArrayList = new ArrayList<T>();
@@ -206,8 +208,6 @@ public class CollectionUtil {
 
 		// Return the reversed arraylist
 		return reversedArrayList;
-	} 
-
-	 
+	}
 
 }

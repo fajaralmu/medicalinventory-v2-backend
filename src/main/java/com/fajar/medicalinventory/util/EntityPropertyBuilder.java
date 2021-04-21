@@ -45,9 +45,8 @@ public class EntityPropertyBuilder {
 			
 			entityProperty.setElementJsonList();
 			entityProperty.setElements(entityElements);
-			entityProperty.setDetailFieldName(fieldToShowDetail);
-//			entityProperty.setDateElementsJson(MyJsonUtil.listToJson(entityProperty.getDateElements()));
-			entityProperty.setFieldNames(MyJsonUtil.listToJson(fieldNames));
+			entityProperty.setDetailFieldName(fieldToShowDetail); 
+			 
 			entityProperty.setFieldNameList(fieldNames);
 			entityProperty.determineIdField();
 

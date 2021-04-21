@@ -52,7 +52,7 @@ public class MvcUtil {
 			}
 			if (optionMap.isEmpty() == false) {
 				withOption = true;
-				optionJson = MyJsonUtil.mapToJson(optionMap);
+//				optionJson = MyJsonUtil.mapToJson(optionMap);
 				System.out.println("=========GENERATED_OPTION: " + optionMap);
 				System.out.println("=========OPTION_JSON: " + optionJson);
 			}

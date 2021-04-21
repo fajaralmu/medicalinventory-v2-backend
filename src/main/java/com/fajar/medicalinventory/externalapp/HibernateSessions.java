@@ -80,6 +80,7 @@ public class HibernateSessions {
 		properties.setProperty("hibernate.connection.pool_size", "1");
 		properties.setProperty("hbm2ddl.auto", ddlAuto);
 		properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
+		properties.setProperty("hibernate.jdbc.batch_size", "20");
 		return properties;
 	}
 

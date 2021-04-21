@@ -19,7 +19,6 @@ import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
-import com.fajar.medicalinventory.util.MyJsonUtil;
 import com.fajar.medicalinventory.util.StringUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Builder
 @AllArgsConstructor
-@Slf4j 
+@Slf4j
 @JsonInclude(Include.NON_NULL)
 public class EntityElement implements Serializable {
 
@@ -45,7 +44,7 @@ public class EntityElement implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6768302238247458766L; 
+	private static final long serialVersionUID = -6768302238247458766L;
 	public final boolean ignoreBaseField;
 	public final boolean isGrouped;
 	public final boolean editable;
@@ -56,7 +55,6 @@ public class EntityElement implements Serializable {
 	private String type;
 	private String className;
 	private String labelName;
-	private String jsonList;
 	private String optionItemName;
 	private String optionValueName;
 	private String entityReferenceName;
@@ -71,16 +69,16 @@ public class EntityElement implements Serializable {
 	private List<? extends BaseModel> options;
 
 	private boolean identity;
-	private boolean required; 
+	private boolean required;
 	private boolean hasJoinColumn;
-	private boolean multiple; 
-	private boolean detailField; 
+	private boolean multiple;
+	private boolean detailField;
 	private boolean hasPreview;
 	@Default
 	private boolean filterable = true;
 
 	@JsonIgnore
-	public EntityProperty entityProperty; 
+	public EntityProperty entityProperty;
 	@JsonIgnore
 	private FormField formField;
 	@JsonIgnore
@@ -88,7 +86,6 @@ public class EntityElement implements Serializable {
 	@JsonIgnore
 	public Map<String, List<?>> additionalMap;
 	final FieldType fieldType;
- 
 
 	public EntityElement(Field field, EntityProperty entityProperty, Map<String, List<?>> additionalMap) {
 		this.field = field;
@@ -97,15 +94,15 @@ public class EntityElement implements Serializable {
 		this.additionalMap = additionalMap;
 		this.isGrouped = entityProperty.isQuestionare();
 		this.formField = field.getAnnotation(FormField.class);
-		
-		if (formField!= null) {
+
+		if (formField != null) {
 			this.fieldType = formField.type();
 			this.editable = formField.editable();
 			setOptionItemName(formField.optionItemName());
 			setFilterable(formField.filterable());
-			setRequiredProp(formField );
-			
-		}else {
+			setRequiredProp(formField);
+
+		} else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
 			this.editable = false;
 		}
@@ -113,76 +110,59 @@ public class EntityElement implements Serializable {
 	}
 
 	private void init() {
-		
+
 		baseField = field.getAnnotation(BaseField.class);
 
 		checkIfIdField();
-		 
+
 		checkIfJoinColumn();
-		if (getEntityField()!=null) {
+		if (getEntityField() != null) {
 			setEntityReferenceClass(getEntityField().getType().getSimpleName());
 		}
 		checkIfGroupedInput();
 	}
-	
+
 	private void checkIfJoinColumn() {
 		Field entityField = getEntityField();
-		if (null == entityField) return;
-		
+		if (null == entityField)
+			return;
+
 		JoinColumn joinColumn = entityField.getAnnotation(JoinColumn.class);
-		setHasJoinColumn(joinColumn!=null);
+		setHasJoinColumn(joinColumn != null);
 	}
-	private Class<? extends BaseEntity> getEntityClass(){ 
+
+	private Class<? extends BaseEntity> getEntityClass() {
 		Class<? extends BaseModel> modelClass = entityProperty.getModelClass();
 		Dto dto = modelClass.getAnnotation(Dto.class);
-		if (null == dto) return null;
-		
+		if (null == dto)
+			return null;
+
 		Class<? extends BaseEntity> entityClass = BaseModel.getEntityClass(modelClass);
 		return entityClass;
 	}
+
 	private Field getEntityField() {
-		
+
 		Class<? extends BaseEntity> entityClass = getEntityClass();
 		Field entityField = EntityUtil.getDeclaredField(entityClass, field.getName());
 		return entityField;
 	}
 
 	private void checkIfIdField() {
-		
+
 		Field entityField = getEntityField();
-		if (null == entityField) return;
-		
-		Id id = entityField.getAnnotation(Id.class); 
-		setIdentity(id!=null);
+		if (null == entityField)
+			return;
+
+		Id id = entityField.getAnnotation(Id.class);
+		setIdentity(id != null);
 	}
-	 
-	
+
 	public String getFieldTypeConstants() {
 		try {
 			return formField.type().toString();
-		}catch (Exception e) {
-			return null;
-		}
-	}
-
-	public String getJsonListString(boolean removeBeginningAndEndIndex) {
-		log.info("getJsonListString from json: {}", jsonList);
-		try {
-			String jsonStringified = objectMapper.writeValueAsString(jsonList).trim();
-			if (removeBeginningAndEndIndex) {
-				StringBuilder stringBuilder = new StringBuilder(jsonStringified);
-				stringBuilder.setCharAt(0, ' ');
-				stringBuilder.setCharAt(jsonStringified.length() - 1, ' ');
-				jsonStringified = stringBuilder.toString().trim();
-				log.info("jsonStringified: {}", jsonStringified);
-			}
-			jsonStringified = jsonStringified.replace("\\t", "");
-			jsonStringified = jsonStringified.replace("\\r", "");
-			jsonStringified = jsonStringified.replace("\\n", "");
-			log.info("RETURN jsonStringified: {}", jsonStringified);
-			return jsonStringified;
 		} catch (Exception e) {
-			return "{}";
+			return null;
 		}
 	}
 
@@ -199,7 +179,7 @@ public class EntityElement implements Serializable {
 		setEntityProperty(null);
 		return result;
 	}
-	
+
 	public void setRequiredProp(FormField formField) {
 		if (formField.type().equals(FieldType.FIELD_TYPE_CHECKBOX)) {
 			setRequired(false);
@@ -210,7 +190,7 @@ public class EntityElement implements Serializable {
 
 	private boolean doBuild() throws Exception {
 
-		boolean formFieldIsNullOrSkip = (formField == null );
+		boolean formFieldIsNullOrSkip = (formField == null);
 		if (formFieldIsNullOrSkip) {
 			return false;
 		}
@@ -227,20 +207,19 @@ public class EntityElement implements Serializable {
 				processJoinColumn(determinedFieldType);
 			}
 
-			checkDetailField(); 
+			checkDetailField();
 			setLabelName(StringUtil.extractCamelCase(labelName));
 			setType(determinedFieldType.value);
-			
-			setId(field.getName()); 
+
+			setId(field.getName());
 			setMultiple(formField.multipleImage());
-			setClassName(field.getType().getCanonicalName()); 
-			
+			setClassName(field.getType().getCanonicalName());
 
 			setHasPreview(formField.hasPreview());
 //			if(isHasPreview()) {
 //				setPreviewLink(formField.previewLink());
 //			}
-			
+
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			throw e1;
@@ -275,7 +254,7 @@ public class EntityElement implements Serializable {
 			processPlainListType();
 			break;
 		case FIELD_TYPE_FIXED_LIST:
-			if(formField.multipleSelect()) {
+			if (formField.multipleSelect()) {
 				processMultipleSelectElements();
 			}
 			break;
@@ -285,7 +264,7 @@ public class EntityElement implements Serializable {
 		}
 
 	}
-	
+
 	private void processMultipleSelectElements() {
 //		entityProperty.getMultipleSelectElements().add(field.getName());
 	}
@@ -340,16 +319,17 @@ public class EntityElement implements Serializable {
 
 	private void processJoinColumn(FieldType fieldType) throws Exception {
 		log.info("field {} of {} is join column, type: {}", field.getName(), field.getDeclaringClass(), fieldType);
- 
+
 		Field referenceEntityIdField = EntityUtil.getIdFieldOfAnObject(getEntityField());
-		System.out.println(fieldType+" referenceEntityIdField: "+referenceEntityIdField);
+		System.out.println(fieldType + " referenceEntityIdField: " + referenceEntityIdField);
 		if (referenceEntityIdField == null) {
 			throw new Exception("ID Field Not Found");
 		}
 
 		if (fieldType.equals(FieldType.FIELD_TYPE_FIXED_LIST) && additionalMap != null) {
 
-			List<? extends BaseModel> referenceEntityList = (List<? extends BaseModel>) additionalMap.get(field.getName());
+			List<? extends BaseModel> referenceEntityList = (List<? extends BaseModel>) additionalMap
+					.get(field.getName());
 			if (null == referenceEntityList || referenceEntityList.size() == 0) {
 				throw new RuntimeException(
 						"Invalid object list provided for key: " + field.getName() + " in EntityElement.AdditionalMap");
@@ -357,15 +337,14 @@ public class EntityElement implements Serializable {
 			log.info("Additional map with key: {} . Length: {}", field.getName(), referenceEntityList.size());
 			if (referenceEntityList != null) {
 				setOptions(referenceEntityList);
-				setJsonList(MyJsonUtil.listToJson(referenceEntityList));
+
 			}
-			
 
 		} else if (fieldType.equals(FieldType.FIELD_TYPE_DYNAMIC_LIST)) {
 
 //			setEntityReferenceClass(referenceEntityClass.getSimpleName());
 		}
-		
+
 		setEntityReferenceClass(getEntityField().getType().getSimpleName());
 		setOptionValueName(referenceEntityIdField.getName());
 //		setMultipleSelect(formField.multipleSelect());

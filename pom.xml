@@ -299,6 +299,7 @@
 	<build>
 
 		<finalName>medicalinventory</finalName>
+		
 		<plugins>
 
 			<plugin>
@@ -308,6 +309,7 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					
 				</configuration>
 			</plugin>
 			<plugin>
@@ -321,7 +323,10 @@
 					<source>${java.version}</source>
 					<target>${java.version}</target>
 					<scanIntervalSeconds>5</scanIntervalSeconds>
-
+					
+					<warSourceExcludes>**/fajar/medicalinventory/externalapp/**</warSourceExcludes>
+					
+					<packagingExcludes>**/medicalinventory/externalapp/**</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>
