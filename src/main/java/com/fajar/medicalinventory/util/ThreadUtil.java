@@ -8,8 +8,8 @@ public class ThreadUtil {
 	public static Thread run(Runnable runnable) {
 		
 		Thread thread  = new Thread(runnable);
-		log.info("running thread: {}", thread.getId());
-		log.info("active thread: {}", Thread.activeCount());
+		log.trace("running thread: {}", thread.getId());
+		log.trace("active thread: {}", Thread.activeCount());
 		thread.start(); 
 		return thread;
 	}
