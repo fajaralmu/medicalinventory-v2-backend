@@ -8,13 +8,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.fajar.medicalinventory.config.security.UserDetailDomain;
 import com.fajar.medicalinventory.dto.KeyValue;
 import com.fajar.medicalinventory.dto.NavigationMenu;
 import com.fajar.medicalinventory.entity.User;
@@ -40,6 +39,8 @@ public class BaseController {
 	 
 	@Autowired
 	protected BindedValues bindedValues;
+	
+	
 	
 	@ModelAttribute("applicationHeaderLabel")
 	public String applicationHeaderLabel(HttpServletRequest request) {
@@ -105,7 +106,7 @@ public class BaseController {
 //		log.info("displayedMenus : {}", displayedMenus.size());
 		return displayedMenus ;
 	}
-
+	
 	@ModelAttribute("ipAndPort")
 	public String getIpAddressAndPort(HttpServletRequest request) {
 

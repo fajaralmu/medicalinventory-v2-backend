@@ -17,11 +17,11 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@RequestMapping("app")
+@RequestMapping("member")
 @Controller 
-public class MvcAppController extends BaseController{  
+public class MvcMemberAreaController extends BaseController{  
 	
-	public MvcAppController() {
+	public MvcMemberAreaController() {
 		log.info("-----------------Mvc App Controller------------------");
 	}
  
@@ -30,14 +30,17 @@ public class MvcAppController extends BaseController{
 	public String wallPage(Model model, HttpServletRequest request, HttpServletResponse response)  { 
 		return basePage;
 	}
+	@RequestMapping(value = { "/application"})
+	@CustomRequestInfo(title="Application")
+	public String application(Model model, HttpServletRequest request, HttpServletResponse response)  { 
+		return "front-end-app";
+	}
 	@RequestMapping(value = { "/profile"})
 	@CustomRequestInfo(pageUrl = "pages/app/profile", title="Profile")
 	public String profile(Model model, HttpServletRequest request, HttpServletResponse response)  { 
 		return basePage;
 	}
-	@RequestMapping(value = { "/main"})
-	public String application(Model model, HttpServletRequest request, HttpServletResponse response)  { 
-		return "front-end-app";
-	}
+	
+	
 
 }

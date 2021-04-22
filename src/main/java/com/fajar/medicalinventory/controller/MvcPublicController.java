@@ -25,7 +25,7 @@ public class MvcPublicController extends BaseController{
 		log.info("-----------------Mvc App Controller------------------");
 	}
 	@RequestMapping(value = { "/main"})
-	@CustomRequestInfo(pageUrl = "pages/main-menu")
+	@CustomRequestInfo(pageUrl = "pages/main-menu", title="Home")
 	public String index(Model model,
 			HttpServletRequest request, HttpServletResponse response)  {
 		model.addAttribute("title", bindedValues.getApplicationHeaderLabel());

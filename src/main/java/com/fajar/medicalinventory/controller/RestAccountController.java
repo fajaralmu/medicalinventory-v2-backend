@@ -56,10 +56,15 @@ public class RestAccountController extends BaseController {
 	}
 	@PostMapping(value="/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public WebResponse logout (HttpServletRequest request, HttpServletResponse response) {
+		try {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null){   
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
+         
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
         return new WebResponse();
     }
 

@@ -3,7 +3,6 @@ package com.fajar.medicalinventory.controller;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +63,7 @@ public class LoginController extends BaseController {
 	public String loginsuccess (HttpServletRequest request, HttpServletResponse response) throws IllegalAccessException {
 		extractRequestHeader(request);
 		extractResponseHeader(response);
-		return "redirect:/app/dashboard";
+		return "redirect:/member/dashboard";
 	}
 	
 	public static Map<String, String> extractResponseHeader(HttpServletResponse httpResponse) {

@@ -27,12 +27,13 @@
 	 	<custom-filter before="PRE_AUTH_FILTER" ref="jwtAuthFilter"/>
 		<intercept-url pattern="/public/**" access="permitAll" />  
 		<intercept-url pattern="/app/**" method="POST"   access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
+		<intercept-url pattern="/member/**" access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		
 		<intercept-url pattern="/api/public/**" access="permitAll" /> 
 		<intercept-url pattern="/api/app/**" method="POST"  access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		
 		<form-login login-page="/login.html"
-			default-target-url="/app/dashboard"  username-parameter="username"
+			default-target-url="/member/dashboard"  username-parameter="username"
 			password-parameter="password" always-use-default-target="true"
 			authentication-failure-handler-ref="loginFailureHandler"
 			authentication-success-forward-url="/loginsuccess" 

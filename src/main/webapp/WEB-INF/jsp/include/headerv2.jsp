@@ -6,7 +6,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	<a class="navbar-brand" href="#">Personal Journal</a>
+	<a class="navbar-brand" href="#">${applicationHeaderLabel }</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse"
 		data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03"
 		aria-expanded="false" aria-label="Toggle navigation">

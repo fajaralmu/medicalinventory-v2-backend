@@ -93,11 +93,21 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 	private String parseJwt(HttpServletRequest request) {
 		String headerAuth = request.getHeader("Authorization");
 		log.debug("headerAuth: {}", headerAuth);
+		if (headerAuth!=null && (headerAuth.replaceAll("[ ]", "").toLowerCase().equals("bearernull")
+				|| headerAuth.trim().toLowerCase().equals("bearer")
+				|| headerAuth.isEmpty())
+				)  {
+			return null;
+		}
 		if (StringUtils.hasText(headerAuth) && headerAuth.startsWith(PREFIX)) {
 			return headerAuth.substring(PREFIX.length(), headerAuth.length());
 		}
 
 		return null;
+	}
+	public static void main(String[] args) {
+		String str = "Bearer null xxx";
+		System.out.println(str.replaceAll("[ ]", ""));
 	}
 
 	private void sendJsonResponseUnAuthenticated(HttpServletRequest request, HttpServletResponse response)

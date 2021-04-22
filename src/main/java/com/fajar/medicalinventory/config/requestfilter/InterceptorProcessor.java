@@ -94,7 +94,7 @@ public class InterceptorProcessor {
 		log.info("URI: {} requires authentication: {}", request.getRequestURI(), authenticationRequired);
 		if (authenticated && request.getRequestURI().endsWith("/login.html")) {
 			response.setStatus(HttpStatus.FOUND.value());
-			response.setHeader("location", request.getContextPath() + "/app/dashboard");
+			response.setHeader("location", request.getContextPath() + "/member/dashboard");
 //			BaseController.sendRedirectLogin(request, response);
 			return false;
 		}
