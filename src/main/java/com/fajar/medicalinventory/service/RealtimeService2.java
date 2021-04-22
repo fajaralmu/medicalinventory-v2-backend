@@ -26,11 +26,11 @@ public class RealtimeService2 {
 
 		return true;
 	}
-
+ int counter = 0;
 	public void sendProgress(double progress, String requestId) {
-//		log.info("Send progress: {} ({})", Math.ceil(progress), requestId);
+		log.info("Send progress ({}): {} ({})", counter, Math.ceil(progress), requestId);
 		sendProgress(WebResponse.builder().requestId(requestId).percentage(progress).build());
-		
+		counter++;
 	}
 
 	public void sendProgress(WebResponse WebResponse) {

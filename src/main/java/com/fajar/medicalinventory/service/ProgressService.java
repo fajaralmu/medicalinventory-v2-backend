@@ -73,7 +73,10 @@ public class ProgressService {
 
 		// comment log.info("adding progress: {} for: {}, currentProgress: {} overall:
 		// {}", newProgress, requestId, currentProgress, overallProgress);
-
+		if (Math.ceil(currentProgress) == Math.ceil(overallProgress)) {
+			progressData.put(requestId, overallProgress);
+			return;
+		}
 		if (overallProgress >= 100) {
 			log.info("overallProgress {} >= 100", overallProgress);
 			progressData.put(requestId, 99d);

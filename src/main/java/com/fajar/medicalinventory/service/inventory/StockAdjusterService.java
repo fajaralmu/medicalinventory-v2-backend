@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -48,13 +47,11 @@ public class StockAdjusterService {
 				pf.copyFromReferenceFlow();
 				
 				session.merge(pf);
-				
 				sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
 				
 			}
 			for (Long id : productFlowMap.keySet()) {
 				session.merge(productFlowMap.get(id));
-
 				sendProgress(1, productFlowMap.keySet().size(), 35, httpServletRequest);
 			}
 			tx.commit();
