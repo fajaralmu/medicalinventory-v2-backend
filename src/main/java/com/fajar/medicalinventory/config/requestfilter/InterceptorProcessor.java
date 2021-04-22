@@ -1,5 +1,7 @@
 package com.fajar.medicalinventory.config.requestfilter;
 
+import static com.fajar.medicalinventory.util.HttpRequestUtil.getPageRequestId;
+
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +22,7 @@ import com.fajar.medicalinventory.annotation.Authenticated;
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.controller.BaseController;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,6 +38,8 @@ public class InterceptorProcessor {
 	private ApplicationContext appContext;
 	@Autowired
 	private SessionValidationService sessionValidationService;
+	@Autowired
+	private ProgressService progressService;
 
 	public InterceptorProcessor() {
 
@@ -82,7 +87,7 @@ public class InterceptorProcessor {
 	public boolean interceptWebPageRequest(HttpServletRequest request, HttpServletResponse response,
 			HandlerMethod handlerMethod) {
 
-		log.info("intercept webpage handler: {}", request.getRequestURI());
+		log.info("intercept request handler: {}", request.getRequestURI());
 		boolean authenticationRequired = getAuthenticationAnnotation(handlerMethod) != null;
 		boolean authenticated = hasSessionToAccessWebPage(request);
 
@@ -107,7 +112,7 @@ public class InterceptorProcessor {
 
 		if (null != customRequestInfo) {
 			if (customRequestInfo.withRealtimeProgress()) {
-//				progressService.init(SessionUtil.getPageRequestId(request));
+				progressService.init(getPageRequestId(request));
 			}
 		}
 
@@ -227,7 +232,7 @@ public class InterceptorProcessor {
 		}
 
 		if (null != resourcePath && resourcePath.withRealtimeProgress()) {
-//			progressService.sendComplete(request);
+			progressService.sendComplete(request);
 		}
 
 	}

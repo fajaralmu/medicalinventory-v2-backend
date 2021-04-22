@@ -28,6 +28,7 @@ public class ProgressService {
 	}
 
 	public void init(String requestId) {
+		log.info(">>>>>>>>Init Progress: {}", requestId);
 		progressData.put(requestId, 0d);
 		sendProgress(0, requestId);
 	}
@@ -74,6 +75,7 @@ public class ProgressService {
 		// {}", newProgress, requestId, currentProgress, overallProgress);
 
 		if (overallProgress >= 100) {
+			log.info("overallProgress {} >= 100", overallProgress);
 			sendComplete(requestId);
 		} else {
 			progressData.put(requestId, overallProgress);
@@ -88,8 +90,13 @@ public class ProgressService {
 		}
 	}
 
+	public void sendComplete(HttpServletRequest httpServletRequest) {
+		sendComplete(getRequestId(httpServletRequest));
+	}
+
 	public void sendComplete(String requestId) {
-		// comment log.debug("________COMPLETE PROGRESS FOR {}________", requestId);
+
+		log.info("________COMPLETE PROGRESS FOR {}________", requestId);
 		sendProgress(98, requestId);
 		sendProgress(99, requestId);
 		sendProgress(100, requestId);
@@ -99,17 +106,15 @@ public class ProgressService {
 
 	private void sendProgress(double progress, String requestId) {
 //		log.info("Send Progress: {} to {}", progress, requestId);
-		try {
+//		ThreadUtil.run(() -> {
 			realtimeService.sendProgress(progress, requestId);
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+//		
 	}
 
 	public void sendProgress(double progress, double maxProgress, double percent, boolean newProgress,
 			HttpServletRequest httpServletRequest) {
 		if (null == httpServletRequest) {
-//			log.info("WILL SEND PROGRESS BUT httpServletRequest is null");
+			log.debug("HTTP SERVLET REQUEST IS NULL");
 			return;
 		}
 		String requestId = getRequestId(httpServletRequest);
@@ -127,14 +132,6 @@ public class ProgressService {
 
 	static String getRequestId(HttpServletRequest httpServletRequest) {
 		return HttpRequestUtil.getPageRequestId(httpServletRequest);
-	}
-
-	public void sendComplete(HttpServletRequest httpServletRequest) {
-		String requestId = getRequestId(httpServletRequest);
-
-		// comment log.info("%%%%%%|COMPLETE PROGRESS|%%%%%%% for {}", requestId);
-		realtimeService.sendProgress(100, requestId);
-
 	}
 
 	public static void main(String[] ccc) {

@@ -1,7 +1,5 @@
 package com.fajar.medicalinventory.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -10,12 +8,28 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
 @EnableScheduling
 @EnableWebSocketMessageBroker
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
  
-	Logger log = LoggerFactory.getLogger(WebSocketConfig.class);
+	static ThreadPoolTaskScheduler threadPoolTaskScheduler;
+	
+	static void stopThreadPoolTaskScheduler () {
+		if (null != threadPoolTaskScheduler) {
+			try {
+				threadPoolTaskScheduler.destroy();
+				log.info("threadPoolTaskScheduler stopped");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	public WebSocketConfig() {
 		log.info("====================Web Socket Config=====================");
 	}
@@ -26,22 +40,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     	long heartbeatServer = 10000; // 10 seconds
         long heartbeatClient = 10000; // 10 seconds
 
-        ThreadPoolTaskScheduler ts = new ThreadPoolTaskScheduler();
-        ts.setPoolSize(2);
-        ts.setThreadNamePrefix("wss-heartbeat-thread-");
-        ts.initialize();
-      //  config.enableSimpleBroker("/topic");
-        config.enableSimpleBroker("/wsResp").setHeartbeatValue(new long[]{heartbeatServer, heartbeatClient})
-        .setTaskScheduler(ts);
+        threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(2);
+        threadPoolTaskScheduler.setThreadNamePrefix("wss-heartbeat-thread-");
+        threadPoolTaskScheduler.initialize();
+//        ts.initialize();
+      
+        config.enableSimpleBroker("/wsResp")
+        .setHeartbeatValue(new long[]{heartbeatServer, heartbeatClient})
+        .setTaskScheduler(threadPoolTaskScheduler)
+        ;
         config.setApplicationDestinationPrefixes("/app");
     }
  
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
     	log.info(". . . . . . . . . register Stomp Endpoints . . . . . . . . . . ");
-      //   registry.addEndpoint("/chat");
-//         registry.addEndpoint("/random").setAllowedOrigins("*").withSockJS();
-//         registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
-         registry.addEndpoint("/realtime-app").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/realtime-app").setAllowedOrigins("*").withSockJS();
     }
 }

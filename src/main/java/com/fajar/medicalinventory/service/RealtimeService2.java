@@ -29,13 +29,13 @@ public class RealtimeService2 {
 	}
 
 	public void sendProgress(double progress, String requestId) {
+		log.info("Send progress: {} ({})", Math.ceil(progress), requestId);
 		sendProgress(WebResponse.builder().requestId(requestId).percentage(progress).build());
+		
 	}
 
 	public void sendProgress(WebResponse WebResponse) {
-		ThreadUtil.run(() -> {
-			webSocket.convertAndSend("/wsResp/progress/" + WebResponse.getRequestId(), WebResponse);
-		});
+		webSocket.convertAndSend("/wsResp/progress/" + WebResponse.getRequestId(), WebResponse);
 	}
 
 	public void sendMessageChatToClient(WebResponse response, String requestId) {

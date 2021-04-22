@@ -21,6 +21,7 @@ public class CustomContextListener implements ServletContextListener {
 
 	public final void contextDestroyed(ServletContextEvent sce) {
 		log.info("---------- context destroyed ------------");
+		WebSocketConfig.stopThreadPoolTaskScheduler();
 	    // ... First close any background tasks which may be using the DB ...
 	    // ... Then close any DB connection pools ...
 		

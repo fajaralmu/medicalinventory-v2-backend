@@ -28,7 +28,7 @@ public class StockAdjusterService {
 	@Autowired
 	private ProgressService progressService;
 	
-	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
+	public synchronized WebResponse adjustStock(HttpServletRequest httpServletRequest) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
@@ -40,31 +40,39 @@ public class StockAdjusterService {
 
 			List productUsedFlows = getDistributedFlow(session);
 			progressService.sendProgress(10, httpServletRequest);
-
+			System.out.println("==");
 			for (Object object : productUsedFlows) {
 				ProductFlow pf = (ProductFlow) object;
 				Long refId = pf.getReferenceProductFlow().getId();
 				productFlowMap.get(refId).addUsedCount(pf.getCount());
 				pf.copyFromReferenceFlow();
+				
 				session.merge(pf);
-				progressService.sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
+				
+				sendProgress(1, productUsedFlows.size(), 35, httpServletRequest);
+				
 			}
 			for (Long id : productFlowMap.keySet()) {
 				session.merge(productFlowMap.get(id));
 
-				progressService.sendProgress(1, productFlowMap.keySet().size(), 35, httpServletRequest);
+				sendProgress(1, productFlowMap.keySet().size(), 35, httpServletRequest);
 			}
 			tx.commit();
 			progressService.sendProgress(10, httpServletRequest);
 		} catch (Exception e) {
+			e.printStackTrace();
 			if (tx != null) {
 				tx.rollback();
 			}
 		} finally {
 			session.close();
-			progressService.sendComplete(httpServletRequest);
 		}
+		System.out.println("==");
 		return new WebResponse();
+	}
+
+	private void sendProgress(int progress, int maxProgress, int percent, HttpServletRequest httpServletRequest) {
+		progressService.sendProgress(progress, maxProgress, percent, httpServletRequest);
 	}
 
 	private List getDistributedFlow(Session session) {
@@ -75,12 +83,16 @@ public class StockAdjusterService {
 	}
 
 	private Map<Long, ProductFlow> getSupplyFlowReseted(Session session) {
-		Query query = session.createQuery(
-				"select pf from ProductFlow pf left join pf.transaction tx " + " where tx.type = ? or tx.type = ? ");
-
-		query.setString(0, TransactionType.TRANS_IN.toString());
-		query.setString(1, TransactionType.TRANS_OUT_TO_WAREHOUSE.toString());
-		List productSupplyFlows = query.list();
+		
+//				"select pf from ProductFlow pf left join pf.transaction tx " + " where tx.type = ? or tx.type = ? "
+		
+		Criteria criteria = session.createCriteria(ProductFlow.class);
+		criteria.createAlias("transaction", "transaction");
+		criteria.add(Restrictions.or(
+				Restrictions.eq("transaction.type", TransactionType.TRANS_IN),
+				Restrictions.eq("transaction.type", TransactionType.TRANS_OUT_TO_WAREHOUSE)
+				));
+		List productSupplyFlows = criteria.list();
 		Map<Long, ProductFlow> productFlowMap = new HashMap<>();
 		for (Object productSupplyFlow : productSupplyFlows) {
 			ProductFlow pf = (ProductFlow) productSupplyFlow;
