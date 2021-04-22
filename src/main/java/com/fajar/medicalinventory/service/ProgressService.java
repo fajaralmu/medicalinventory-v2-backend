@@ -76,7 +76,8 @@ public class ProgressService {
 
 		if (overallProgress >= 100) {
 			log.info("overallProgress {} >= 100", overallProgress);
-			sendComplete(requestId);
+			progressData.put(requestId, 99d);
+			updateProgress(requestId, 0, newRequest);
 		} else {
 			progressData.put(requestId, overallProgress);
 			sendProgress(overallProgress, requestId);

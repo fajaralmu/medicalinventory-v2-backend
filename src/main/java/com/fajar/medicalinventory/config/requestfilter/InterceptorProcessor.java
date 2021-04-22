@@ -80,7 +80,7 @@ public class InterceptorProcessor {
 //			}
 			//log.info("REQUEST AUTHORIZED");
 		}
-		
+		initProgress(handlerMethod, request);
 		return true;
 	}
 
@@ -108,6 +108,12 @@ public class InterceptorProcessor {
 			}
 		}
 
+		initProgress(handlerMethod, request);
+
+		return true;
+	}
+
+	private void initProgress(HandlerMethod handlerMethod, HttpServletRequest request) {
 		CustomRequestInfo customRequestInfo = getCustomRequestInfoAnnotation(handlerMethod);
 
 		if (null != customRequestInfo) {
@@ -115,8 +121,6 @@ public class InterceptorProcessor {
 				progressService.init(getPageRequestId(request));
 			}
 		}
-
-		return true;
 	}
 
 	public static void main(String[] args) throws Exception {
