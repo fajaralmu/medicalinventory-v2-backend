@@ -5,7 +5,7 @@
 <head>
 <title>Redirecting</title>
  <meta http-equiv="refresh"
-   content="0; url=<c:url value="/login.html"/>">
+   content="0; url=<c:url value="/member/dashboard"/>">
 </head>
 <body>
 <p>Welcome</p>

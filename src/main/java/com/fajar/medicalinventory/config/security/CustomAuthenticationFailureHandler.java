@@ -45,7 +45,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 			}
 			
 		}
-		String targetUrl = "/login.html?error=true";
+		String targetUrl = "/login?error";
 		if ( response.isCommitted()) {
 			log.debug("Response has already been committed. Unable to redirect to " + targetUrl);
 			return;

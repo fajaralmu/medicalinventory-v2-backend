@@ -44,7 +44,7 @@
 			<c:if test="${isAuthenticated == false }">
 			
 				<a class="btn btn-info my-2 my-sm-0"
-					href='<spring:url value="/login.html"></spring:url>'> <i
+					href='<spring:url value="/login"></spring:url>'> <i
 					class="fas fa-sign-in-alt"></i>&nbsp;Login
 				</a>
 			</c:if>

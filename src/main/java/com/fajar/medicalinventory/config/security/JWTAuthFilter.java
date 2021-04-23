@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,8 +47,18 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 			return;
 		}
 		try {
+			
 			String jwt = parseJwt(request);
-			if (jwt != null) {
+			Object userPrincipal = null;
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			if (auth != null) {
+			    Object principal = auth.getPrincipal();  
+			    if (principal instanceof UserDetails) {
+			    	userPrincipal = (UserDetails) principal;
+			    }
+			}
+			log.debug("User principal: {}", userPrincipal);
+			if (jwt != null && null == userPrincipal) {
 				if (jwtUtils.validateJwtToken(jwt)) {
 
 					String username = jwtUtils.getUserNameFromJwtToken(jwt);
@@ -73,9 +84,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		}
 
 		filterChain.doFilter(request, response);
-		if (request.getMethod().toLowerCase().equals("options")) {
-			response.setStatus(HttpStatus.OK.value());
-		}
+		
 	}
 
 	public static void setCorsHeaders(HttpServletResponse response) {
@@ -86,7 +95,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		response.setHeader("Access-Control-Max-Age", "3600");
 		response.setHeader("Access-Control-Allow-Headers",
 				"Content-Type, Accept, X-Requested-With, Authorization, requestid, access-token");
-//		response.setStatus(HttpStatus.OK.value());
+		response.setStatus(HttpStatus.OK.value());
 
 	}
 

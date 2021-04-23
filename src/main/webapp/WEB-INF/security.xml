@@ -15,6 +15,9 @@
  	<beans:bean id="jwtAuthFilter" class="com.fajar.medicalinventory.config.security.JWTAuthFilter">
  		<beans:property name="userDetailsService" ref="userDetailsService"></beans:property>
  	</beans:bean>
+ 	<beans:bean id="formLoginFilter" class="com.fajar.medicalinventory.config.security.FormLoginFilter">
+ 		<beans:property name="defaultPage" value="/member/dashboard"/>
+ 	</beans:bean>
  	<beans:bean id="loginFailureHandler" class="com.fajar.medicalinventory.config.security.CustomAuthenticationFailureHandler">
  		<beans:property name="objectMapper" ref="objectMapper"></beans:property>
  		<beans:property name="jwtUtils" ref="jwtUtils"></beans:property>
@@ -24,26 +27,29 @@
  		<beans:property name="jwtUtils" ref="jwtUtils"></beans:property>
  	</beans:bean>
  	<beans:bean id="authEntryPoint" class="com.fajar.medicalinventory.config.security.UserAuthenticationEntryPoint">
-	
+		 <beans:constructor-arg value="/login" index="0"  />
 	</beans:bean>
 	<http auto-config="true" >
 	 	<custom-filter before="PRE_AUTH_FILTER" ref="jwtAuthFilter"/>
+	 	<custom-filter before="FORM_LOGIN_FILTER" ref="formLoginFilter"/>
 		<intercept-url pattern="/public/**" access="permitAll" />  
 		<intercept-url pattern="/app/**" method="POST"   access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		<intercept-url pattern="/member/**" access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		
 		<intercept-url pattern="/api/public/**" access="permitAll" /> 
 		<intercept-url pattern="/api/app/**" method="POST"  access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
-		<http-basic entry-point-ref="authEntryPoint" />
-		<form-login login-page="/login.html"
+		<http-basic entry-point-ref="authEntryPoint"  />
+		<!--   <form-login login-page="/login"
+			
 			default-target-url="/member/dashboard"  username-parameter="username"
 			password-parameter="password" always-use-default-target="true"
 			authentication-failure-handler-ref="loginFailureHandler"
-			authentication-success-forward-url="/loginsuccess" 
-			authentication-success-handler-ref="loginSuccessHandler"
-			/>
-		<logout logout-url="/logout" delete-cookies="JSESSIONID"
-			invalidate-session="true" logout-success-url="/login.html?logout=true" />
+			authentication-success-handler-ref="loginSuccessHandler" 
+			authentication-success-forward-url="/loginsuccess"
+			/>   -->
+			<!-- authentication-success-forward-url="/loginsuccess"  -->
+		<logout logout-url="/logout" delete-cookies="JSESSIONID,medical-inventory-login-key"
+			invalidate-session="true" logout-success-url="/login?logout" />
 			
 		<csrf disabled="true"/>
 	</http>

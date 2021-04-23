@@ -18,7 +18,7 @@ import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.fajar.medicalinventory.constants.AuthorityType;
-import com.fajar.medicalinventory.controller.LoginController;
+import com.fajar.medicalinventory.controller.AuthController;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +50,7 @@ public class SimpleAuthenticationSuccessHandler implements AuthenticationSuccess
 	protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
 			throws IOException {
 
-		LoginController.extractRequestHeader(request);
+		AuthController.extractRequestHeader(request);
 		
 		String targetUrl = determineTargetUrl(authentication);
 		if (isJsonResponse(request)) {
