@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans:beans
-	xmlns="http://www.springframework.org/schema/security"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:beans="http://www.springframework.org/schema/beans"
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans.xsd
-          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+          	http://www.springframework.org/schema/security
+          	http://www.springframework.org/schema/security/spring-security.xsd">
  
 	<http pattern="/res/**" security="none" />
 	<http pattern="/assets/**" security="none" />
@@ -16,7 +16,8 @@
  		<beans:property name="userDetailsService" ref="userDetailsService"></beans:property>
  	</beans:bean>
  	<beans:bean id="formLoginFilter" class="com.fajar.medicalinventory.config.security.FormLoginFilter">
- 		<beans:property name="defaultPage" value="/member/dashboard"/>
+ 		<beans:property name="defaultPath" value="/member/dashboard"/>
+ 		<beans:property name="loginPath" value="/login"/>
  	</beans:bean>
  	<beans:bean id="loginFailureHandler" class="com.fajar.medicalinventory.config.security.CustomAuthenticationFailureHandler">
  		<beans:property name="objectMapper" ref="objectMapper"></beans:property>
