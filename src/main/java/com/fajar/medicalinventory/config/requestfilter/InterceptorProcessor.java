@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import com.fajar.medicalinventory.annotation.Authenticated;
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.controller.BaseController;
-import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,40 +45,11 @@ public class InterceptorProcessor {
 		log.info(" //////////// InterceptorProcessor ///////////// ");
 	}
 
-	private void printNotAuthenticated(HttpServletResponse response, boolean loginRequired) {
-		response.setContentType("application/json");
-		try {
-			String msg;
-			if (loginRequired) {
-				msg = "User Not Authenticated";
-			} else {
-				msg = "Request Not Authenticated";
-			}
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			response.getWriter().write(objectMapper.writeValueAsString(WebResponse.failed(msg)));
-			response.setHeader("error_message", "Invalid Authentication");
-		} catch (Exception e) {
-			log.error("Error writing JSON Error Response: {}", e);
-		}
-	}
-
 	public boolean interceptApiRequest(HttpServletRequest request, HttpServletResponse response,
 			HandlerMethod handlerMethod) {
 
 		log.info("intercept api handler: {}", request.getRequestURI());
 
-		Authenticated authenticated = getAuthenticationAnnotation(handlerMethod);
-		boolean authenticationRequired = authenticated != null;
-		if (authenticationRequired) {
-
-//			if (null == userSessionService.getRegisteredRequest(request)) {
-//				printNotAuthenticated(response, true);
-//				log.info("NOT Authorized");
-//				return false;
-
-//			}
-			//log.info("REQUEST AUTHORIZED");
-		}
 		initProgress(handlerMethod, request);
 		return true;
 	}
