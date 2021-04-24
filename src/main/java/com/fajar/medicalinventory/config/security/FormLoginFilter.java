@@ -84,16 +84,9 @@ public class FormLoginFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		String path = getPath(request);
-		boolean isLoginPath = isLoginPath(request);
-		boolean allowed = isAllowedForWebPages(path);
-		if (!allowed) {
-			setUrlSession(request);
-			log.info("SET TARGET_URL_ATTRIBUTE: {}", request.getRequestURI());
-		} else if (!isLoginPath) {
-			removeUrlSession(request);
-		}
-		if (!isLoginPath) {
+		setSavedPath(request);
+		
+		if (!isLoginPath(request)) {
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -114,6 +107,23 @@ public class FormLoginFilter extends OncePerRequestFilter {
 		}
 		filterChain.doFilter(request, response);
 
+	}
+
+	/**
+	 * save path to session before redirecting to login page in order to redirect to it again after login
+	 * @param request
+	 */
+	private void setSavedPath(HttpServletRequest request) {
+		
+		String path = getPath(request);
+		boolean isLoginPath = isLoginPath(request);
+		boolean allowed = isAllowedForWebPages(path);
+		if (!allowed) {
+			setUrlSession(request);
+			log.info("SET TARGET_URL_ATTRIBUTE: {}", request.getRequestURI());
+		} else if (!isLoginPath) {
+			removeUrlSession(request);
+		}
 	}
 
 	private boolean isLoginPath(HttpServletRequest request) {
