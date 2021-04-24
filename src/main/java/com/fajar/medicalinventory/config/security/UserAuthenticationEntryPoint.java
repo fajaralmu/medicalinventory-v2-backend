@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -25,6 +24,7 @@ public class UserAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoi
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex)
 			throws IOException, ServletException {
+		
 		log.info("Auth exception {} on {}", ex.getMessage(), request.getRequestURI());
 		if (request.getMethod().toLowerCase().equals(RequestMethod.POST.toString().toLowerCase())) {
 			printApiResponse(response, ex);
@@ -37,7 +37,7 @@ public class UserAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoi
 	private void printApiResponse(HttpServletResponse response, AuthenticationException ex) throws IOException {
 		 
 		response.setContentType("application/json");
-		response.getOutputStream().print("{\"message\":\""+ex.getMessage()+"\"}");
+		response.getOutputStream().print("{\"code\":\"-1\",\"message\":\""+ex.getMessage()+"\"}");
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 }
