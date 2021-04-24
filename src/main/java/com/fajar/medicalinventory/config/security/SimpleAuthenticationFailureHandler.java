@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class SimpleAuthenticationFailureHandler implements AuthenticationFailureHandler {
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 	private JWTUtils jwtUtils;
 	private ObjectMapper objectMapper;

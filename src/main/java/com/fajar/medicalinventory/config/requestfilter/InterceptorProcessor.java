@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,10 +22,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import com.fajar.medicalinventory.annotation.Authenticated;
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
+import com.fajar.medicalinventory.config.security.SimpleAuthenticationSuccessHandler;
 import com.fajar.medicalinventory.controller.BaseController;
+import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,14 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 public class InterceptorProcessor {
 
 	@Autowired
-	private ObjectMapper objectMapper;
-	@Autowired
 	private ApplicationContext appContext;
 	@Autowired
 	private SessionValidationService sessionValidationService;
 	@Autowired
-	private ProgressService progressService;
-
+	private ProgressService progressService; 
+	
+	
 	public InterceptorProcessor() {
 
 		log.info(" //////////// InterceptorProcessor ///////////// ");
@@ -57,26 +59,17 @@ public class InterceptorProcessor {
 	public boolean interceptWebPageRequest(HttpServletRequest request, HttpServletResponse response,
 			HandlerMethod handlerMethod) {
 
-		log.info("intercept request handler: {}", request.getRequestURI());
-		boolean authenticationRequired = getAuthenticationAnnotation(handlerMethod) != null;
-		boolean authenticated = hasSessionToAccessWebPage(request);
-
-		log.info("URI: {} requires authentication: {}", request.getRequestURI(), authenticationRequired);
-
-		if (authenticationRequired) {
-			if (!authenticated) {
-				log.info("URI: {} not authenticated, will redirect to login page", request.getRequestURI());
-				response.setStatus(HttpStatus.FOUND.value());
-				response.setHeader("location", request.getContextPath() + "/public/main");
-//				BaseController.sendRedirectLogin(request, response);
-				return false;
-			}
-		}
-
+		
+		String path = request.getRequestURI().substring(request.getContextPath().length());
+		log.info("intercept webpage request handler: {}, path info: {}", request.getRequestURI(), path);
+		
+		
 		initProgress(handlerMethod, request);
 
 		return true;
 	}
+
+	
 
 	private void initProgress(HandlerMethod handlerMethod, HttpServletRequest request) {
 		CustomRequestInfo customRequestInfo = getCustomRequestInfoAnnotation(handlerMethod);
@@ -160,7 +153,7 @@ public class InterceptorProcessor {
 				return handlerMethod;
 			}
 		} catch (Exception e) {
-			//log.warn("Lookup the handler method ERROR", e);
+			// log.warn("Lookup the handler method ERROR", e);
 		} finally {
 			log.debug("URI = " + request.getRequestURI() + ", handlerMethod = " + handlerMethod);
 		}

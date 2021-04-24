@@ -6,31 +6,94 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.fajar.medicalinventory.exception.ApplicationException;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FormLoginFilter extends OncePerRequestFilter {
 
-	
+	@Autowired
+	private ApplicationContext appContext;
+
 	private String defaultPath;
 	private String loginPath;
+
 	public void setdefaultPath(String defaultPath) {
 		this.defaultPath = defaultPath;
 	}
+
 	public void setLoginPath(String loginPath) {
 		this.loginPath = loginPath;
 	}
+
+	private DefaultWebInvocationPrivilegeEvaluator webInvocationPrivilegeEvaluator = null;
+
+	private DefaultWebInvocationPrivilegeEvaluator getWebInvocationPrivilegeEvaluator() {
+		if (null != webInvocationPrivilegeEvaluator) {
+			return webInvocationPrivilegeEvaluator;
+		}
+		String[] beanNames = appContext.getBeanNamesForType(DefaultWebInvocationPrivilegeEvaluator.class);
+		if (null == beanNames || beanNames.length < 2) {
+			throw new ApplicationException("NO BEAN FOR DefaultWebInvocationPrivilegeEvaluator found");
+		}
+		/**
+		 * beanNames[0] = APIs, beanNames[1] = webPages see <http ....> in security.xml
+		 */
+		webInvocationPrivilegeEvaluator = (DefaultWebInvocationPrivilegeEvaluator) appContext.getBean(beanNames[1]);
+		return webInvocationPrivilegeEvaluator;
+	}
+
+	private boolean isAllowedForWebPages(String path) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		boolean allowed = getWebInvocationPrivilegeEvaluator().isAllowed(path, auth);
+		log.info("allowed for {}: {}", path, allowed);
+		return allowed;
+	}
+
+	public void setUrlSession(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+
+		if (session == null) {
+			return;
+		}
+		session.setAttribute(SimpleAuthenticationSuccessHandler.TARGET_URL_ATTRIBUTE, getPath(request));
+	}
+
+	private void removeUrlSession(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+
+		if (session == null) {
+			return;
+		}
+		session.removeAttribute(SimpleAuthenticationSuccessHandler.TARGET_URL_ATTRIBUTE);
+
+	}
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		if (!request.getRequestURI().trim().equals(request.getContextPath()+loginPath)) {
+		String path = getPath(request);
+		boolean isLoginPath = isLoginPath(request);
+		boolean allowed = isAllowedForWebPages(path);
+		if (!allowed) {
+			setUrlSession(request);
+			log.info("SET TARGET_URL_ATTRIBUTE: {}", request.getRequestURI());
+		} else if (!isLoginPath) {
+			removeUrlSession(request);
+		}
+		if (!isLoginPath) {
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -38,21 +101,27 @@ public class FormLoginFilter extends OncePerRequestFilter {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		Object userPrincipal = null;
 		if (auth != null) {
-		    Object principal = auth.getPrincipal();  
-		    if (principal instanceof UserDetails) {
-		    	userPrincipal = (UserDetails) principal;
-		    }
+			Object principal = auth.getPrincipal();
+			if (principal instanceof UserDetails) {
+				userPrincipal = (UserDetails) principal;
+			}
 		}
 		log.info("userPrincipal: {}", userPrincipal);
 		if (null != userPrincipal) {
 			response.setStatus(HttpStatus.FOUND.value());
-			response.setHeader("location", request.getContextPath()+defaultPath);
+			response.setHeader("location", request.getContextPath() + defaultPath);
 			return;
 		}
 		filterChain.doFilter(request, response);
-		
+
 	}
 
-	 
+	private boolean isLoginPath(HttpServletRequest request) {
+		return request.getRequestURI().trim().equals(request.getContextPath() + loginPath);
+	}
+
+	private String getPath(HttpServletRequest request) {
+		return request.getRequestURI().substring(request.getContextPath().length());
+	}
 
 }

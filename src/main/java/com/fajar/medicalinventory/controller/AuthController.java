@@ -44,11 +44,6 @@ public class AuthController extends BaseController {
 			@RequestParam(value = "logout", required = false) String logout, Model model, 
 			HttpServletRequest httpServletRequest, HttpServletResponse response) {
 		String errorMessge = null;
-		if (null != sessionValidationService.getLoggedUser(httpServletRequest)) {
-			response.setStatus(HttpStatus.FOUND.value());
-			response.setHeader("location", httpServletRequest.getContextPath()+"/member/dashboard");
-			return null;
-		}
 		if (error != null) {
 			errorMessge = "Username or Password is incorrect !!";
 		}
