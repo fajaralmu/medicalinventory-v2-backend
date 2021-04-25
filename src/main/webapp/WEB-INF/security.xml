@@ -69,7 +69,7 @@
 					<!-- authentication-success-forward-url="/loginsuccess"  -->
 		<logout logout-url="/logout" delete-cookies="JSESSIONID"
 			invalidate-session="true" logout-success-url="/login?logout" />
-			
+		<remember-me remember-me-parameter="remember-me" key="uniqueAndSecret"/>
 		<csrf disabled="true"/>
 	</http>
 	
