@@ -23,6 +23,7 @@ import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.config.DefaultUserService;
+import com.fajar.medicalinventory.util.HttpRequestUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,9 +63,9 @@ public class RestAccountController extends BaseController {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
          
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
+		} catch (Exception e) { }
+		
+		HttpRequestUtil.removeLoginKeyCookie(response);
         return new WebResponse();
     }
 

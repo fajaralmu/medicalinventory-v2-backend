@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
+import com.fajar.medicalinventory.util.HttpRequestUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +50,7 @@ public class AuthController extends BaseController {
 		}
 		if (logout != null) {
 			errorMessge = "You have been successfully logged out !!";
+			HttpRequestUtil.removeLoginKeyCookie(response);
 		}
 		model.addAttribute("errorMessge", errorMessge);
 		return basePage;
@@ -65,6 +67,7 @@ public class AuthController extends BaseController {
         if (auth != null){   
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
+        
         return "redirect:/login?logout";
     }
 	@RequestMapping(value="/loginsuccess" )
