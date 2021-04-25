@@ -3,16 +3,17 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-
+<%@ taglib prefix="ct" uri="customTag"%>
 <div class="text-center">
 
 
 	<c:if test="${not empty errorMessge}">
-		<div style="color: red; font-weight: bold; margin: 30px 0px;">${errorMessge}</div>
+		<ct:warning message="${errorMessge}"/>
 	</c:if>
-
-	<form name='login' action='<spring:url value="/login"></spring:url>'
-		method='POST'  class="form-signin">
+	<form:form id="form-signin" cssClass="form-signin" method="POST" name="login" 
+	 action="${pageContext.request.contextPath}/login"
+	>
+	 
 		<h2><i class="fas fa-user-circle"></i></h2>
 		<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 		<label for="username" class="sr-only">Username</label>
@@ -29,7 +30,7 @@
 		 <input type="hidden" name="${_csrf.parameterName}"
 			value="${_csrf.token}" />
 		<input name="transport_type" type="hidden" value="web">
-	</form>
+	</form:form>
  
 </div>
 
