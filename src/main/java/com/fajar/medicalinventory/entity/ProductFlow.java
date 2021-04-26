@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -81,6 +82,8 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	@Column 
 	private boolean generic;  
 	 
+	@Transient
+	private List<ProductFlow> referencingProductFlow;
 	
 	public void addUsedCount(int count) {
 		 
