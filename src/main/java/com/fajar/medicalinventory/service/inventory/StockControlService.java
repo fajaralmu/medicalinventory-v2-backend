@@ -122,6 +122,7 @@ public class StockControlService {
 			final TransactionType type = record.getType();
 			List<ProductFlow> productFlows = productFlowRepository.findByTransaction(record);
 			progressService.sendProgress(10, httpServletRequest);
+			record.setProductFlows(productFlows);
 			
 			if (type.equals(TransactionType.TRANS_OUT)) {
 				return WebResponse.builder().transaction(record.toModel()).build();
@@ -137,7 +138,7 @@ public class StockControlService {
 			setReferencingFlows(combineReferencingItems(productFlows));
 			progressService.sendProgress(40, httpServletRequest);
 			
-			record.setProductFlows(productFlows);
+			
 //			summary(record);
 			return WebResponse.builder().transaction(record.toModel()).build();
 		} catch (Exception e) {
@@ -148,22 +149,6 @@ public class StockControlService {
 			throw new ApplicationException(e);
 		}
 
-	}
-
-	private static void summary(com.fajar.medicalinventory.entity.Transaction record) {
-
-		log.info("Id: {}", record.getId());
-		log.info("Type: {}", record.getType());
-		List<ProductFlow> productFlows = record.getProductFlows();
-		int i = 1;
-		for (ProductFlow item : productFlows) {
-			log.info("{}. Item id: {}, qty: ({}) --- {}", i, item.getId(), item.getCount(), transactionDate(item));
-			List<ProductFlow> referencing1 = item.getReferencingItems();
-			if (referencing1 != null && !referencing1.isEmpty()) {
-				printReferencing(referencing1, 1);
-			}
-			i++;
-		}
 	}
 
 	private static void printReferencing(List<ProductFlow> referencingItems, int level) {

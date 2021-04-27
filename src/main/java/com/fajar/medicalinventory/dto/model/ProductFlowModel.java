@@ -27,7 +27,7 @@ import lombok.Setter;
  * 
  * @author fajar
  */
-@Dto(  updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
+@Dto(value="Transaction Item", updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
 @JsonInclude(value=Include.NON_NULL)
 @Builder
 @Data

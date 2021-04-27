@@ -20,7 +20,7 @@ import com.fajar.medicalinventory.entity.Transaction;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TestModel {
+public class TestTransactionRelatedRecords {
 
 	static Session session;
 
