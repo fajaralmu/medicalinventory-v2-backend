@@ -199,7 +199,7 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 			}
 			model.setReferencingItems(refItems);
 		}
-		return model;
+		return copy(model, "referencingItems");
 	}
 	 
 	

@@ -181,9 +181,8 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 	}
 
 	private List<Field> getObjectModelField() {
-		List<Field> fields = EntityUtil.getDeclaredFields(getClass());
 		List<Field> filtered = new ArrayList<>();
-		for (Field field : fields) {
+		for (Field field : EntityUtil.getDeclaredFields(getClass())) {
 			if (BaseEntity.class.equals(field.getType().getSuperclass())) {
 				filtered.add(field);
 			}
@@ -209,7 +208,6 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 			try {
 				Object value = field.get(this);
 				if (value instanceof Serializable) {
-//					System.out.println("SERIALIZABLE: "+field.getName());
 					value = SerializationUtils.clone((Serializable)value);
 				}
 			if (null == value || false == (value instanceof BaseEntity))
@@ -232,26 +230,21 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 			}
 			
 		}
-//		setFieldValuesHavingEntityFieldProp(e, ignoredProperties); 
+		setFieldValuesHavingEntityFieldProp(e); 
 	}
 
-	private void setFieldValuesHavingEntityFieldProp(M model, String...ignoredProperties) throws IllegalArgumentException, IllegalAccessException { 
+	private void setFieldValuesHavingEntityFieldProp(M model) throws IllegalArgumentException, IllegalAccessException { 
 		List<Field> modelFields = EntityUtil.getDeclaredFields(model.getClass());
 		for (Field modelField : modelFields) {
 			
 			try {
 			FormField formField = modelField.getAnnotation(FormField.class);
-			if(!isSubClassOf(modelField.getType(), BaseModel.class) || null == formField) continue;
+			if(!BaseModel.class.equals(modelField.getType().getSuperclass()) || null == formField) continue;
 			if (!formField.entityField().trim().isEmpty())
 			{
 				
 				Field entityField = EntityUtil.getDeclaredField(getClass(), formField.entityField().trim());
-				
-				if (Arrays.asList(ignoredProperties).contains(entityField.getName())) {
-					continue;
-				}
-				
-				if (null != entityField && isSubClassOf(entityField.getType(), BaseEntity.class) ) {
+				if (null != entityField &&  BaseEntity.class.equals(entityField.getType().getSuperclass()) ) {
 					Object value = entityField.get(this);
 					if (value instanceof Serializable) {
 						value = SerializationUtils.clone((Serializable)value);
@@ -271,9 +264,6 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		 
 	}
 
-	private boolean isSubClassOf(Class _class1, Class _class) {
-		return _class1.getSuperclass()!=null && _class1.getSuperclass().equals(_class);
-	}
 
 	protected M copy(M e, String... ignoredProperties) {
 		try {
@@ -281,7 +271,9 @@ public class BaseEntity<M extends BaseModel> implements Serializable {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+		
 		BeanUtils.copyProperties(this, e, ignoredProperties);
+		e.setNulledFields(null);
 		return e;
 	}
 

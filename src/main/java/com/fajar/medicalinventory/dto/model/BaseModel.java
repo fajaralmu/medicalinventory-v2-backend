@@ -18,6 +18,8 @@ import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.util.EntityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +27,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 @MappedSuperclass
+@JsonInclude(value=Include.NON_NULL)
 public abstract class BaseModel<E extends BaseEntity> implements Serializable {
 
 	public BaseModel() {

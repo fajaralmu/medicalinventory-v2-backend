@@ -12,6 +12,8 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.entity.ProductFlow;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,7 +28,7 @@ import lombok.Setter;
  * @author fajar
  */
 @Dto(  updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
-
+@JsonInclude(value=Include.NON_NULL)
 @Builder
 @Data
 @AllArgsConstructor

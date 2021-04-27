@@ -9,11 +9,10 @@ import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
 import com.fajar.medicalinventory.entity.Supplier;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 
 /**
@@ -22,10 +21,6 @@ import lombok.NoArgsConstructor;
  */
 @Dto( value="Pemasok")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-
 public class SupplierModel extends BaseModel<Supplier>{
 	/**
 	 * 
@@ -40,6 +35,18 @@ public class SupplierModel extends BaseModel<Supplier>{
     private String address;
 	@FormField
     private String contact; 
+	
+	public SupplierModel() {
+		
+	}
 
+	public static void main(String[] args) throws JsonProcessingException {
+		ObjectMapper m = new ObjectMapper();
+		Supplier  model = new Supplier();
+		model.setName("NAME");
+		model.setNulledFields(null);
+		String val = m.writeValueAsString(model.toModel());
+		System.out.println(val);
+	}
   
 }
