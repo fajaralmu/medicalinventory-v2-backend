@@ -135,7 +135,6 @@ public class CollectionUtil {
 		Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 		return actualTypeArguments;
 	}
-
 	public static Field getIDFieldOfUnderlyingListType(Field field) {
 
 		Type[] actualTypeArguments = getGenericTypes(field);

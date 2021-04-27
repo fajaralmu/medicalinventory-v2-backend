@@ -5,6 +5,7 @@
  */
 package com.fajar.medicalinventory.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.fajar.medicalinventory.annotation.CustomEntity;
 import com.fajar.medicalinventory.dto.model.ProductFlowModel;
+import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,7 +39,6 @@ import lombok.Setter;
  * @author fajar
  */
 @CustomEntity
-//@Dto(updateService = "productFlowUpdateService", creatable= false, withProgressWhenUpdated = true)
 @Component
 @Entity
 @Table(name = "product_flow")
@@ -67,6 +68,8 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	private int count;
 	@Column(name="used_count", nullable = false) 
 	private int usedCount;
+//	@Column(name="reference_flow_id", nullable = false) 
+//	private Long refStockId;
 	
 	@Nullable
 	@ManyToOne
@@ -83,7 +86,7 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	private boolean generic;  
 	 
 	@Transient
-	private List<ProductFlow> referencingProductFlow;
+	private List<ProductFlow> referencingItems;
 	
 	public void addUsedCount(int count) {
 		 
@@ -97,6 +100,8 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	public int getStock() { 
 		return count - usedCount;
 	}
+	
+	////////////
 
 	public static int sumStockCount(List<ProductFlow> productFlows) {
 		int sum = 0;
@@ -183,10 +188,35 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		return result;
 	}
 	
+	
+	@Override
+	public ProductFlowModel toModel() {
+		ProductFlowModel model = super.toModel();
+		if (referencingItems!=null) {
+			List<ProductFlowModel> refItems = new ArrayList<>();
+			for (ProductFlow productFlow : referencingItems) {
+			refItems.add(productFlow.toModel());
+			}
+			model.setReferencingItems(refItems);
+		}
+		return model;
+	}
+	 
+	
 	public static void main(String[] args) {
-		ProductFlow pf = ProductFlow.builder().transaction(Transaction.builder().code("123").build()).build();
-		ProductFlowModel model = pf.toModel();
-		System.out.println(model.getTransaction2());
+		List<ProductFlow> items = new ArrayList<>();
+		items.add(ProductFlow.builder().count(111).build());
+		items.add(ProductFlow.builder().count(5).build());
+		items.add(ProductFlow.builder().count(101).build());
+		Transaction trx = Transaction.builder().code("123").build();
+		ProductFlow pf = ProductFlow.builder()
+				.referencingItems(items )
+//				transaction(trx )
+				.build();
+		trx.addProductFlow(pf);
+		TransactionModel model = trx.toModel();
+		ProductFlowModel pfModel = model.getProductFlows().get(0);
+		System.out.println(pfModel.getReferencingItems());
 		
 	}
  

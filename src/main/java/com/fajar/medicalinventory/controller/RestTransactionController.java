@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.service.LogProxyFactory;
+import com.fajar.medicalinventory.service.inventory.StockControlService;
 import com.fajar.medicalinventory.service.transaction.TransactionService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,8 @@ public class RestTransactionController extends BaseController {
 
 	@Autowired
 	private TransactionService transactionService; 
+	@Autowired
+	private StockControlService stockControlService;
 
 	public RestTransactionController() {
 		log.info("------------------RestTransactionControllerr-----------------");
@@ -59,6 +63,11 @@ public class RestTransactionController extends BaseController {
 	public WebResponse deletetransactionrecord(@PathVariable String code, HttpServletRequest httpRequest) {
 		log.info("deletetransactionrecord {}", code);
 		return transactionService.deleteRecordByCode(code);
+	}
+	@GetMapping(value = "/relatedrecord/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
+	public WebResponse getTransactionRelatedRecords(@PathVariable String code, HttpServletRequest httpRequest) {
+		log.info("getTransactionRelatedRecords {}", code);
+		return stockControlService.getTransactionRelatedRecords(code);
 	}
 
 	 

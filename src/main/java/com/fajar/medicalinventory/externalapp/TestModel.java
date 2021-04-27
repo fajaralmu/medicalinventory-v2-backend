@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.dto.model.ProductFlowModel;
+import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
 
@@ -22,9 +25,14 @@ public class TestModel {
 	static Session session;
 
 	public static void main(String[] args) {
+		try {
 		session = HibernateSessions.setSession();
 
 		transactionHistory(52L);
+		} catch (Exception  | Error e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 		session.close();
 		System.exit(0);
 
@@ -34,7 +42,13 @@ public class TestModel {
 		Transaction record = (Transaction) session.get(Transaction.class, id);
 		final TransactionType type = record.getType();
 		List<ProductFlow> productFlows = getProductFlows(record);
-
+		Transaction cloned = SerializationUtils.clone(record);
+		cloned.setProductFlows(null);
+//		cloned.setCustomer(null);
+		productFlows.forEach(p->{
+			p.setTransaction(cloned);
+			p.setReferenceProductFlow(null);
+		});
 		if (type.equals(TransactionType.TRANS_OUT)) {
 			return;
 		}
@@ -47,19 +61,20 @@ public class TestModel {
 		System.out.println("========= level 2 ========="); 
 		setReferencingFlows(combineReferencingItems(productFlows));
 
-		summary(record);
+		summary(record.toModel());
 
 	}
 
-	private static void summary(Transaction record) {
+	private static void summary(TransactionModel record) {
 		
 		log.info("Id: {}", record.getId());
 		log.info("Type: {}", record.getType());
-		List<ProductFlow> productFlows = record.getProductFlows();
+		List<ProductFlowModel> productFlows = record.getProductFlows();
 		int i = 1;
-		for (ProductFlow item : productFlows) {
+		for (ProductFlowModel item : productFlows) {
+//			if (item == null) continue;
 			log.info("{}. Item id: {}, qty: ({}) --- {}",i,  item.getId(), item.getCount(), transactionDate(item));
-			List<ProductFlow> referencing1 = item.getReferencingProductFlow();
+			List<ProductFlowModel> referencing1 = item.getReferencingItems();
 			if (referencing1 != null && !referencing1.isEmpty()) {
 				printReferencing(referencing1, 1);
 			}
@@ -67,10 +82,12 @@ public class TestModel {
 		}
 	}
 
-	private static void printReferencing(List<ProductFlow> referencingItems, int level) {
+	private static void printReferencing(List<ProductFlowModel> referencingItems, int level) {
 		int i = 1;
-		for (ProductFlow item : referencingItems) {
-			List<ProductFlow> referencing1 = item.getReferencingProductFlow();
+//		System.out.println("referencingItems: "+referencingItems.get(0));
+//		 if(true) return;
+		for (ProductFlowModel item : referencingItems) {
+			List<ProductFlowModel> referencing1 = item.getReferencingItems();
 
 			log.info(StringUtils.repeat("  ", level) + i + ". Item id:{}, qty: ({}) --- {}", item.getId(),
 					item.getCount(), transactionDate(item));
@@ -82,15 +99,16 @@ public class TestModel {
 
 	}
 
-	private static String transactionDate(ProductFlow item) {
+	private static String transactionDate(ProductFlowModel item) {
 		return item.getTransaction().getTransactionDate().toGMTString();
 	}
 
 	private static List<ProductFlow> combineReferencingItems(List<ProductFlow> productFlows) {
 		List<ProductFlow> items = new ArrayList<>();
-		productFlows.forEach(p->{
-			items.addAll(p.getReferencingProductFlow());
-		});
+		if (null != productFlows)
+			productFlows.forEach(p->{
+				items.addAll(p.getReferencingItems());
+			});
 		return items;
 	}
 
@@ -102,7 +120,9 @@ public class TestModel {
 	private static void mapReferencingFlows(List<ProductFlow> productFlows, List<ProductFlow> referencingFlows) {
 		Map<Long, List<ProductFlow>> mapped = new HashMap<>();
 		for (ProductFlow productFlow : referencingFlows) {
+			
 			Long refId = productFlow.getReferenceProductFlow().getId();
+			productFlow.setReferenceProductFlow(null);
 			if (mapped.get(refId) == null) {
 				mapped.put(refId, new ArrayList<>());
 			}
@@ -110,7 +130,7 @@ public class TestModel {
 		}
 		for (ProductFlow productFlow : productFlows) {
 			List<ProductFlow> referencingItems = mapped.get(productFlow.getId());
-			productFlow.setReferencingProductFlow(referencingItems == null ? new ArrayList<>() : referencingItems);
+			productFlow.setReferencingItems(referencingItems == null ? new ArrayList<>() : referencingItems);
 		}
 	}
 

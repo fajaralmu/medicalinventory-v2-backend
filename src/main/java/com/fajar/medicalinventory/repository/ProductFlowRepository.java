@@ -407,6 +407,8 @@ public interface ProductFlowRepository extends JpaRepository<ProductFlow, Long> 
 	
 	@Query("select sum(pf.count) from ProductFlow pf left join pf.transaction tx where tx.type = ?1 and pf.product.id = ?2")
 	public BigInteger getSumOfProductFlowByTransactionType(TransactionType type, Long productId);
+	
+	public List<ProductFlow> findByReferenceProductFlowIn(List<ProductFlow> productFlows);
 
 	
 

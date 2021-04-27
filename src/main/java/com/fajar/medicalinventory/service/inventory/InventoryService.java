@@ -54,7 +54,7 @@ public class InventoryService {
 	@Autowired
 	private ProgressService progressService;
 	@Autowired
-	private StockAdjusterService stockAdjusterService;
+	private StockControlService stockAdjusterService;
 	@Autowired
 	private ProductAvailabilityRepository productAvailabilityRepository;
 

@@ -6,6 +6,7 @@
 package com.fajar.medicalinventory.dto.model;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
@@ -17,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -61,6 +61,8 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	@Setter(value = AccessLevel.NONE)
 	@FormField(optionItemName = "id", editable = false) 
 	private ProductFlowModel referenceProductFlow;
+//	@FormField
+//	private Long refStockId;
 
 	@Default
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
@@ -71,6 +73,8 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private boolean generic;  
 	
 	private String stockLocation;
+	
+	private List<ProductFlowModel> referencingItems;
 	 
  	public String getType() {
  		try {

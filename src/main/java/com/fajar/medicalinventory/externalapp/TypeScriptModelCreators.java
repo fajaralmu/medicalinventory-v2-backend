@@ -31,7 +31,7 @@ public class TypeScriptModelCreators {
 			try {
 				_class = Class.forName(packageName + "." + name);
 				classes.add(_class);
-			} catch (ClassNotFoundException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

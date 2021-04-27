@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
-import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
