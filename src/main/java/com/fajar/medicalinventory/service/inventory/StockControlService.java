@@ -110,27 +110,32 @@ public class StockControlService {
 		return productFlowMap;
 	}
 
-	public WebResponse getTransactionRelatedRecords(String code) {
+	public WebResponse getTransactionRelatedRecords(String code, HttpServletRequest httpServletRequest) {
 
 		try {
 			com.fajar.medicalinventory.entity.Transaction record = transactionRepository.findByCode(code);
+			progressService.sendProgress(10, httpServletRequest);
+			
 			if (null == record) {
 				throw new DataNotFoundException("Record not found");
 			}
 			final TransactionType type = record.getType();
 			List<ProductFlow> productFlows = productFlowRepository.findByTransaction(record);
-
+			progressService.sendProgress(10, httpServletRequest);
+			
 			if (type.equals(TransactionType.TRANS_OUT)) {
 				return WebResponse.builder().transaction(record.toModel()).build();
 			}
 			System.out.println("========= level 1 =========");
 			setReferencingFlows(productFlows);
-
+			progressService.sendProgress(40, httpServletRequest);
+			
 			if (type.equals(TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
 				return WebResponse.builder().transaction(record.toModel()).build();
 			}
 			System.out.println("========= level 2 =========");
 			setReferencingFlows(combineReferencingItems(productFlows));
+			progressService.sendProgress(40, httpServletRequest);
 			
 			record.setProductFlows(productFlows);
 //			summary(record);

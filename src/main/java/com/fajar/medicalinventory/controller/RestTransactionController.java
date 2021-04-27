@@ -60,14 +60,15 @@ public class RestTransactionController extends BaseController {
 		return transactionService.getTransactionByCode(code);
 	}
 	@PostMapping(value = "/deleterecord/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
-	public WebResponse deletetransactionrecord(@PathVariable String code, HttpServletRequest httpRequest) {
+	public WebResponse deleteTransactionRecord(@PathVariable String code, HttpServletRequest httpRequest) {
 		log.info("deletetransactionrecord {}", code);
 		return transactionService.deleteRecordByCode(code);
 	}
-	@GetMapping(value = "/relatedrecord/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
+	@PostMapping(value = "/relatedrecord/{code}", produces = MediaType.APPLICATION_JSON_VALUE) 
+	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse getTransactionRelatedRecords(@PathVariable String code, HttpServletRequest httpRequest) {
 		log.info("getTransactionRelatedRecords {}", code);
-		return stockControlService.getTransactionRelatedRecords(code);
+		return stockControlService.getTransactionRelatedRecords(code, httpRequest);
 	}
 
 	 
