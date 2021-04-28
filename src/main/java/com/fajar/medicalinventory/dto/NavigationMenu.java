@@ -2,7 +2,7 @@ package com.fajar.medicalinventory.dto;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +74,7 @@ public class NavigationMenu implements Serializable {
 
 	public static List<NavigationMenu> defaultMenus() {
 		if (menus == null) {
-			menus = new ArrayList<>();
+			menus = new LinkedList<>();
 		} else {
 			return menus;
 		}
@@ -92,7 +92,7 @@ public class NavigationMenu implements Serializable {
 			final boolean authenticated) {
 		Controller controller = _class.getAnnotation(Controller.class);
 		if (null == controller)
-			return new ArrayList<>();
+			return new LinkedList<>();
 		RequestMapping baseRequestMapping = _class.getAnnotation(RequestMapping.class);
 		String basePath = baseRequestMapping != null && notEmptyArray(baseRequestMapping.value())
 				? baseRequestMapping.value()[0]

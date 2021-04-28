@@ -34,7 +34,7 @@
 	<http pattern="/res/**" security="none" />
 	<http pattern="/assets/**" security="none" />
 	<http pattern="/realtime-app/**" security="none" />
-	<http pattern="/public/**"  security="none" />
+	
 	<http name="httpConfigForAPI" auto-config="true" pattern="/api/**" >
 		<custom-filter before="PRE_AUTH_FILTER" ref="jwtAuthFilter"/>
 		<intercept-url pattern="/api/public/**" access="permitAll" /> 
@@ -55,7 +55,7 @@
 	<http name="httpConfigForWebPages" auto-config="true" >
 	 	
 	 	<custom-filter before="FORM_LOGIN_FILTER" ref="formLoginFilter"/>
-		
+		<intercept-url pattern="/public/**" access="permitAll" /> 
 		<intercept-url pattern="/app/**" method="POST"   access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		<intercept-url pattern="/member/**" access="hasAnyRole('ROLE_ADMIN','ROLE_USER')" />
 		<form-login login-page="/login"

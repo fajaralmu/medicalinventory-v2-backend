@@ -2,8 +2,13 @@ package com.fajar.medicalinventory.controller;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,6 +25,7 @@ import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.UserSessionService;
 import com.fajar.medicalinventory.service.config.BindedValues;
+import com.fajar.medicalinventory.service.config.DefaultApplicationProfileService;
 import com.fajar.medicalinventory.util.DateUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,36 +36,36 @@ public class BaseController {
 
 	private static final String MODEL_ATTR_TITLE = "title";
 	private static final String MODEL_ATTR_PAGE_URL = "pageUrl";
-	
+
 	protected String basePage = "BASE_PAGE";
 	@Autowired
 	protected SessionValidationService sessionValidationService;
 	@Autowired
 	protected UserSessionService userSessionService;
-	 
+
 	@Autowired
 	protected BindedValues bindedValues;
-	
-	
-	
+	@Autowired
+	protected DefaultApplicationProfileService defaultApplicationProfileService;
+
 	@ModelAttribute("applicationHeaderLabel")
 	public String applicationHeaderLabel(HttpServletRequest request) {
-		
-		return bindedValues.getApplicationHeaderLabel();
+
+		return defaultApplicationProfileService.getApplicationProfile().getName();
 	}
-	
+
 	@ModelAttribute("applicationDescription")
 	public String applicationDescription(HttpServletRequest request) {
-		
-		return bindedValues.getApplicationDescription();
+
+		return defaultApplicationProfileService.getApplicationProfile().getShortDescription();
 	}
-	
+
 	@ModelAttribute("applicationFooterLabel")
 	public String applicationFooterLabel(HttpServletRequest request) {
-		
-		return bindedValues.getApplicationFooterLabel();
+
+		return applicationHeaderLabel(request);
 	}
-	 
+
 	@ModelAttribute("isPhone")
 	public boolean isPhone(HttpServletRequest request) {
 		try {
@@ -72,41 +78,55 @@ public class BaseController {
 	@ModelAttribute("contextPath")
 	public String getContextPath(HttpServletRequest request) {
 		return request.getContextPath();
-	} 
+	}
 
 	@ModelAttribute("year")
 	public int getCurrentYear(HttpServletRequest request) {
 		return DateUtil.getCalendarItem(new Date(), Calendar.YEAR);
 	}
+
 	@ModelAttribute("isAuthenticated")
 	public boolean isAuthenticated(HttpServletRequest request) {
 		return validatePrinciple(request.getUserPrincipal());
 	}
+
 	@ModelAttribute("loggedUser")
 	public User loggedUser(HttpServletRequest request) {
 		return sessionValidationService.getLoggedUser(request);
-	}	
+	}
+
 	@ModelAttribute("userPrincipal")
 	public Object getUserPrincipal(HttpServletRequest request) {
 		return sessionValidationService.getUserPrincipal(request);
 	}
-	
+
+	@ModelAttribute("greeting")
+	public String greeting(HttpServletRequest request) {
+		User user = loggedUser(request);
+		String name = user == null ? "" : user.getDisplayName();
+		return "Good " + DateUtil.getTimeGreeting() + ", " + name;
+
+	}
+
 	@ModelAttribute("navigationMenus")
 	public List<NavigationMenu> navigationMenus(HttpServletRequest request) {
-		List<NavigationMenu> menus = NavigationMenu.defaultMenus();
-		boolean authenticated = validatePrinciple(request.getUserPrincipal()); 
-		List<NavigationMenu> displayedMenus = new ArrayList<>();
-		
-		for (NavigationMenu navigationMenu : menus) {
-			if (!authenticated && navigationMenu.isAuthenticated()) {
-				continue;
-			}
-			displayedMenus.add(navigationMenu);
-		}
-//		log.info("displayedMenus : {}", displayedMenus.size());
-		return displayedMenus ;
+		boolean authenticated = validatePrinciple(request.getUserPrincipal());
+		List<NavigationMenu> displayedMenus = NavigationMenu.defaultMenus().stream()
+				.filter(predicateNavigationMenu(authenticated))
+				.collect(Collectors.toList());
+		return displayedMenus;
 	}
-	
+
+	private Predicate<? super NavigationMenu> predicateNavigationMenu(boolean authenticated) {
+
+		return (NavigationMenu t) -> {
+			if (!authenticated && t.isAuthenticated()) {
+				return false;
+			}
+			return true;
+		};
+	}
+
 	@ModelAttribute("ipAndPort")
 	public String getIpAddressAndPort(HttpServletRequest request) {
 
@@ -114,7 +134,8 @@ public class BaseController {
 		int port = request.getServerPort();
 
 		return remoteAddress + ":" + port;
-	} 
+	}
+
 	protected static void setTitle(Model model, String title) {
 		model.addAttribute(MODEL_ATTR_TITLE, title);
 	}
@@ -122,19 +143,17 @@ public class BaseController {
 	protected static void setPageUrl(Model model, String pageUrl) {
 		model.addAttribute(MODEL_ATTR_PAGE_URL, pageUrl);
 	}
-	
+
 	protected boolean validatePrinciple(Object principal) {
 		return sessionValidationService.validatePrinciple(principal);
 	}
-	
-	
 
 	/**
 	 * ====================================================== Statics
 	 * ======================================================
 	 * 
 	 */
- 
+
 	private static void addResourcePaths(ModelAndView modelAndView, String resourceName, String... paths) {
 		List<KeyValue<String, String>> resoucePaths = new ArrayList<>();
 		for (int i = 0; i < paths.length; i++) {
@@ -161,7 +180,6 @@ public class BaseController {
 		addResourcePaths(modelAndView, "additionalStylePaths", paths);
 	}
 
-	
 	public static void addJavaScriptResourcePaths(ModelAndView modelAndView, String... paths) {
 		if (null == paths) {
 			return;

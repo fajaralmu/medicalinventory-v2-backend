@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

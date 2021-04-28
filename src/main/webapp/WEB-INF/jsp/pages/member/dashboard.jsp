@@ -7,6 +7,14 @@
 <div>
 	<h2>Dashboard</h2>
 	<div>
-		<div class="alert alert-primary" role="alert">Welcome, ${loggedUser.username }</div>
+		<div class="alert alert-primary" role="alert">
+		${greeting }
+		<hr/>
+		</div>
+		<p>
+			<a class="btn btn-dark" href="<c:url value="${applicationURL }"></c:url>">
+				Application Page
+			</a>
+		</p>
 	</div>
 </div>

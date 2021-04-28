@@ -11,8 +11,8 @@
 <div id="sidebar-wrapper" style="position: relative;" class="bg-dark">
 	<ul class="sidebar-nav">
 		<c:if test="${isAuthenticated==true }">
-			<li class="sidebar-brand"><div
-					style="text-align: center; padding-top: 10px; padding-bottom: 10px">
+			<li class="sidebar-brand text-center"><div
+					style="margin-bottom: 10px">
 					<h3 class="text-light">
 						<i class="fas fa-user-circle"></i>
 					</h3>
