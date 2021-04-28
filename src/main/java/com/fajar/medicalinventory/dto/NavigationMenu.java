@@ -112,8 +112,14 @@ public class NavigationMenu implements Serializable {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(publicMenus());
-		System.out.println(memberMenus());
+//		System.out.println(publicMenus());
+//		System.out.println(memberMenus());
+		String x = "select id, (select  pf.price  from product_flow pf  "
+				+ "left join  transaction tx on pf.transaction_id = tx.id "
+				+ "left join  product p on p.id = pf.product_id  "
+				+ "where tx.type = 'TRANS_IN' and p.id = p1.id and tx.transaction_date<=?1 "
+				+ "order by  tx.transaction_date desc limit 1) as price from product p1";
+		System.out.println(x);
 	}
 
 	static boolean notEmptyArray(String[] values) {

@@ -12,7 +12,7 @@
 		</layout>
 	</appender>
 	<appender name="fileAppender"
-		class="org.apache.log4j.RollingFileAppender">
+		class="org.apache.log4j.rolling.RollingFileAppender">
 		<param name="append" value="false" />
 		<param name="file" value="./logs/application_log.log" />
 		<param name="Threshold" value="TRACE" />
