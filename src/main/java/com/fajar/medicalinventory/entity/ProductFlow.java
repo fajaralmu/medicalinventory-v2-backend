@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +85,9 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	private double price;
 	@Column 
 	private boolean generic;  
+	
+	@Formula(value = "count - used_count")
+	private int stock;
 	 
 	@Transient
 	private List<ProductFlow> referencingItems;

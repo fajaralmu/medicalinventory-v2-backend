@@ -8,12 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.annotations.Formula;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -202,16 +204,7 @@ public class CriteriaBuilder {
 			setCurrentAlias(alias, path, queryField.getOtherName());
 		}
 
-	}
-//	private void setJoinColumnAliases() {
-//		List<QueryField> joinColumns = QueryUtil.getJoinColumnFieldsByBaseModel(getModelClass());
-////		List<Field> joinColumns = QueryUtil.getJoinColumnFields(entityClass);
-//		for (int i = 0; i < joinColumns.size(); i++) {
-//			QueryField queryField =joinColumns.get(i);
-//			setCurrentAlias(joinColumns.get(i).getName());
-//		}
-//
-//	}
+	} 
 	
 	public static void main(String[] args) {
 		List<QueryField> joinColumns = QueryUtil.getJoinColumnFieldsByBaseModel(ProductFlowModel.class);
@@ -231,10 +224,12 @@ public class CriteriaBuilder {
 	public Criteria createCriteria() {
 		return createCriteria(false);
 	}
-
+	private String entityName() {
+		return entityClass.getSimpleName();
+	}
 	private Criteria createCriteria(boolean onlyRowCount) {
 
-		String entityName = entityClass.getSimpleName();
+		
 		setCurrentAlias(THIS, null);
 
 		for (final String rawKey : fieldsFilter.keySet()) {
@@ -244,7 +239,7 @@ public class CriteriaBuilder {
 			if (fieldsFilter.get(rawKey) == null)
 				continue;
 
-			String currentKey = rawKey; 
+			final String currentKey = rawKey; 
 			log.info("Raw key: {} Now KEY: {}", rawKey, currentKey);
 			// check if date
 			Criterion dateFilterSql = getDateFilter(rawKey, currentKey);
@@ -256,22 +251,25 @@ public class CriteriaBuilder {
 			}
 
 			final boolean multiKey = rawKey.contains(".");
-			final Field field, fieldRelativeToEntityClass;
+			final Field field, fieldOwnedByEntityClass;
 			if (multiKey) {
-				fieldRelativeToEntityClass = getDeclaredField(entityClass, rawKey.split("\\.")[0]);
-				field = getDeclaredField(fieldRelativeToEntityClass.getType(), rawKey.split("\\.")[1]);
+				fieldOwnedByEntityClass = getDeclaredField(entityClass, rawKey.split("\\.")[0]);
+				field = getDeclaredField(fieldOwnedByEntityClass.getType(), rawKey.split("\\.")[1]);
 			} else {
-				field = fieldRelativeToEntityClass = getFieldByKeyName(currentKey);
+				field = fieldOwnedByEntityClass = getFieldByKeyName(currentKey);
 			}
 
 			if (field == null) {
 				log.warn("Field Not Found :" + currentKey + " !");
-				System.err.println("Field Not Found :" + currentKey + " !");
+				continue;
+			}
+			//supported annotations
+			if (!annotationPresent(field, Column.class, JoinColumn.class)) {
 				continue;
 			}
 
 			String fieldName = field.getName();
-			KeyValue<String, String> joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, fieldRelativeToEntityClass,field, false);
+			KeyValue<String, String> joinColumnResult = QueryUtil.checkIfJoinColumn(currentKey, fieldOwnedByEntityClass,field, false);
 			System.out.println("joinColumnResult: "+joinColumnResult);
 			
 			//TODO: process exact with join column
@@ -280,7 +278,7 @@ public class CriteriaBuilder {
 					Class<?> _class = field.getType();
 					if (joinColumnResult.isMultiKey()) {
 						fieldName = joinColumnResult.getKey();
-						_class = fieldRelativeToEntityClass.getType();
+						_class = fieldOwnedByEntityClass.getType();
 					}
 					if (allItemExactSearch) {
 						Criterion eq = restrictionEquals( fieldName+ "." + joinColumnResult.getValue(), fieldsFilter.get(rawKey));
@@ -298,7 +296,7 @@ public class CriteriaBuilder {
 					Criterion eq = restrictionEquals(currentKey, fieldsFilter.get(rawKey));
 					addCriteria(eq); 
 				} else {
-					Criterion like = (restrictionLike(entityName + "." + currentKey, entityClass, fieldsFilter.get(rawKey)));
+					Criterion like = (restrictionLike(entityName() + "." + currentKey, entityClass, fieldsFilter.get(rawKey)));
 					addCriteria(like);
 				}
 			}
@@ -314,6 +312,13 @@ public class CriteriaBuilder {
 
 	}
 	
+	private boolean annotationPresent(Field field, Class ...annotations ) {
+		for (Class class1 : annotations) {
+			if (field.getAnnotation(class1) != null) return true;
+		}
+		return false;
+	}
+
 	private void addCriteria(Criterion c) {
 		if (null != c ) {
 			criteria.add(c );

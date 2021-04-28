@@ -31,8 +31,8 @@ import com.fajar.medicalinventory.exception.DataNotFoundException;
 import com.fajar.medicalinventory.repository.ProductFlowRepository;
 import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
+import com.fajar.medicalinventory.service.entity.CommonFilterResult;
 import com.fajar.medicalinventory.service.entity.MasterDataService;
-import com.fajar.medicalinventory.service.entity.MasterDataService.EntityResult;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.MapUtil;
 
@@ -154,7 +154,7 @@ public class ProductStatisticService {
 		if (startDate.after(endDate)) {
 			throw new ApplicationException("invalid period");
 		}
-		EntityResult<Product> filtered = masterDataService.filterEntities(filter, Product.class);
+		CommonFilterResult<Product> filtered = masterDataService.filterEntities(filter, Product.class);
 		List<Product> products = filtered.getEntities(); 
 		int totalData = filtered.getCount();
 		progressService.sendProgress(30, httpServletRequest);

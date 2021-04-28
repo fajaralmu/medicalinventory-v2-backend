@@ -8,14 +8,24 @@ import static org.hibernate.criterion.Restrictions.lt;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.BigIntegerType;
+import org.hibernate.type.IntegerType;
 import org.hibernate.type.Type;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.constants.TransactionType;
+import com.fajar.medicalinventory.dto.Filter;
+import com.fajar.medicalinventory.entity.ProductFlow;
+import com.fajar.medicalinventory.querybuilder.CriteriaBuilder;
+import com.fajar.medicalinventory.service.entity.CommonFilterResult;
 import com.fajar.medicalinventory.util.DateUtil;
 
 @Service
@@ -33,6 +43,29 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 
 		return wrapper;
 	}
+	public CommonFilterResult<ProductFlow> filter(Filter filter) {
+		
+		Session session = getSession(); 
+		Criteria listCriteria =  new CriteriaBuilder(session, ProductFlow.class, filter).createCriteria();
+		Criteria countCriteria =  new CriteriaBuilder(session, ProductFlow.class, filter).createRowCountCriteria();
+		
+		Criterion transTypeFilter = Restrictions.in("transaction.type", new TransactionType[] {
+				TransactionType.TRANS_IN,TransactionType.TRANS_OUT_TO_WAREHOUSE
+		});
+		Criterion stockFilter = Restrictions.sqlRestriction("(this_.count - this_.used_count) > ?", 0 , IntegerType.INSTANCE);
+		listCriteria.add(stockFilter);
+		listCriteria.add(transTypeFilter);
+		countCriteria.add(stockFilter);
+		countCriteria.add(transTypeFilter);
+		
+		BigInteger count = bigint(countCriteria.uniqueResult());
+		List list = listCriteria.list();
+		
+		session.close();
+		
+		return CommonFilterResult.listAndCount(list, count.intValue());
+		
+	} 
 
 	////////////////// BRANCH WAREHOUSE ///////////////////
 

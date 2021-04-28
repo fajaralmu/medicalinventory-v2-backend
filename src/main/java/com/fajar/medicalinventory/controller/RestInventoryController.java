@@ -73,5 +73,11 @@ public class RestInventoryController extends BaseController {
 		 
 		return productStatisticService.getProductListWithUsage( webRequest, httpRequest);
 	}
+	@PostMapping(value = "/filter", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
+	public WebResponse filter( @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {
+		log.info("filter stock");
+		
+		return inventoryService.filterStock(webRequest);
+	}
 	 
 }

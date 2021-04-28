@@ -32,6 +32,7 @@ import com.fajar.medicalinventory.repository.ProductRepository;
 import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 import com.fajar.medicalinventory.service.config.InventoryConfigurationService;
+import com.fajar.medicalinventory.service.entity.CommonFilterResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -299,6 +300,16 @@ public class InventoryService {
 		WebResponse response = new WebResponse();
 		response.setConfiguration(config.toModel());
 		response.setInventoryData(inventoryData);
+		return response;
+	}
+	
+	public WebResponse filterStock(WebRequest webRequest) {
+		CommonFilterResult<ProductFlow> result = productStockRepository.filter(webRequest.getFilter());
+		
+		WebResponse response = new WebResponse();
+		response.setEntities(BaseModel.toModels(result.getEntities()));
+		response.setTotalData(result.getCount());
+		response.setFilter(webRequest.getFilter());
 		return response;
 	}
 

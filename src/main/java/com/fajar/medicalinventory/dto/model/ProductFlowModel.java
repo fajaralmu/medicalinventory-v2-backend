@@ -57,8 +57,8 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private int count;
 	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int usedCount;
-
-	
+	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
+	private int stock;
 	
 	@Setter(value = AccessLevel.NONE)
 	@FormField(optionItemName = "id", editable = false) 
