@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.controller;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,7 +20,6 @@ import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.User;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.config.DefaultUserService;
 import com.fajar.medicalinventory.util.HttpRequestUtil;
 
@@ -37,11 +35,6 @@ public class RestAccountController extends BaseController {
 	private DefaultUserService userService;
 	public RestAccountController() {
 		log.info("------------------RestAccountController-----------------");
-	}
-
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
 	}
 
 	

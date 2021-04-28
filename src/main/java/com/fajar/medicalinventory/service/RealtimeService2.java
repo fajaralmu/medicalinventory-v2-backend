@@ -14,11 +14,7 @@ public class RealtimeService2 {
 
 	@Autowired
 	private SimpMessagingTemplate webSocket;
-
-	public RealtimeService2() {
-		LogProxyFactory.setLoggers(this);
-		log.info("=======================REALTIME SERVICE 2=======================");
-	}
+ 
 
 	public boolean sendUpdateSession(Object payload) {
 

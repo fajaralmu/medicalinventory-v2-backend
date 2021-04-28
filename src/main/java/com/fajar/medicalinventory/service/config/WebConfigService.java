@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.fajar.medicalinventory.config.LogProxyFactory;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.entity.User;
 import com.fajar.medicalinventory.repository.AppProfileRepository;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.util.CollectionUtil;
 
 import lombok.Data;
@@ -55,9 +55,19 @@ public class WebConfigService {
 	public void init() {
 		log.info("WebConfigService INITIALIZE");
 
-		LogProxyFactory.setLoggers(this);
-
 		getJpaReporitoriesBean();
+		setLoggers();
+	}
+
+	private void setLoggers() {
+		
+		String[] beanNames = applicationContext.getBeanDefinitionNames();
+		for (String string : beanNames) {
+			Object beans = applicationContext.getBean(string);
+			if (beans == null || !beans.getClass().getCanonicalName().startsWith("com.fajar")) continue;
+			LogProxyFactory.setLoggers(beans);
+			
+		}
 	}
 
 	private void getJpaReporitoriesBean() {

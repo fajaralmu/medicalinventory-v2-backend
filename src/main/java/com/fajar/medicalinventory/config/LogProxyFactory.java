@@ -20,6 +20,7 @@ public class LogProxyFactory {
 	public static final DefaultParameterNameDiscoverer discoverer = new DefaultParameterNameDiscoverer();
 	
 	public static void setLoggers(Object obj) {
+		if (null == obj) return;
 		log.info("set logger to object: {}", obj.getClass());
 		
 		Field[] fields = obj.getClass().getDeclaredFields();
@@ -31,13 +32,6 @@ public class LogProxyFactory {
 			field.setAccessible(true);
 			try {
 				Object fieldValue = field.get(obj); 
-				boolean isInterface = fieldValue.getClass().isInterface();
-				boolean repo = fieldValue.getClass().getSuperclass()!=null &&
-							fieldValue.getClass().getSuperclass().equals(JpaRepository .class);
-				 
-				if(isInterface || repo) {
-					continue;
-				}
 				field.set(obj, logWrapper(fieldValue));
 			} catch (Exception e) { 
 				continue;
@@ -48,9 +42,8 @@ public class LogProxyFactory {
 	
 	public static Object logWrapper(Object obj) {
 		
-		
 		ProxyFactory proxyFactory = new ProxyFactory(obj);
-		Logger logger = LoggerFactory.getLogger(obj.getClass());
+		Logger logger =  LoggerFactory.getLogger(obj.getClass());
 		MethodInterceptor mi = new MethodInterceptor() {
 			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -62,7 +55,7 @@ public class LogProxyFactory {
 				 */
 
 				Object methodName = invocation.getMethod().getName();
-				logger.info("=========>[Execute Method: {}]", methodName);  
+				logger.debug("=========>[Execute Method: {}]", methodName);  
 				try {
 					/**
 					 * prints parameters of the method
@@ -79,11 +72,11 @@ public class LogProxyFactory {
 					
 					Object[] arguments = invocation.getArguments();
 					if(null == arguments || arguments.length == 0) {
-						logger.info("[No Argument]");
+						logger.debug("[No Argument]");
 					}else
 						for (int i = 0; i < arguments.length; i++) {
 							String parameterName = params[i] == null ? "arg" + i : params[i];
-							logger.info("[argument{}] {}:{}",i, parameterName, arguments[i]);
+							logger.debug("[argument{}] {}:{}",i, parameterName, arguments[i]);
 						}
 				}catch(Exception ex) {
 					System.out.println("[ERROR] logging "+methodName);
@@ -97,8 +90,8 @@ public class LogProxyFactory {
 						retValToLog = retVal.toString().substring(0, 490).concat("... [*_*]");
 					}
 					
-					logger.info("[{} has return value] : {}", invocation.getMethod().getName(), retValToLog);
-					logger.info("<=========[Finish Execute Method: {}] with success in {}ms", invocation.getMethod().getName(),
+					logger.debug("[{} has return value] : {}", invocation.getMethod().getName(), retValToLog);
+					logger.debug("<=========[Finish Execute Method: {}] with success in {}ms", invocation.getMethod().getName(),
 							 end.getTime() - start.getTime());
 					
 					return retVal;

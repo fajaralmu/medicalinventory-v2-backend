@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.controller;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fajar.medicalinventory.dto.WebResponse;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,14 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/public")
 public class RestPublicController extends BaseController {
- 
-	  
-	 
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
-	}
-
+  
 	public RestPublicController() {
 		log.info("----------------------Rest Public Controller-------------------");
 	}

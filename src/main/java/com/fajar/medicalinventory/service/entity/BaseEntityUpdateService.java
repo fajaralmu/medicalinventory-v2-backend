@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -19,7 +18,6 @@ import com.fajar.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.fajar.medicalinventory.entity.setting.MultipleImageModel;
 import com.fajar.medicalinventory.entity.setting.SingleImageModel;
 import com.fajar.medicalinventory.repository.EntityRepository;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.resources.FileService;
 import com.fajar.medicalinventory.service.resources.ImageUploadService;
@@ -38,11 +36,7 @@ public class BaseEntityUpdateService<T extends BaseEntity> {
 	private SessionValidationService sessionValidationService; 
 	@Autowired
 	private ImageUploadService imageUploadService;
-	
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
-	}
+	 
 
 	public T saveEntity(T object, boolean newRecord, HttpServletRequest httpServletRequest) throws Exception {
 		log.error("SaveEntity Method NOT IMPLEMENTED IN BASEENTITY UPDATE SERVICE");

@@ -1,6 +1,5 @@
 package com.fajar.medicalinventory.controller;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,7 +16,6 @@ import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.entity.EntityManagementPageService;
 import com.fajar.medicalinventory.service.entity.MasterDataService;
 
@@ -36,12 +34,7 @@ public class RestEntityController extends BaseController {
 
 	public RestEntityController() {
 		log.info("------------------Rest Entity Controller-----------------");
-	}
-
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
-	}
+	} 
 
 	@PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)

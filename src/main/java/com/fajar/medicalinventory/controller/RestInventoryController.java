@@ -1,6 +1,5 @@
 package com.fajar.medicalinventory.controller;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.inventory.InventoryService;
 import com.fajar.medicalinventory.service.transaction.ProductStatisticService;
 
@@ -35,11 +33,7 @@ public class RestInventoryController extends BaseController {
 	public RestInventoryController() {
 		log.info("------------------RestInventoryController-----------------");
 	}
-
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
-	}
+ 
  
 	@PostMapping(value = "/availableproducts/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) 
 	public WebResponse gettransactionbycode(@PathVariable String code, @RequestBody WebRequest webRequest, HttpServletRequest httpRequest) {

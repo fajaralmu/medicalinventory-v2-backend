@@ -3,7 +3,6 @@ package com.fajar.medicalinventory.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +21,7 @@ public class ProgressService {
 
 	private final Map<String, Double> progressData = new HashMap<>();
 
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
-	}
+	 
 
 	public void init(String requestId) {
 		log.info(">>>>>>>>Init Progress: {}", requestId);

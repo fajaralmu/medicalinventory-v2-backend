@@ -13,8 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.fajar.medicalinventory.config.LogProxyFactory;
 import com.fajar.medicalinventory.entity.setting.EntityProperty;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 
 import lombok.extern.slf4j.Slf4j;
 

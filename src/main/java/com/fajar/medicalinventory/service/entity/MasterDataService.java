@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import com.fajar.medicalinventory.exception.ApplicationException;
 import com.fajar.medicalinventory.repository.CustomRepositoryImpl;
 import com.fajar.medicalinventory.repository.DatabaseProcessor;
 import com.fajar.medicalinventory.repository.EntityRepository;
-import com.fajar.medicalinventory.service.LogProxyFactory;
-import com.fajar.medicalinventory.util.CollectionUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
 import lombok.AllArgsConstructor;
@@ -40,8 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MasterDataService {
 
-	public static final String ORIGINAL_PREFFIX = "{ORIGINAL>>";
-
 	@Autowired
 	private CustomRepositoryImpl customRepository;
 	@Autowired
@@ -49,11 +44,6 @@ public class MasterDataService {
 	@Autowired
 	private EntityManagementPageService entityManagementPageService;   
 	
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this); 
-	}
-
 	private EntityManagementConfig getEntityManagementConfig(String key) {
 		return entityRepository.getConfiguration(key);
 	}

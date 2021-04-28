@@ -2,7 +2,6 @@ package com.fajar.medicalinventory.controller;
 
 import java.io.OutputStream;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fajar.medicalinventory.annotation.CustomRequestInfo;
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.exception.ApplicationException;
-import com.fajar.medicalinventory.service.LogProxyFactory;
 import com.fajar.medicalinventory.service.report.CustomWorkbook;
 import com.fajar.medicalinventory.service.transaction.ReportService;
 
@@ -35,11 +33,6 @@ public class RestReportController extends BaseController {
 
 	public RestReportController() {
 		log.info("------------------RestReportController-----------------");
-	}
-
-	@PostConstruct
-	public void init() {
-		LogProxyFactory.setLoggers(this);
 	}
 
 	@PostMapping(value = "/stockopname", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
