@@ -10,11 +10,14 @@ import java.util.Map;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
+import org.springframework.util.Assert;
+
 import com.fajar.medicalinventory.annotation.AdditionalQuestionField;
 import com.fajar.medicalinventory.annotation.BaseField;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.Filterable;
 import com.fajar.medicalinventory.dto.model.BaseModel;
 import com.fajar.medicalinventory.entity.BaseEntity;
 import com.fajar.medicalinventory.util.CollectionUtil;
@@ -76,6 +79,8 @@ public class EntityElement implements Serializable {
 	private boolean hasPreview;
 	@Default
 	private boolean filterable = true;
+	@Default
+	private boolean orderable = true;
 
 	@JsonIgnore
 	public EntityProperty entityProperty;
@@ -99,14 +104,30 @@ public class EntityElement implements Serializable {
 			this.fieldType = formField.type();
 			this.editable = formField.editable();
 			setOptionItemName(formField.optionItemName());
-			setFilterable(formField.filterable());
 			setRequiredProp(formField);
-
+			
+			setFilterableProp();
 		} else {
 			this.fieldType = FieldType.FIELD_TYPE_TEXT;
 			this.editable = false;
 		}
 		init();
+	}
+
+	private void setFilterableProp() {
+		if (null == formField) {
+			log.debug("formField is null for: {}", this.id);
+			return;
+		}
+		Filterable filterableInfo = formField.filterable();
+		boolean enableFilter = filterableInfo.equals(Filterable.ENABLE_ALL);
+		boolean _filterable = !filterableInfo.equals(Filterable.DISABLE_ALL) &&
+				!filterableInfo.toString().contains("UNFILTERABLE");
+
+		boolean _orderable = !filterableInfo.equals(Filterable.DISABLE_ALL) &&
+				!filterableInfo.toString().contains("UNORDERABLE");
+		setFilterable(enableFilter || _filterable);
+		setOrderable(enableFilter ||_orderable);
 	}
 
 	private void init() {

@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.Filterable;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -30,7 +31,7 @@ public @interface FormField {
 	
 	public boolean hasPreview() default false;
 	public boolean editable() default true;
-	public boolean filterable() default true; 
+	public Filterable filterable() default Filterable.ENABLE_ALL; 
 	public String entityField() default "";
 
 }

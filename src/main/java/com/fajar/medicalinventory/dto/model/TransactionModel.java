@@ -12,6 +12,7 @@ import java.util.List;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.Filterable;
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -44,7 +45,7 @@ public class TransactionModel extends BaseModel<Transaction> {
 	private Date transactionDate = new Date();
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String description;
-	@FormField(editable = false, filterable = false)
+	@FormField(editable = false, filterable = Filterable.DISABLE_ALL)
 	@Getter(value = AccessLevel.NONE)
 	private Integer productCount;
 

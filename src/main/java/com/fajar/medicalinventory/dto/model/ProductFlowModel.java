@@ -11,6 +11,7 @@ import java.util.List;
 import com.fajar.medicalinventory.annotation.Dto;
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.constants.FieldType;
+import com.fajar.medicalinventory.constants.Filterable;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -57,7 +58,7 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private int count;
 	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
 	private int usedCount;
-	@FormField(type=FieldType.FIELD_TYPE_NUMBER)
+	@FormField(type=FieldType.FIELD_TYPE_NUMBER, filterable = Filterable.UNFILTERABLE_ORDERABLE)
 	private int stock;
 	
 	@Setter(value = AccessLevel.NONE)
