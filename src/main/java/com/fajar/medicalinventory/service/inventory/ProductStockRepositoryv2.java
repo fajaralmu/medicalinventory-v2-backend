@@ -1,5 +1,6 @@
 package com.fajar.medicalinventory.service.inventory;
 
+import static com.fajar.medicalinventory.constants.TransactionType.TRANS_IN;
 import static com.fajar.medicalinventory.constants.TransactionType.TRANS_OUT_TO_WAREHOUSE;
 import static com.fajar.medicalinventory.util.DateUtil.clock00Midnight;
 import static com.fajar.medicalinventory.util.DateUtil.clock24Midnight;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.BigIntegerType;
@@ -43,16 +45,43 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 
 		return wrapper;
 	}
+	
+	private static void createAlias(String path, String alias, Criteria...criterias) {
+		for (int i = 0; i < criterias.length; i++) {
+			criterias[i].createAlias(path, alias);
+		}
+	}
+	
 	public CommonFilterResult<ProductFlow> filter(Filter filter) {
 		
 		Session session = getSession(); 
 		Criteria listCriteria =  new CriteriaBuilder(session, ProductFlow.class, filter).createCriteria();
 		Criteria countCriteria =  new CriteriaBuilder(session, ProductFlow.class, filter).createRowCountCriteria();
 		
+		createAlias("transaction.healthCenterLocation", "healthCenterLocation", listCriteria, countCriteria);
+		createAlias("transaction.healthCenterDestination", "healthCenterDestination", listCriteria, countCriteria);
+		
+		
 		Criterion transTypeFilter = Restrictions.in("transaction.type", new TransactionType[] {
-				TransactionType.TRANS_IN,TransactionType.TRANS_OUT_TO_WAREHOUSE
+				TRANS_IN,TRANS_OUT_TO_WAREHOUSE
 		});
+		
 		Criterion stockFilter = Restrictions.sqlRestriction("(this_.count - this_.used_count) > ?", 0 , IntegerType.INSTANCE);
+		
+		if(filter.getFieldsFilterValue("location")!=null) {
+			String location = filter.getFieldsFilterValue("location").toString();
+			Criterion transInLocation = Restrictions.and(
+					Restrictions.eq("transaction.type", TRANS_IN),
+					Restrictions.ilike("healthCenterLocation.name", location, MatchMode.ANYWHERE)
+					);
+			Criterion transOutLocation = Restrictions.and(
+					Restrictions.eq("transaction.type", TRANS_OUT_TO_WAREHOUSE),
+					Restrictions.ilike("healthCenterDestination.name", location, MatchMode.ANYWHERE)
+					);
+			Criterion locationFilter = Restrictions.or(transInLocation, transOutLocation);
+			listCriteria.add(locationFilter);
+			countCriteria.add(locationFilter);
+		}
 		listCriteria.add(stockFilter);
 		listCriteria.add(transTypeFilter);
 		countCriteria.add(stockFilter);
@@ -138,7 +167,7 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 	}
 
 	private CriteriaWrapper getTotalItemsAllLocationCriteria() {
-		return commonStockCriteria(null, TransactionType.TRANS_IN, TransactionType.TRANS_OUT_TO_WAREHOUSE);
+		return commonStockCriteria(null, TRANS_IN, TransactionType.TRANS_OUT_TO_WAREHOUSE);
 	}
 
 	private BigInteger getTotalItemsAllLocation() {
@@ -188,7 +217,7 @@ public class ProductStockRepositoryv2 extends CommonRepository {
 	}
 
 	private CriteriaWrapper getTotalItemsAtMasterCriteria() {
-		return commonStockCriteria(null, TransactionType.TRANS_IN);
+		return commonStockCriteria(null, TRANS_IN);
 	}
 
 	private BigInteger getTotalItemsAtMasterWarehouse() {

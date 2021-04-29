@@ -304,12 +304,16 @@ public class InventoryService {
 	}
 	
 	public WebResponse filterStock(WebRequest webRequest) {
+		log.info("filterStock: {}", webRequest.getFilter());
+		
 		CommonFilterResult<ProductFlow> result = productStockRepository.filter(webRequest.getFilter());
+		Configuration config = inventoryConfigurationService.getTempConfiguration();
 		
 		WebResponse response = new WebResponse();
 		response.setEntities(BaseModel.toModels(result.getEntities()));
 		response.setTotalData(result.getCount());
 		response.setFilter(webRequest.getFilter());
+		response.setConfiguration(config.toModel());
 		return response;
 	}
 
