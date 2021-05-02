@@ -131,6 +131,6 @@
       })([]);
     </script>
     <script src="<c:url value="/res/react_resources/static/js/2.f1ff6c2d.chunk.js"/>"></script>
-    <script src="<c:url value="/res/react_resources/static/js/main.29d62007.chunk.js"/>"></script>
+    <script src="<c:url value="/res/react_resources/static/js/main.4b1eca7b.chunk.js"/>"></script>
   </body>
 </html>
