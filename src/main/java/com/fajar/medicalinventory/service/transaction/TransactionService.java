@@ -179,9 +179,14 @@ public class TransactionService {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
+			
 			Transaction record = transactionRepository.findByCode(code);
 			if (null == record) {
 				throw new Exception("Record not found");
+			}
+			List<ProductFlow> productFlows = productFlowRepository.findByTransaction(record);
+			for (ProductFlow productFlow : productFlows) {
+				session.delete(productFlow);
 			}
 			session.delete(record);
 			hibernateTransaction.commit();
