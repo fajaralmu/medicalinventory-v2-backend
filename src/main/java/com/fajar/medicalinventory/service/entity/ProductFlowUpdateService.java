@@ -40,7 +40,7 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 		}
 		ProductFlow existingObject = existingObjectOpt.get();
 		existingObject.setCount(object.getCount());
-		
+		existingObject.setPrice(object.getPrice());
 		existingObject.setSuitable(object.isSuitable());
 		
 		if (false == existingObject.isDistributed ()) {
