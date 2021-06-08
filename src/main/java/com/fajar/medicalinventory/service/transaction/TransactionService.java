@@ -81,6 +81,8 @@ public class TransactionService {
 			
 			transaction = DatabaseProcessor.save(transaction, session);
 			
+			log.info("saved trx items: {}", transaction.getProductFlows().size());
+			
 			progressService.sendProgress(10, httpServletRequest);
 			
 			
@@ -93,7 +95,7 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
-			transaction.setProductFlows(productFlows);
+			
 			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction.toModel());
 			return response;
@@ -186,7 +188,7 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
-			transaction.setProductFlows(productFlows);
+			
 			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction.toModel());
 			return response;
