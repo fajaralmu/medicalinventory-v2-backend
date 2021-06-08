@@ -62,12 +62,12 @@ public class TransactionService {
 		return response ;
 	}
 
-	public synchronized WebResponse performTransactionIN(WebRequest webRequest, HttpServletRequest httpServletRequest) {
+	public synchronized WebResponse performTransactionSupply(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buildTransactionSupply(webRequest, httpServletRequest);
+			final Transaction transaction = buildTransactionSupply(webRequest, httpServletRequest);
 			List<ProductFlow> productFlows = transaction.getProductFlows();
 			progressService.sendProgress(10, httpServletRequest);
 			
@@ -79,7 +79,7 @@ public class TransactionService {
 				throw new ApplicationException("Transaction item is empty!");
 			}
 			
-			transaction = DatabaseProcessor.save(transaction, session);
+			Transaction savedTransaction = DatabaseProcessor.save(transaction, session);
 			
 			log.info("saved trx items: {}", transaction.getProductFlows().size());
 			
@@ -87,7 +87,9 @@ public class TransactionService {
 			
 			
 			for (ProductFlow productFlow : productFlows) {
-				productFlow.setTransaction(transaction);
+				
+				productFlow.setId(null);
+				productFlow.setTransaction(savedTransaction);
 				DatabaseProcessor.save(productFlow, session);
 				
 				progressService.sendProgress(1, productFlows.size(), 80, httpServletRequest);
@@ -122,6 +124,8 @@ public class TransactionService {
 	private Transaction buildTransactionSupply(WebRequest webRequest, HttpServletRequest httpServletRequest) {
 		HealthCenter masterHealthCenter = defaultHealthCenterMasterService.getMasterHealthCenter();
 		Transaction transaction = webRequest.getTransaction().toEntity();
+		
+		transaction.setId(null);
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
 		transaction.setTypeAndCode();
 		transaction.setHealthCenterLocation(masterHealthCenter);
@@ -136,7 +140,7 @@ public class TransactionService {
 		if (locationOptional.isPresent() == false) {
 			throw new DataNotFoundException("Location not found");
 		}
-		
+		transaction.setId(null);
 		transaction.setUser(sessionValidationService.getLoggedUser(httpServletRequest));
 		transaction.setTypeAndCode();
 		 
@@ -149,7 +153,7 @@ public class TransactionService {
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
 			 
-			Transaction transaction = buidTransactionDistribution(webRequest, httpServletRequest);
+			final Transaction transaction = buidTransactionDistribution(webRequest, httpServletRequest);
 			List<ProductFlow> productFlows = transaction.getProductFlows();
 			
 			progressService.sendProgress(10, httpServletRequest);
@@ -161,7 +165,7 @@ public class TransactionService {
 			if (productFlows.size() == 0) {
 				throw new ApplicationException("Transaction item is empty!");
 			}
-			transaction = DatabaseProcessor.save(transaction, session);
+			Transaction savedTransaction = DatabaseProcessor.save(transaction, session);
 			
 			progressService.sendProgress(10, httpServletRequest);
 			
@@ -176,7 +180,8 @@ public class TransactionService {
 					throw new ApplicationException("Reference flow does not exist in the DB");
 				}
 				
-				productFlow.setTransaction(transaction);
+				productFlow.setId(null);
+				productFlow.setTransaction(savedTransaction);
 				productFlow.setReferenceProductFlow(referenceFlow);				
 				referenceFlow.addUsedCount(productFlow.getCount());
 				

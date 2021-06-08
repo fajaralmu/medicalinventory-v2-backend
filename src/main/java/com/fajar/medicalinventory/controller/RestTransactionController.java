@@ -38,7 +38,7 @@ public class RestTransactionController extends BaseController {
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public WebResponse transactionin(@RequestBody WebRequest request, HttpServletRequest httpRequest) {
 		log.info("transactionin ");
-		return transactionService.performTransactionIN(request, httpRequest);
+		return transactionService.performTransactionSupply(request, httpRequest);
 	}
 	@PostMapping(value = "/transactionout", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)

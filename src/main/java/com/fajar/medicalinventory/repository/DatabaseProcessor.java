@@ -134,7 +134,7 @@ public class DatabaseProcessor {
 	}
 
 	/**
-	 * insert new record or update existing record
+	 * insert new record or update existing record (IF ID exists)
 	 * 
 	 * @param <T>
 	 * @param object
