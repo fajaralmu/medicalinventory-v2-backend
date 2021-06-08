@@ -1,5 +1,6 @@
 package com.fajar.medicalinventory.service.transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.fajar.medicalinventory.dto.WebRequest;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.dto.model.ProductFlowModel;
+import com.fajar.medicalinventory.dto.model.TransactionModel;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
 import com.fajar.medicalinventory.entity.Transaction;
@@ -25,7 +28,10 @@ import com.fajar.medicalinventory.service.ProgressService;
 import com.fajar.medicalinventory.service.SessionValidationService;
 import com.fajar.medicalinventory.service.config.DefaultHealthCenterMasterService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TransactionService {
 
 	@Autowired
@@ -62,15 +68,22 @@ public class TransactionService {
 		try {
 			 
 			Transaction transaction = buildTransactionSupply(webRequest, httpServletRequest);
+			List<ProductFlow> productFlows = transaction.getProductFlows();
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getSupplier()) {
 				throw new DataNotFoundException("Supplier Missing");
+			}			
+			log.info("transaction (supply) items: {}", productFlows.size());
+			if (productFlows.size() == 0) {
+				throw new ApplicationException("Transaction item is empty!");
 			}
+			
 			transaction = DatabaseProcessor.save(transaction, session);
 			
 			progressService.sendProgress(10, httpServletRequest);
-			List<ProductFlow> productFlows = transaction.getProductFlows();
+			
+			
 			for (ProductFlow productFlow : productFlows) {
 				productFlow.setTransaction(transaction);
 				DatabaseProcessor.save(productFlow, session);
@@ -80,18 +93,28 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
+			transaction.setProductFlows(productFlows);
 			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction.toModel());
 			return response;
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
-			throw e;
+			throw new ApplicationException(e.getMessage());
 		} finally {
 			session.close();
 		}
+	}
+	
+	public static void main(String[] args) {
+		TransactionModel model = new TransactionModel();
+		List<ProductFlowModel> productFlows = new ArrayList<ProductFlowModel>();
+		productFlows.add(ProductFlowModel.builder().count(111).build());
+		model.setProductFlows(productFlows );
+		Transaction e = model.toEntity();
+		System.out.println(e.getProductFlows());
 	}
 
 	private Transaction buildTransactionSupply(WebRequest webRequest, HttpServletRequest httpServletRequest) {
@@ -125,15 +148,22 @@ public class TransactionService {
 		try {
 			 
 			Transaction transaction = buidTransactionDistribution(webRequest, httpServletRequest);
+			List<ProductFlow> productFlows = transaction.getProductFlows();
+			
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getCustomer() && transaction.getHealthCenterDestination() == null) {
 				throw new ApplicationException("Fields Missing");
 			}
+			log.info("transaction (distribution) items: {}", productFlows.size());
+			if (productFlows.size() == 0) {
+				throw new ApplicationException("Transaction item is empty!");
+			}
 			transaction = DatabaseProcessor.save(transaction, session);
 			
 			progressService.sendProgress(10, httpServletRequest);
-			List<ProductFlow> productFlows = transaction.getProductFlows();
+			
+			
 			for (ProductFlow productFlow : productFlows) {
 				if (productFlow.getReferenceProductFlow() == null) {
 					throw new ApplicationException("Reference flow does not exist in the request");
@@ -156,11 +186,12 @@ public class TransactionService {
 			hibernateTransaction.commit();
 			
 			WebResponse response = new WebResponse();
+			transaction.setProductFlows(productFlows);
 			transaction.setProductFlowsTransactionNull();
 			response.setTransaction(transaction.toModel());
 			return response;
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
