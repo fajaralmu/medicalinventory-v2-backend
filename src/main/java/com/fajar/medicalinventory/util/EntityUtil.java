@@ -22,13 +22,13 @@ import org.springframework.util.Assert;
 
 import com.fajar.medicalinventory.annotation.FormField;
 import com.fajar.medicalinventory.entity.BaseEntity;
+import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.Transaction;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EntityUtil {
-
 
 	static boolean isIdField(Field field) {
 		return field.getAnnotation(Id.class) != null;
@@ -103,11 +103,12 @@ public class EntityUtil {
 	
 	public static void main(String[] args) {
 		String fieldName= "id";
-		System.out.println(getDeclaredField(Transaction.class, fieldName));
+		System.out.println(getDeclaredField(Customer.class, "code"));
 		System.out.println(getDeclaredFields(Transaction.class));
 	}
 
 	public static Field getDeclaredField(Class<?> clazz, String fieldName) {
+		log.info("get field {} from class {}", fieldName, clazz.getSimpleName());
 		try {
 			Field field = clazz.getDeclaredField(fieldName);
 			if (field == null) {
@@ -128,8 +129,8 @@ public class EntityUtil {
 				superClassField.setAccessible(true);
 				return superClassField;
 			} catch (Exception e) {
-
-				log.error("FAILED Getting FIELD: " + fieldName);
+				e.printStackTrace();
+				log.error("FAILED Getting FIELD: " + fieldName + ", error: " + e.getMessage());
 				 
 			}
 		}

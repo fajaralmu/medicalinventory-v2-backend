@@ -1,5 +1,7 @@
 package com.fajar.medicalinventory.exception;
 
+import com.fajar.medicalinventory.util.ErrorUtil;
+
 public class ApplicationException extends RuntimeException{
 
 	/**
@@ -12,7 +14,7 @@ public class ApplicationException extends RuntimeException{
 	}
 
 	public ApplicationException(Exception ex) {
-		super(ex.getMessage());
+		super(ErrorUtil.getRootCaouseMessage(ex));
 	}
   
 }

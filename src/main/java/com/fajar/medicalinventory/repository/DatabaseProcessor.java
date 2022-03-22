@@ -239,7 +239,7 @@ public class DatabaseProcessor {
 			if (null != transaction) {
 				transaction.rollback();
 			}
-			return null;
+			throw e;
 		} finally {
 			refresh();
 		}

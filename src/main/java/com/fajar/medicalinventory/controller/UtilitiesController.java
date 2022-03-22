@@ -15,6 +15,7 @@ import org.springframework.web.util.NestedServletException;
 
 import com.fajar.medicalinventory.config.security.JWTAuthFilter;
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.util.ErrorUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +83,7 @@ public class UtilitiesController {
 			log.error("======= !! HANDLING exception: {}", exception);
 			if (exception != null && exception instanceof NestedServletException) {
 				NestedServletException nestedServletException = (NestedServletException) exception;
-				return getRootCaouseMessage(nestedServletException);
+				return ErrorUtil.getRootCaouseMessage(nestedServletException);
 			}
 			
 			return String.valueOf(exception);
@@ -143,22 +144,7 @@ public class UtilitiesController {
 		}
 	}
 	 
-	 
 	private Object getAttribute(HttpServletRequest httpServletRequest, String name) {
 		return httpServletRequest.getAttribute(name);
 	}
-
-	public static String getRootCaouseMessage(Throwable e)
-    {
-        Throwable innerException = e.getCause();
-        String cause = e.getMessage();
-        while(innerException != null)
-        {
-            cause           = innerException.getMessage();
-            innerException  = innerException.getCause();
-        }
-        return cause;
-    }
-	 
-
 }
