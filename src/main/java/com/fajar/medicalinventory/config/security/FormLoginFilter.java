@@ -2,6 +2,7 @@ package com.fajar.medicalinventory.config.security;
 
 import java.io.IOException;
 
+import javax.management.RuntimeErrorException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,8 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.access.DefaultWebInvocationPrivilegeEvaluator;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.fajar.medicalinventory.exception.ApplicationException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +45,7 @@ public class FormLoginFilter extends OncePerRequestFilter {
 		}
 		String[] beanNames = appContext.getBeanNamesForType(DefaultWebInvocationPrivilegeEvaluator.class);
 		if (null == beanNames || beanNames.length < 2) {
-			throw new ApplicationException("NO BEAN FOR DefaultWebInvocationPrivilegeEvaluator found");
+			throw new RuntimeException("NO BEAN FOR DefaultWebInvocationPrivilegeEvaluator found");
 		}
 		/**
 		 * beanNames[0] = APIs, beanNames[1] = webPages see <http ....> in security.xml

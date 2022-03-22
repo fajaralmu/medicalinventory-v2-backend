@@ -114,7 +114,7 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 		} else if (healthCenterDestination != null) {
 			type = TransactionType.TRANS_OUT_TO_WAREHOUSE;
 		} else {
-			throw new ApplicationException("Missing transaction data!");
+			throw ApplicationException.fromMessage("Missing transaction data!");
 		}
 		log.info("Transaction type: {}", type);
 		setType(type);

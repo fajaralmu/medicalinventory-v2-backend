@@ -169,7 +169,7 @@ public class MasterDataService {
 			BaseEntityUpdateService updateService = entityConfig.getEntityUpdateService();
 			return updateService.deleteEntity(id, entityConfig.getEntityClass(), httpRequest);
 		} catch (Exception e) {
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException(e);
 		} finally {
 			 
 		}

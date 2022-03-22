@@ -76,7 +76,7 @@ public class TransactionService {
 			}			
 			log.info("transaction (supply) items: {}", productFlows.size());
 			if (productFlows.size() == 0) {
-				throw new ApplicationException("Transaction item is empty!");
+				throw ApplicationException.fromMessage("Transaction item is empty!");
 			}
 			
 			Transaction savedTransaction = DatabaseProcessor.save(transaction, session);
@@ -106,7 +106,7 @@ public class TransactionService {
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException(e);
 		} finally {
 			session.close();
 		}
@@ -159,11 +159,11 @@ public class TransactionService {
 			progressService.sendProgress(10, httpServletRequest);
 			
 			if (null == transaction.getCustomer() && transaction.getHealthCenterDestination() == null) {
-				throw new ApplicationException("Fields Missing");
+				throw ApplicationException.fromMessage("Fields Missing");
 			}
 			log.info("transaction (distribution) items: {}", productFlows.size());
 			if (productFlows.size() == 0) {
-				throw new ApplicationException("Transaction item is empty!");
+				throw ApplicationException.fromMessage("Transaction item is empty!");
 			}
 			Transaction savedTransaction = DatabaseProcessor.save(transaction, session);
 			
@@ -172,12 +172,12 @@ public class TransactionService {
 			
 			for (ProductFlow productFlow : productFlows) {
 				if (productFlow.getReferenceProductFlow() == null) {
-					throw new ApplicationException("Reference flow does not exist in the request");
+					throw ApplicationException.fromMessage("Reference flow does not exist in the request");
 				}
 				
 				ProductFlow referenceFlow = getReferenceFlow(session, productFlow);
 				if (null == referenceFlow) {
-					throw new ApplicationException("Reference flow does not exist in the DB");
+					throw ApplicationException.fromMessage("Reference flow does not exist in the DB");
 				}
 				
 				productFlow.setId(null);
@@ -202,7 +202,7 @@ public class TransactionService {
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException(e);
 		} finally {
 			session.close();
 		}
@@ -234,7 +234,7 @@ public class TransactionService {
 			if (null != hibernateTransaction) {
 				hibernateTransaction.rollback();
 			}
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException(e);
 		} finally {
 			session.close();
 		}

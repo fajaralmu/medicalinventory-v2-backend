@@ -60,13 +60,13 @@ public class EntityManagementConfig implements Serializable {
 	private void init() {
 		CustomEntity customEntity = entityClass.getAnnotation(CustomEntity.class);
 		if (null == customEntity) {
-			throw new ApplicationException("NOT Custom Entity: "+ entityClass) ;
+			throw new ApplicationException(new Exception("NOT Custom Entity: "+ entityClass));
 		}
 		modelClass = BaseEntity.getModelClass(entityClass);
 		
 		Dto dtoAnnotation = modelClass.getAnnotation(Dto.class);
 		if (null == dtoAnnotation) {
-			throw new ApplicationException("NOT Custom Entity: "+ modelClass) ;
+			throw new ApplicationException(new Exception("NOT Custom Entity: "+ modelClass)) ;
 		}
 		disabled = dtoAnnotation.editable() == false;
 	}
@@ -74,7 +74,7 @@ public class EntityManagementConfig implements Serializable {
 	public String getLabel() {
 		Dto dtoAnnotation = modelClass.getAnnotation(Dto.class);
 		if (null == dtoAnnotation) {
-			throw new ApplicationException("NOT Custom Entity: "+ modelClass) ;
+			throw new ApplicationException(new Exception("NOT Custom Entity: "+ modelClass)) ;
 		}
 		String label = dtoAnnotation.value().equals("") ? entityClass.getSimpleName() : dtoAnnotation.value();
 		return label;

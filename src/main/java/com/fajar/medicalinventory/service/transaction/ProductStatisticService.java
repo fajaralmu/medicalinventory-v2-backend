@@ -66,7 +66,7 @@ public class ProductStatisticService {
 		progressService.sendProgress(30, httpServletRequest);
 
 		if (startDate.after(endDate)) {
-			throw new ApplicationException("invalid period");
+			throw new ApplicationException(new Exception("invalid period"));
 		}
 
 		log.info("startDate : {}, endDate: {}", startDate, endDate);
@@ -152,7 +152,7 @@ public class ProductStatisticService {
 		Date endDate = filter.getEndPeriodByYYMMDD();
 
 		if (startDate.after(endDate)) {
-			throw new ApplicationException("invalid period");
+			throw new ApplicationException(new Exception("invalid period"));
 		}
 		CommonFilterResult<Product> filtered = masterDataService.filterEntities(filter, Product.class);
 		List<Product> products = filtered.getEntities(); 

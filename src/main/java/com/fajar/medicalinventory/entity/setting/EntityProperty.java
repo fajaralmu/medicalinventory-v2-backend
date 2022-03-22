@@ -41,6 +41,7 @@ public class EntityProperty implements Serializable {
 	private int formInputColumn; 
 	private boolean editable = true; 
 	private boolean creatable = true; 
+	private boolean deletable = false;
 	private boolean withDetail = false; 
 	private boolean withProgressWhenUpdated = false;
  
@@ -65,6 +66,7 @@ public class EntityProperty implements Serializable {
 		setCreatable(dto.creatable());
 		setAlias(dto.value().isEmpty() ? StringUtil.extractCamelCase(entityClass.getSimpleName()) : dto.value());
 		setEditable(dto.editable());
+		setDeletable(dto.deletable());
 		setFormInputColumn(dto.formInputColumn().value);
 	}
 

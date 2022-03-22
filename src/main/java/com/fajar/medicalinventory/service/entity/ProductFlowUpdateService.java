@@ -36,7 +36,7 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 		log.info("Save product flow");
 		Optional<ProductFlow> existingObjectOpt = productFlowRepository.findById(object.getId());
 		if (existingObjectOpt.isPresent() == false) {
-			throw new ApplicationException("existing product flow not found");
+			throw new ApplicationException(new Exception("existing product flow not found"));
 		}
 		ProductFlow existingObject = existingObjectOpt.get();
 		existingObject.setCount(object.getCount());
@@ -70,7 +70,7 @@ public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlo
 			
 			if (tx != null)
 				tx.rollback();
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException(e);
 		} finally {
 			session.close();
 		}
