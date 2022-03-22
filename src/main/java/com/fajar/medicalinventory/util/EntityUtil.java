@@ -293,8 +293,8 @@ public class EntityUtil {
 
 		for (T object : list) {
 			Field field = EntityUtil.getDeclaredField(object.getClass(), fieldName);
-			field.setAccessible(true);
 			try {
+				field.setAccessible(true);
 				Object fieldValue = field.get(object);
 
 				if (fieldValue != null && fieldValue.equals(value)) {

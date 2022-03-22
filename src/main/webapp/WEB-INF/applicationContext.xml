@@ -38,7 +38,7 @@
 	</bean>
 
 	<!-- if you use postgres, change all "Like" query statement with "ILIKE" for not activating math case  -->
-	   <!-- <bean id="dataSource_postgres"
+	  <bean id="dataSource_postgres"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"
 			value="org.postgresql.Driver" />
@@ -46,8 +46,8 @@
 			value="jdbc:postgresql://localhost:5432/medicalinventory" />
 		<property name="username" value="postgres" />
 		<property name="password" value="root" />
-	</bean>   --> 
-	<bean id="dataSource_postgres"
+	</bean>   
+	<!-- <bean id="dataSource_postgres"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName"
 			value="org.postgresql.Driver" />
@@ -55,7 +55,7 @@
 			value="jdbc:postgresql://ec2-34-198-31-223.compute-1.amazonaws.com/dc6ae9nu44of5v" />
 		<property name="username" value="slokamrmgtxyal" />
 		<property name="password" value="c21264c654a7f741b037ecf286282e8a33418ace10e6cc0bcc7cebda2ae51121" />
-	</bean> 
+	</bean> --> 
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="packagesToScan"

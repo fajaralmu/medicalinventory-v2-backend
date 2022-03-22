@@ -18,12 +18,15 @@ import lombok.extern.slf4j.Slf4j;
  @Slf4j
 public class DeploymentUtils {
 
-
-	static final String DIR = "D:\\Development\\Fajar\\medicalinventory";
+//	 static final String APP_NAME = "arabicclub";
+//	 static final String APP_NAME = "employeedata";
+	 static final String APP_NAME = "medicalinventory";
+	static final String DIR = "D:\\Development\\Fajar\\"+APP_NAME;
+//	static final String DIR = "D:\\Development\\Fajar\\employeedata";
 	static final String TARGET_DIRECTORY = DIR+"\\target\\";
 	static final String WEBAPPS_DIRECTORY = "E:\\123Program\\apache-tomcat-9.0.37\\webapps\\";
 //	static final String WEBAPPS_DIRECTORY = "D:\\Development\\XamppPhp74\\tomcat\\webapps\\";
-	static final String APP_NAME = "medicalinventory";
+	
 	 
 	public static void main(String[] args) throws Exception {
 		runCommand();
@@ -60,7 +63,7 @@ public class DeploymentUtils {
 				out.write(buffer, 0, lengthRead);
 				out.flush();
 			}
-			System.out.println("COPIED new War File");
+			System.out.println("COPIED new War File: "+copied.getCanonicalPath());
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();

@@ -1,12 +1,14 @@
 package com.fajar.medicalinventory.service.report;
 
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 import com.fajar.medicalinventory.constants.TransactionType;
 import com.fajar.medicalinventory.entity.Customer;
 import com.fajar.medicalinventory.entity.HealthCenter;
 import com.fajar.medicalinventory.entity.ProductFlow;
+import com.fajar.medicalinventory.entity.Supplier;
 import com.fajar.medicalinventory.entity.Transaction;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -25,14 +27,17 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 	
 	private final Transaction transaction;
 	private final HealthCenter mainLocation;
+	static final DecimalFormat df = new DecimalFormat("#,###.##");
 	
 	public TransactionReceiptGenerator(Transaction transaction, HealthCenter mainLocation ) {
 		this.transaction = transaction;
 		this.mainLocation = mainLocation;
 	}
 	
-	
-	
+	private static String df(double value) {
+		return df.format(value);
+	}
+
 	public void generateReport(OutputStream os) throws  Exception {
 		HealthCenter location = this.mainLocation;
 		
@@ -56,8 +61,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 //		Desa Village Kec.Mulicipality.Kab.Kebumen.Telp.(0123)334567Kebumen
 		Paragraph pKop1 = new Paragraph("DINAS KESEHATAN", fontKop);
 		Paragraph pKop2 = new Paragraph(location.getName(), fontKop);
-		Paragraph pAlamat = new Paragraph("Alamat: "+location.getAddress(),
-				fontAlamat);
+		Paragraph pAlamat = new Paragraph("Alamat: "+location.getAddress(), fontAlamat);
 		Paragraph pContact = new Paragraph(location.getContact(), fontEmail);
 		pAlamat.setAlignment(Element.ALIGN_CENTER);
 		pContact.setAlignment(Element.ALIGN_CENTER);
@@ -82,15 +86,17 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		Customer p = null;
 
 		if (transaction.getType().equals(TransactionType.TRANS_OUT) || transaction.getType().equals(TransactionType.TRANS_OUT_TO_WAREHOUSE)) {
+			Customer customer 			= transaction.getCustomer();
+			HealthCenter destination 	= transaction.getHealthCenterDestination();
+
 			identitas_transaksi[2] = new Paragraph("Kode penerima: "
-					+ (transaction. getCustomer() != null ? transaction. getCustomer(). getCode() : transaction. getHealthCenterDestination(). getCode()),
-					fontJudulTabel);
+					+ (customer != null ? customer.getCode() : destination.getCode()), fontJudulTabel);
 			identitas_transaksi[3] = new Paragraph("Nama penerima: "
-					+ (transaction. getCustomer() != null ? transaction. getCustomer(). getName() : transaction. getHealthCenterDestination(). getName()),
-					fontJudulTabel);
+					+ (customer != null ? customer.getName() : destination.getName()), fontJudulTabel);
 		} else {
-			identitas_transaksi[2] = new Paragraph("Kode pemasok: " + transaction. getSupplier().getId(), fontJudulTabel);
-			identitas_transaksi[3] = new Paragraph("Nama pemasok: " + transaction. getSupplier().getName(), fontJudulTabel);
+			Supplier supplier = transaction.getSupplier();
+			identitas_transaksi[2] = new Paragraph("Kode pemasok: " + supplier.getId(), fontJudulTabel);
+			identitas_transaksi[3] = new Paragraph("Nama pemasok: " + supplier.getName(), fontJudulTabel);
 		}
 
 		for (int i = 0; i < identitas_transaksi.length; i++) {
@@ -101,11 +107,10 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		if (transaction. getCustomer() != null) {
 			p = transaction. getCustomer();
 
-			Paragraph tgllahir_par = new Paragraph("Tgl Lahir: " + simpleDateFormat.format(p.getBirthDate()),
-					fontJudulTabel);
-			Paragraph age_par = new Paragraph("Umur: " +p.toModel().getAge(),
-					fontJudulTabel);
-			Paragraph alamat_par = new Paragraph("Alamat: " + p.getAddress(), fontJudulTabel);
+			Paragraph tgllahir_par 	= new Paragraph("Tgl Lahir: " + simpleDateFormat.format(p.getBirthDate()), fontJudulTabel);
+			Paragraph age_par 		= new Paragraph("Umur: " +p.toModel().getAge(), fontJudulTabel);
+			Paragraph alamat_par 	= new Paragraph("Alamat: " + p.getAddress(), fontJudulTabel);
+
 			tgllahir_par.setIndentationLeft(30);
 			age_par.setIndentationLeft(30);
 			alamat_par.setIndentationLeft(30);
@@ -115,13 +120,14 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		}
 
 		Integer i = 1;
-		PdfPCell noHead = new PdfPCell(new Phrase("No", fontJudulTabel));
-		PdfPCell namaHead = new PdfPCell(new Phrase("Nama Obat", fontJudulTabel));
-		PdfPCell tglED = new PdfPCell(new Phrase("Kadaluarsa", fontJudulTabel));
-		PdfPCell idStok = new PdfPCell(new Phrase("Record Id", fontJudulTabel));
-		PdfPCell jmlHead = new PdfPCell(new Phrase("Qty", fontJudulTabel));
-		PdfPCell hargaSatuanHead = new PdfPCell(new Phrase("Harga Satuan", fontJudulTabel));
+		PdfPCell noHead 			= new PdfPCell(new Phrase("No", fontJudulTabel));
+		PdfPCell namaHead 			= new PdfPCell(new Phrase("Nama Obat", fontJudulTabel));
+		PdfPCell tglED 				= new PdfPCell(new Phrase("Kadaluarsa", fontJudulTabel));
+		PdfPCell idStok 			= new PdfPCell(new Phrase("Record Id", fontJudulTabel));
+		PdfPCell jmlHead 			= new PdfPCell(new Phrase("Qty", fontJudulTabel));
+		PdfPCell hargaSatuanHead 	= new PdfPCell(new Phrase("Harga Satuan", fontJudulTabel));
 		PdfPCell totalHargaItemHead = new PdfPCell(new Phrase("Harga Total", fontJudulTabel));
+
 		noHead.setBorder(Rectangle.BOTTOM);
 		namaHead.setBorder(Rectangle.BOTTOM);
 		tglED.setBorder(Rectangle.BOTTOM);
@@ -129,6 +135,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		jmlHead.setBorder(Rectangle.BOTTOM);
 		hargaSatuanHead.setBorder(Rectangle.BOTTOM);
 		totalHargaItemHead.setBorder(Rectangle.BOTTOM);
+
 		pt.addCell(noHead);
 		pt.addCell(namaHead);
 		pt.addCell(tglED);
@@ -145,11 +152,13 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 				Namaobat += " (generik)";
 			}
 
-			PdfPCell nama = new PdfPCell(new Phrase(Namaobat, fontRincianTransaksi));
-			PdfPCell jml = new PdfPCell(new Phrase(String.valueOf(ao.getCount()), fontRincianTransaksi));
+			PdfPCell nama 	= new PdfPCell(new Phrase(Namaobat, fontRincianTransaksi));
+			PdfPCell jml 	= new PdfPCell(new Phrase(String.valueOf(ao.getCount()), fontRincianTransaksi));
+
 			String tgl_ed = "";
 			long id_stok = ao.getId();
 			boolean includeED = true;
+			
 			if (!includeED) {
 				tgl_ed = "-";
 			} else {
@@ -158,11 +167,13 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			}
 			PdfPCell ED = new PdfPCell(new Phrase(tgl_ed, fontRincianTransaksi));
 			System.out.println("Bukti tr id stok: " + id_stok);
-			PdfPCell ID_STOK = new PdfPCell(new Phrase(String.valueOf(id_stok), fontRincianTransaksi));
-			PdfPCell no = new PdfPCell(new Phrase(i.toString(), fontRincianTransaksi));
-			PdfPCell hargaItem = new PdfPCell(new Phrase(String.valueOf(ao.getPrice()), fontRincianTransaksi));
-			Double totalHargaItem_int = (double) (ao.getPrice() * ao.getCount());
-			PdfPCell totalHargaItem = new PdfPCell(new Phrase(totalHargaItem_int.toString(), fontRincianTransaksi));
+
+			PdfPCell ID_STOK 			= new PdfPCell(new Phrase(String.valueOf(id_stok), fontRincianTransaksi));
+			PdfPCell no 				= new PdfPCell(new Phrase(i.toString(), fontRincianTransaksi));
+			PdfPCell hargaItem 			= new PdfPCell(new Phrase(df(ao.getPrice()), fontRincianTransaksi));
+			Double totalHargaItem_int 	= (double) (ao.getPrice() * ao.getCount());
+			PdfPCell totalHargaItem 	= new PdfPCell(new Phrase(df(totalHargaItem_int), fontRincianTransaksi));
+			
 			no.setBorder(Rectangle.NO_BORDER);
 			nama.setBorder(Rectangle.NO_BORDER);
 			jml.setBorder(Rectangle.NO_BORDER);
@@ -170,6 +181,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			ID_STOK.setBorder(Rectangle.NO_BORDER);
 			hargaItem.setBorder(Rectangle.NO_BORDER);
 			totalHargaItem.setBorder(Rectangle.NO_BORDER);
+			
 			pt.addCell(no);
 			pt.addCell(nama);
 			pt.addCell(ED);
@@ -177,20 +189,23 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			pt.addCell(jml);
 			pt.addCell(hargaItem);
 			pt.addCell(totalHargaItem);
+			
 			totalHarga = totalHarga + totalHargaItem_int;
 			total = total + ao.getCount();
 			// System.out.println("total " + total);
 			i++;
 			notifyProgress(1, transaction. getProductFlows().size(), 50);
 		}
-		PdfPCell kosong = new PdfPCell(new Phrase("", fontJudulTabel));
-		PdfPCell labelTotal = new PdfPCell(new Phrase("total", fontJudulTabel));
-		PdfPCell jmlTotal = new PdfPCell(new Phrase(total.toString(), fontJudulTabel));
-		PdfPCell jmlHargaTotal = new PdfPCell(new Phrase("Rp " + numbToCurrencyString(totalHarga), fontJudulTabel));
+		PdfPCell kosong 		= new PdfPCell(new Phrase("", fontJudulTabel));
+		PdfPCell labelTotal 	= new PdfPCell(new Phrase("total", fontJudulTabel));
+		PdfPCell jmlTotal 		= new PdfPCell(new Phrase(total.toString(), fontJudulTabel));
+		PdfPCell jmlHargaTotal 	= new PdfPCell(new Phrase("Rp " + df(totalHarga), fontJudulTabel));
+
 		kosong.setBorder(Rectangle.TOP);
 		labelTotal.setBorder(Rectangle.TOP);
 		jmlTotal.setBorder(Rectangle.TOP);
 		jmlHargaTotal.setBorder(Rectangle.TOP);
+		
 		pt.addCell(kosong);
 		pt.addCell(labelTotal);
 		pt.addCell(kosong);
@@ -198,6 +213,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		pt.addCell(jmlTotal);
 		pt.addCell(kosong);
 		pt.addCell(jmlHargaTotal);
+		
 		doc.add(Chunk.NEWLINE);
 		doc.add(pt);
 		doc.close();

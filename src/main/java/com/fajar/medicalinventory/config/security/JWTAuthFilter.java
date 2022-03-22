@@ -123,10 +123,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 			throws Exception {
 
 		log.info("JWT Authentication Failed");
-		response.setStatus(HttpStatus.UNAUTHORIZED.value());
+		
+		setCorsHeaders(response);
+		
 		WebResponse data = WebResponse.builder().date(new Date()).message("Unauthenticated").build();
-
 		response.getOutputStream().println(objectMapper.writeValueAsString(data));
+		response.setStatus(HttpStatus.UNAUTHORIZED.value()); 
 
 	}
 

@@ -54,8 +54,14 @@ public class SimpleAuthenticationFailureHandler implements AuthenticationFailure
 		redirectStrategy.sendRedirect(request, response, targetUrl);
 		
 	}
+	
+	private class SS {
+		
+	}
 	private void sendJsonResponse(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException exception) throws  Exception {
+		
+		JWTAuthFilter.setCorsHeaders(response);
 		
 		log.info("Authentication Failed");
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());

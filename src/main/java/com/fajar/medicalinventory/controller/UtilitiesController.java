@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
 @RequestMapping("web")
-public class UtilitiesController extends BaseController{  
+public class UtilitiesController {  
 	private ObjectMapper objectMapper;
 	
 	public UtilitiesController() {
@@ -50,7 +50,7 @@ public class UtilitiesController extends BaseController{
 		JWTAuthFilter.setCorsHeaders(httpResponse);
 		errorPage.addObject("errorCode", httpErrorCode);
 		errorPage.addObject("errorMessage", getErrorMessage(httpRequest ));
-		
+		httpResponse.setStatus(httpErrorCode);
 		printHttpRequestAttrs(httpRequest);
 		return errorPage;
 	}
@@ -82,7 +82,7 @@ public class UtilitiesController extends BaseController{
 			log.error("======= !! HANDLING exception: {}", exception);
 			if (exception != null && exception instanceof NestedServletException) {
 				NestedServletException nestedServletException = (NestedServletException) exception;
-				return nestedServletException.getRootCause().getMessage();
+				return getRootCaouseMessage(nestedServletException);
 			}
 			
 			return String.valueOf(exception);
@@ -103,7 +103,7 @@ public class UtilitiesController extends BaseController{
 		}
 		JWTAuthFilter.setCorsHeaders(httpResponse);
 
-		Object message = getErrorMessage(httpRequest );
+		String message 		= getErrorMessage(httpRequest );
 		WebResponse payload = WebResponse.failed(String.valueOf(message));
 		payload.setCode("400");
 		httpResponse.setStatus(400);
@@ -147,6 +147,18 @@ public class UtilitiesController extends BaseController{
 	private Object getAttribute(HttpServletRequest httpServletRequest, String name) {
 		return httpServletRequest.getAttribute(name);
 	}
+
+	public static String getRootCaouseMessage(Throwable e)
+    {
+        Throwable innerException = e.getCause();
+        String cause = e.getMessage();
+        while(innerException != null)
+        {
+            cause           = innerException.getMessage();
+            innerException  = innerException.getCause();
+        }
+        return cause;
+    }
 	 
 
 }
