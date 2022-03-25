@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/app/report")
 @Slf4j
-public class RestReportController extends BaseController {
+public class RestReportController {
 
 	@Autowired
 	private ReportService reportService;

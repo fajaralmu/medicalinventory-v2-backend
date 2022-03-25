@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/app/transaction")
 @Slf4j
-public class RestTransactionController extends BaseController {
+public class RestTransactionController {
 
 	@Autowired
 	private TransactionService transactionService; 

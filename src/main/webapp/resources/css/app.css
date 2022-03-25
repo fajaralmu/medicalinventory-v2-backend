@@ -26,21 +26,13 @@ body {
 	#sidebar-wrapper {
 		display: none;
 	}
-	#page-content {
-		padding-left: 10;
-	}
+	 
 }
 
 @media screen and (min-width: 992px) {
 	 
 	#navbar-top {
 		visibility: hidden;
-	}
-	#sidebar-wrapper {
-		display: block;
-	}
-	#page-content {
-		padding-left: 270px;
 	}
 }
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fajar.medicalinventory.dto.WebResponse;
+import com.fajar.medicalinventory.service.UserSessionService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,8 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/public")
-public class RestPublicController extends BaseController {
+public class RestPublicController {
   
+	@Autowired
+	private UserSessionService userSessionService;
+
 	public RestPublicController() {
 		log.info("----------------------Rest Public Controller-------------------");
 	}

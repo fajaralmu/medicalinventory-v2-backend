@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/app/setting")
 @Slf4j
-public class RestSettingController extends BaseController {
+public class RestSettingController {
 
 	@Autowired
 	private DefaultApplicationProfileService defaultAppProfileService;

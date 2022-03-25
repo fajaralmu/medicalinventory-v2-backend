@@ -63,13 +63,51 @@
 	</div>
 	<div id="loading-div"></div>
 	<jsp:include page="include/headerv2.jsp"></jsp:include>
+	<div class="row w-100">
+	
+		<jsp:include page="include/sidebarv2.jsp"></jsp:include>
 
-	<jsp:include page="include/sidebarv2.jsp"></jsp:include>
-
-	<div id="page-content" class="container-fluid" style="min-height: 80vh">
-		<jsp:include page="${pageUrl == null? 'error/notfound': pageUrl}.jsp"></jsp:include>
+	<div class="col-lg-9">
+		<div id="page-content" class="container-fluid" style="min-height: 80vh">
+			<jsp:include page="${pageUrl == null? 'error/notfound': pageUrl}.jsp"></jsp:include>
+		</div>
+	</div>
 	</div>
 
 	<jsp:include page="include/foot.jsp"></jsp:include>
+	<script>
+		function overrideFormDeleteOnSubmit()
+		{
+			const formDelete = document.getElementsByName('formDelete');
+			for (let i = 0; i < formDelete.length; i++) {
+				const form = formDelete[i];
+				form.onsubmit = function(e)
+				{
+					e.preventDefault();
+					if (confirm("Delete record?"))
+					{
+						e.target.submit();
+					}
+				}
+				
+			}
+		}
+
+		function adjustInputDateValue()
+		{
+			const inputs = document.querySelectorAll('input[value][type="date"]:not([value=""])');
+			for (let i = 0; i < inputs.length; i++) {
+				const input = inputs[i];
+				let val     = input.getAttribute("value");
+				if (val.toString().includes(" "))
+				{
+					input.setAttribute("value", val.toString().split(" ")[0]);
+				}
+				
+			}
+		}
+		adjustInputDateValue();
+		overrideFormDeleteOnSubmit();
+	</script>
 </body>
 </html>

@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/app/inventory")
 @Slf4j
-public class RestInventoryController extends BaseController {
+public class RestInventoryController {
 
 	@Autowired
 	private InventoryService inventoryService; 

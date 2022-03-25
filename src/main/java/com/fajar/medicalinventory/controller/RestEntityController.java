@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/app/entity")
 @Slf4j
-public class RestEntityController extends BaseController {
+public class RestEntityController {
 
 	@Autowired
 	private MasterDataService entityService;

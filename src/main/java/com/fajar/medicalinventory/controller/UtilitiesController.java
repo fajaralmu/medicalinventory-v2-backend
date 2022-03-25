@@ -79,7 +79,7 @@ public class UtilitiesController {
 	}
 	private String getErrorMessage(HttpServletRequest httpRequest) {
 		try {
-			Object exception = getAttribute(httpRequest, "javax.servlet.error.exception");
+			Object exception = httpRequest.getAttribute("javax.servlet.error.exception");
 			log.error("======= !! HANDLING exception: {}", exception);
 			if (exception != null && exception instanceof NestedServletException) {
 				NestedServletException nestedServletException = (NestedServletException) exception;
@@ -142,9 +142,5 @@ public class UtilitiesController {
 
 			return 500;
 		}
-	}
-	 
-	private Object getAttribute(HttpServletRequest httpServletRequest, String name) {
-		return httpServletRequest.getAttribute(name);
 	}
 }
