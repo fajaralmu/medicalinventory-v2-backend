@@ -26,7 +26,7 @@
     <link rel="apple-touch-icon" href="<c:url value="/res/react_resources/logo192.png"/>" />
     <link rel="manifest" href="<c:url value="/res/react_resources/manifest.json"/>" />
     <title>Medical Inventory</title>
-    <link rel="stylesheet" href="<c:url value="/res/react_resources/static/css/main.9e1886b2.chunk.css"/>" />
+    <link rel="stylesheet" href="<c:url value="/res/react_resources/static/css/main.335240f3.chunk.css"/>" />
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -130,7 +130,7 @@
         t();
       })([]);
     </script>
-    <script src="<c:url value="/res/react_resources/static/js/2.f1ff6c2d.chunk.js"/>"></script>
-    <script src="<c:url value="/res/react_resources/static/js/main.4b1eca7b.chunk.js"/>"></script>
+    <script src="<c:url value="/res/react_resources/static/js/2.2b31c51e.chunk.js"/>"></script>
+    <script src="<c:url value="/res/react_resources/static/js/main.171263a0.chunk.js"/>"></script>
   </body>
 </html>
