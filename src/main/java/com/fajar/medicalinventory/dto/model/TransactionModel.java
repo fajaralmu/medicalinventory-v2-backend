@@ -45,10 +45,7 @@ public class TransactionModel extends BaseModel<Transaction> {
 	private Date transactionDate = new Date();
 	@FormField(type = FieldType.FIELD_TYPE_TEXTAREA, required = false)
 	private String description;
-	@FormField(editable = false, filterable = Filterable.DISABLE_ALL)
-	@Getter(value = AccessLevel.NONE)
-	private Integer productCount;
-
+	
 	@FormField(editable = false)
 	private TransactionType type;
 	@FormField(optionItemName = "displayName", editable = false)
@@ -66,7 +63,16 @@ public class TransactionModel extends BaseModel<Transaction> {
 	 */
 	@FormField(type = FieldType.FIELD_TYPE_DYNAMIC_LIST, optionItemName = "name", editable = false)
 	private HealthCenterModel healthCenterLocation;
+
+	///// Read Only Fields //////
 	
+	@FormField(editable = false, filterable = Filterable.DISABLE_ALL)
+	@Getter(value = AccessLevel.NONE)
+	private Integer productCount;
+	@FormField(editable = false, filterable = Filterable.DISABLE_ALL)
+	@Getter(value = AccessLevel.NONE)
+	private Integer productVariant;
+
 	private List<ProductFlowModel> productFlows = new ArrayList<>();
 
 	public TransactionModel() {}
@@ -94,6 +100,12 @@ public class TransactionModel extends BaseModel<Transaction> {
 		return count;
 	}
 	
+	public Integer getProductVariant() {
+		if (null == productFlows) {
+			return null;
+		}
+		return productFlows.size();
+	}
 
 	public UserModel getUser() {
 		if (null == user) return null;

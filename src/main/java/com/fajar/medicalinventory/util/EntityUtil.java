@@ -108,7 +108,7 @@ public class EntityUtil {
 	}
 
 	public static Field getDeclaredField(Class<?> clazz, String fieldName) {
-		log.info("get field {} from class {}", fieldName, clazz.getSimpleName());
+		// log.info("get field {} from class {}", fieldName, clazz.getSimpleName());
 		try {
 			Field field = clazz.getDeclaredField(fieldName);
 			if (field == null) {

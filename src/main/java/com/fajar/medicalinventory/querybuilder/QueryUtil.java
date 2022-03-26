@@ -34,7 +34,7 @@ public class QueryUtil {
 	public static final String SQL_RAW_DATE_FILTER = " ${MODE}(`${TABLE_NAME}`.`${COLUMN_NAME}`) = ${VALUE} ";
 	 
 	public static Field getFieldByName(String name, List<Field> entityFields, Class<? extends BaseEntity> entityClass) {
-		System.out.println("will get field by key: "+name);
+		// System.out.println("will get field by key: "+name);
 		Field field = EntityUtil.getObjectFromListByFieldName("name", name, entityFields);
 		if (field == null) { 
 			Field modelField = BaseEntity.getModelField(name, entityClass);
