@@ -40,9 +40,9 @@ public abstract class BaseModel<E extends BaseEntity> implements Serializable {
 	private static final long serialVersionUID = -64034238773261408L;
 	@FormField(labelName = "Record Id")
 	private Long id;
-
+	@JsonIgnore
 	private Date createdDate;
-
+	@JsonIgnore
 	private Date modifiedDate;
 	@JsonIgnore
 	private Date deleted;
