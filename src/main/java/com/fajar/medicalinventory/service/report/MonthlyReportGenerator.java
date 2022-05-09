@@ -86,16 +86,16 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 			 */
 			loop: for (Transaction transaction : transactions) {
 
-				if (!transaction.getType().equals(TransactionType.TRANS_OUT) || transaction.getCustomer() == null) {
+				if (!transactionMatch(transaction)) {
 					continue loop;
 				}
 
 				XSSFRow cunsumptionRow = sheet.createRow(row);
 				XSSFCell[] customerConsumptionCells = new XSSFCell[4 + productCount()];
+				String destinationName = transaction.getCustomer() != null ? transaction.getCustomer().getName() : transaction.getHealthCenterDestination().getName();
 
 				customerConsumptionCells[0] = createCellWithString(cunsumptionRow, 2, String.valueOf(number));
-				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3,
-						transaction.getCustomer().getName());
+				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3, destinationName);
 				customerConsumptionCells[2] = createCellWithString(cunsumptionRow, 4,
 						transaction.getHealthCenterLocation().getName());
 				sheet.autoSizeColumn(3);
@@ -158,6 +158,18 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		writeConsumptionByLocations();
 
 		return xwb;
+	}
+
+	private static boolean transactionMatch(Transaction transaction) {
+		if (TransactionType.TRANS_OUT_TO_WAREHOUSE.equals(transaction.getType()) &&
+			transaction.getHealthCenterDestination() != null) {
+			return true;
+		}
+		if (TransactionType.TRANS_OUT.equals(transaction.getType()) &&
+			transaction.getCustomer() != null) {
+			return true;
+		}
+		return false;
 	}
 
 	private List<Transaction> filterTransactionByLocation(HealthCenter healthCenter) {
