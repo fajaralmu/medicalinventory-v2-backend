@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.poi.hssf.util.CellRangeAddress;
@@ -26,6 +27,9 @@ import com.fajar.medicalinventory.entity.Transaction;
 import com.fajar.medicalinventory.util.DateUtil;
 import com.fajar.medicalinventory.util.EntityUtil;
 
+/**
+ * ONLY Reports consumptions from master to customer and master to branch
+ */
 public class MonthlyReportGenerator extends BaseReportGenerator {
 
 	private final Map<Integer, List<Transaction>> transactionMapped;
@@ -35,9 +39,15 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 	private final List<HealthCenter> locations;
 	private final XSSFCellStyle productNameStyle;
 	private final XSSFCellStyle regularStyle;
+	private final HealthCenter masterLocation;
 
-	public MonthlyReportGenerator(Filter filter, List<Transaction> transactionsOneMonth, List<Product> products,
-			List<HealthCenter> locations, ProgressNotifier progressNotifier) {
+	public MonthlyReportGenerator(Filter filter, 
+								  List<Transaction> transactionsOneMonth, 
+								  List<Product> products,
+								  List<HealthCenter> locations,
+								  HealthCenter masterLocation,
+								  ProgressNotifier progressNotifier
+	) {
 		this.transactionsOneMonth = transactionsOneMonth;
 		this.xwb = new XSSFWorkbook();
 		this.month = filter.getMonth();
@@ -48,6 +58,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		this.productNameStyle = createProductNameStyle();
 		this.regularStyle = createRegularStyle();
 		this.progressNotifier = progressNotifier;
+		this.masterLocation = masterLocation;
 
 		allProducts.forEach(p -> {
 			p.setCount(0);
@@ -155,7 +166,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		}
 		/**************** END DAILY CONSUMPTION ***********************/
 
-		writeConsumptionByLocations();
+		writeConsumtionSummary();
 
 		return xwb;
 	}
@@ -172,20 +183,17 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		return false;
 	}
 
-	private List<Transaction> filterTransactionByLocation(HealthCenter healthCenter) {
+	private List<Transaction> getTransactionsToDestination(HealthCenter location) {
 
-		List<Transaction> result = new ArrayList<>();
-		for (Transaction transaction : transactionsOneMonth) {
-			TransactionType type = transaction.getType();
-			boolean isTransOut = (type.equals(TRANS_OUT));// || type.equals(TRANS_OUT_TO_WAREHOUSE));
-			if (isTransOut && transaction.getHealthCenterLocation().idEquals(healthCenter)) {
-				result.add(transaction);
-			}
-		}
-		return result;
+		return transactionsOneMonth.stream()
+				.filter(t -> {
+					return TransactionType.TRANS_OUT_TO_WAREHOUSE.equals(t.getType()) &&
+					location.idEquals(t.getHealthCenterDestination());
+				})
+				.collect(Collectors.toList());
 	}
 
-	private void writeConsumptionByLocations() {
+	private void writeConsumtionSummary() {
 
 		/**************** BEGIN SUMMARY ***********************/
 		XSSFSheet xsheetpkm = xwb.createSheet("Rincian Per Puskesmas Bulan " + month);
@@ -199,18 +207,29 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		// ************************SHEET TERAKHIR***********************//
 		List<Product> productsTotal = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
 		productsTotal.forEach(p -> p.setCount(0));
+		List<Transaction> toCustomers = transactionsOneMonth.stream()
+			.filter(t -> TransactionType.TRANS_OUT.equals(t.getType()))
+			.collect(Collectors.toList());
 
 		for (HealthCenter location : locations) {
 			int totalProductsPerLocation = 0;
+			boolean isMaster = location.idEquals(masterLocation);
 
 			XSSFRow locationRow = xsheetpkm.createRow(locationRowNum);
 			XSSFCell[] rowDataCells = new XSSFCell[4 + productCount()];
 
+			String name = isMaster ? "Pasien" : location.getName();
+
 			rowDataCells[0] = createCellWithString(locationRow, 2, String.valueOf(locationRowNum - 3));
-			rowDataCells[1] = createCellWithString(locationRow, 3, location.getName());
+			rowDataCells[1] = createCellWithString(locationRow, 3, name);
 
 			List<Product> productsPerLocation = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
-			List<Transaction> transactions = filterTransactionByLocation(location);
+			List<Transaction> transactions;
+			if (isMaster) {
+				transactions = toCustomers;
+			} else {
+				transactions = getTransactionsToDestination(location);
+			}
 
 			productsPerLocation.forEach(p -> p.setCount(0));
 			int locationRowItem = 0;
@@ -249,8 +268,11 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 
 	}
 
-	private void writeAccumulationForSummarySheet(XSSFSheet xsheetpkm, int locationRowNum,
-			List<Product> productsTotal) {
+	private void writeAccumulationForSummarySheet(
+		XSSFSheet xsheetpkm,
+		int locationRowNum,
+		List<Product> productsTotal
+	) {
 		int column = 5;
 		int totalProductsAllLocation = 0;
 		XSSFRow summaryRow = xsheetpkm.createRow(locationRowNum);
@@ -319,7 +341,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		xkolomAtas[0] = xbarisJudulTabel.createCell(2);
 		xkolomAtas[0].setCellValue("No");
 		xkolomAtas[1] = xbarisJudulTabel.createCell(3);
-		xkolomAtas[1].setCellValue("Lokasi Transaksi");
+		xkolomAtas[1].setCellValue("Tujuan");
 		xkolomAtas[2] = xbarisJudulTabel.createCell(4);
 		xkolomAtas[2].setCellValue("Jumlah Obat");
 		for (int c = 0; c < xkolomAtas.length; c++) {

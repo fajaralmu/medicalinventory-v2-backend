@@ -76,12 +76,18 @@ public class ReportGenerator {
 		List<Product> products = productRepository.findByOrderByUtilityTool();
 		progressService.sendProgress(3, httpServletRequest);
 
-		List<Transaction> transactionsOneMonth = fillProductFlows(
-				transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear()));
+		List<Transaction> transactionsOneMonth = transactionRepository.findByMonthAndYear(filter.getMonth(), filter.getYear());
+		transactionsOneMonth = fillProductFlows(transactionsOneMonth);
 		progressService.sendProgress(4, httpServletRequest);
 
-		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter, transactionsOneMonth, products, locations,
-				notifier(httpServletRequest));
+		HealthCenter master = defaultHealthCenterMasterService.getMasterHealthCenter();
+
+		MonthlyReportGenerator generator = new MonthlyReportGenerator(filter,
+																	  transactionsOneMonth,
+																	  products,
+																	  locations,
+																	  master,
+																	  notifier(httpServletRequest));
 		return generator.generateReport();
 	}
 
@@ -116,8 +122,11 @@ public class ReportGenerator {
 		return MapUtil.mapValuesToList(transactionMap);
 	}
 
-	public void generateTransactionReceipt(String code, HttpServletRequest httpServletRequest, OutputStream os)
-			throws Exception {
+	public void generateTransactionReceipt(
+		String code, 
+		HttpServletRequest httpServletRequest, 
+		OutputStream os
+	) throws Exception {
 
 		Transaction t = transactionRepository.findByCode(code);
 
@@ -213,7 +222,12 @@ public class ReportGenerator {
 	 * @param httpServletRequest
 	 * @throws Exception
 	 */
-	public void generateProductRequestSheet(WebRequest webRequest, OutputStream os, HttpServletRequest httpServletRequest) throws Exception {
+	public void generateProductRequestSheet(
+		WebRequest webRequest,
+		OutputStream os,
+		HttpServletRequest httpServletRequest
+	) throws Exception {
+		
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Filter filter = webRequest.getFilter();
 		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
@@ -247,8 +261,11 @@ public class ReportGenerator {
 
 	}
 	
-	public XSSFWorkbook getStockOpnameReport(WebRequest webRequest, HttpServletRequest httpServletRequest)
-			throws Exception {
+	public XSSFWorkbook getStockOpnameReport(
+		WebRequest webRequest, 
+		HttpServletRequest httpServletRequest
+	) throws Exception {
+
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Date selectedDate = DateUtil.getDate(webRequest.getFilter());
 		// prev year date

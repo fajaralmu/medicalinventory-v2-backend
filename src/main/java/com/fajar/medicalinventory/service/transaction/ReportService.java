@@ -46,10 +46,14 @@ public class ReportService {
 		
 	}
 
-	public void printMonthlyReport(WebRequest webRequest, HttpServletRequest httpServletRequest,
-			HttpServletResponse httpServletResponse) throws Exception {
+	public void printMonthlyReport(
+		WebRequest webRequest, 
+		HttpServletRequest httpServletRequest,
+		HttpServletResponse httpServletResponse
+	) throws Exception {
+
 		Filter filter = webRequest.getFilter();
-		String fileName = "MONTHLY_"+filter.getYear()+"-"+ filter.getMonth();
+		String fileName = "Laporan-Bulan"+filter.getYear()+"-"+ filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
 
 		XSSFWorkbook wb = reportGenerator.getMonthyReport(filter, httpServletRequest);
@@ -57,8 +61,12 @@ public class ReportService {
 		
 	}
 
-	public void receiveRequestSheet(WebRequest webRequest, HttpServletRequest httpRequest,
-			HttpServletResponse httpServletResponse) throws   Exception {
+	public void receiveRequestSheet(
+		WebRequest webRequest,
+		HttpServletRequest httpRequest,
+		HttpServletResponse httpServletResponse
+	) throws Exception {
+
 		Filter filter = webRequest.getFilter();
 		String fileName = "LPLPO_"+webRequest.getHealthcenter().getName()+"_"+filter.getYear()+"-"+ filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xls");
@@ -68,7 +76,7 @@ public class ReportService {
 
 	public void generateTransactionReceipt(String code, HttpServletRequest httpRequest,
 			HttpServletResponse httpServletResponse) throws IOException, Exception {
-		String fileName = "Receipt_"+code;
+		String fileName = "Struk-Transaksi_"+code;
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".pdf");
 		reportGenerator.generateTransactionReceipt(code, httpRequest, httpServletResponse.getOutputStream());
 	}
