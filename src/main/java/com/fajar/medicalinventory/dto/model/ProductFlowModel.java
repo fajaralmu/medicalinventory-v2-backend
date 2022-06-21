@@ -74,7 +74,8 @@ public class ProductFlowModel extends BaseModel<ProductFlow> {
 	private double price;
 	@FormField(type=FieldType.FIELD_TYPE_CHECKBOX)
 	private boolean generic;  
-	
+	@FormField
+	private String batchNum;
 	private String stockLocation;
 	
 	private List<ProductFlowModel> referencingItems;

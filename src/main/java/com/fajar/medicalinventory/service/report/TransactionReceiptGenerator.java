@@ -48,12 +48,13 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		HealthCenter location 	= this.mainLocation;
 		
 		Document doc = new Document(PageSize.A5);
-		PdfPTable pt = new PdfPTable(7);
+		PdfPTable pt = new PdfPTable(8);
 		// pt.setTotalWidth(800);
 		pt.setTotalWidth(new float[] { 
 			50,  // no
 			200, // name
 			170, // exp date
+			170, // batch
 			120, // record id
 			100, // qty
 			200, // price @
@@ -142,6 +143,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		PdfPCell noHead 			= new PdfPCell(new Phrase("No", fontTitle));
 		PdfPCell namaHead 			= new PdfPCell(new Phrase("Nama Obat", fontTitle));
 		PdfPCell expDate 			= new PdfPCell(new Phrase("Kadaluarsa", fontTitle));
+		PdfPCell batch 				= new PdfPCell(new Phrase("Batch", fontTitle));
 		PdfPCell idStok 			= new PdfPCell(new Phrase("Record Id", fontTitle));
 		PdfPCell jmlHead 			= new PdfPCell(new Phrase("Qty", fontTitle));
 		PdfPCell hargaSatuanHead 	= new PdfPCell(new Phrase("Harga Satuan", fontTitle));
@@ -150,6 +152,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		noHead.setBorder(Rectangle.BOTTOM);
 		namaHead.setBorder(Rectangle.BOTTOM);
 		expDate.setBorder(Rectangle.BOTTOM);
+		batch.setBorder(Rectangle.BOTTOM);
 		idStok.setBorder(Rectangle.BOTTOM);
 		jmlHead.setBorder(Rectangle.BOTTOM);
 		hargaSatuanHead.setBorder(Rectangle.BOTTOM);
@@ -158,6 +161,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		pt.addCell(noHead);
 		pt.addCell(namaHead);
 		pt.addCell(expDate);
+		pt.addCell(batch);
 		pt.addCell(idStok);
 		pt.addCell(jmlHead);
 		pt.addCell(hargaSatuanHead);
@@ -186,6 +190,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 				 
 			}
 			PdfPCell exp 				= new PdfPCell(new Phrase(expDateString, fontDetail));
+			PdfPCell itemBatch			= new PdfPCell(new Phrase(ao.getBatchNum(), fontDetail));
 			PdfPCell ID_STOK 			= new PdfPCell(new Phrase(String.valueOf(id_stok), fontDetail));
 			PdfPCell no 				= new PdfPCell(new Phrase(i.toString(), fontDetail));
 			PdfPCell hargaItem 			= new PdfPCell(new Phrase(df(ao.getPrice()), fontDetail));
@@ -196,6 +201,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			nama.setBorder(Rectangle.NO_BORDER);
 			jml.setBorder(Rectangle.NO_BORDER);
 			exp.setBorder(Rectangle.NO_BORDER);
+			itemBatch.setBorder(Rectangle.NO_BORDER);
 			ID_STOK.setBorder(Rectangle.NO_BORDER);
 			hargaItem.setBorder(Rectangle.NO_BORDER);
 			totalHargaItem.setBorder(Rectangle.NO_BORDER);
@@ -203,6 +209,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 			pt.addCell(no);
 			pt.addCell(nama);
 			pt.addCell(exp);
+			pt.addCell(itemBatch);
 			pt.addCell(ID_STOK);
 			pt.addCell(jml);
 			pt.addCell(hargaItem);
@@ -224,6 +231,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		
 		pt.addCell(emptyCell);
 		pt.addCell(labelTotal);
+		pt.addCell(emptyCell);
 		pt.addCell(emptyCell);
 		pt.addCell(emptyCell);
 		pt.addCell(jmlTotal);

@@ -65,6 +65,8 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 
 	@Column(name="expired_date") 
 	private Date expiredDate;
+	@Column(name="batch_num")
+	private String batchNum;
 	@Column 
 	private int count;
 	@Column(name="used_count", nullable = false) 
@@ -141,6 +143,7 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		setExpiredDate(referenceProductFlow.getExpiredDate());
 		setGeneric(referenceProductFlow.isGeneric());
 		setPrice(referenceProductFlow.getPrice());
+		setBatchNum(referenceProductFlow.getBatchNum());
 	}
 
 
@@ -173,13 +176,11 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	@JsonIgnore
 	public int getTransactionMonth () {
 		if (null == transaction) return 1;
-		Date date = transaction.getTransactionDate();
-		return DateUtil.getCalendarMonth(date) + 1;
+		return DateUtil.getCalendarMonth(transaction.getTransactionDate()) + 1;
 	}
 	public int getTransactionYear () {
 		if (null == transaction) return 0;
-		Date date = transaction.getTransactionDate();
-		return DateUtil.getCalendarYear(date);
+		return DateUtil.getCalendarYear(transaction.getTransactionDate());
 	}
 
 
