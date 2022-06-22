@@ -41,13 +41,14 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 	private final XSSFCellStyle regularStyle;
 	private final HealthCenter masterLocation;
 
-	public MonthlyReportGenerator(Filter filter, 
-								  List<Transaction> transactionsOneMonth, 
-								  List<Product> products,
-								  List<HealthCenter> locations,
-								  HealthCenter masterLocation,
-								  ProgressNotifier progressNotifier
-	) {
+	public MonthlyReportGenerator(
+    Filter filter, 
+    List<Transaction> transactionsOneMonth, 
+    List<Product> products,
+    List<HealthCenter> locations,
+    HealthCenter masterLocation,
+    ProgressNotifier progressNotifier
+  ) {
 		this.transactionsOneMonth = transactionsOneMonth;
 		this.xwb = new XSSFWorkbook();
 		this.month = filter.getMonth();
@@ -82,8 +83,8 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
 		mainLoop: for (Integer day = 1; day <= 31; day++) {
-			List<Product> productsPerDay = (List<Product>) EntityUtil.cloneSerializable((Serializable) allProducts);
-			int allProductCountDaily = 0;
+			List<Product> productsPerDay = EntityUtil.cloneSerializable(allProducts);
+			int productQtySum = 0, productKindCountSum = 0;
 			// JUDUL TABEL//
 			XSSFSheet sheet = xwb.createSheet(day.toString());
 			createProductNameCells(sheet.createRow(3), sheet);
@@ -101,40 +102,41 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 					continue loop;
 				}
 
-				XSSFRow cunsumptionRow = sheet.createRow(row);
-				XSSFCell[] customerConsumptionCells = new XSSFCell[4 + productCount()];
+				XSSFRow dailyRow = sheet.createRow(row);
+				XSSFCell[] dailyUsageCell = new XSSFCell[5 + productCount()];
 				String destinationName = transaction.getCustomer() != null ? transaction.getCustomer().getName() : transaction.getHealthCenterDestination().getName();
 
-				customerConsumptionCells[0] = createCellWithString(cunsumptionRow, 2, String.valueOf(number));
-				customerConsumptionCells[1] = createCellWithString(cunsumptionRow, 3, destinationName);
-				customerConsumptionCells[2] = createCellWithString(cunsumptionRow, 4,
-						transaction.getHealthCenterLocation().getName());
+				dailyUsageCell[0] = createCellWithString(dailyRow, 2, String.valueOf(number));
+				dailyUsageCell[1] = createCellWithString(dailyRow, 3, destinationName);
+				dailyUsageCell[2] = createCellWithString(dailyRow, 4, transaction.getHealthCenterLocation().getName());
 				sheet.autoSizeColumn(3);
 
 				int totalProductPerCustomer = transaction.getTotalProductFlowCount();
-				allProductCountDaily += totalProductPerCustomer;
-				customerConsumptionCells[3] = createCellWithNumber(cunsumptionRow, 5, (double) totalProductPerCustomer);
+				
+				productQtySum += totalProductPerCustomer;
+				productKindCountSum += transaction.getProductFlows().size();
+
+				dailyUsageCell[3] = createCellWithNumber(dailyRow, 5, (double) transaction.getProductFlows().size());
+				dailyUsageCell[4] = createCellWithNumber(dailyRow, 6, (double) totalProductPerCustomer);
 
 				// rincian obat per orang
-				int consumptionColumn = 5;
-				int idxObat = 3;
+				int dailyCol = 6;
+				int cellIndex = 4;
 				/**
 				 * consumptions per product for each products (transaction details)
 				 */
 				for (Product product : productsPerDay) {
-					idxObat++;
-					consumptionColumn++;
+					cellIndex++;
+					dailyCol++;
 					int productCount = transaction.getProductCount(product);
 					product.addCount(productCount);
 					if (productCount > 0) {
-						customerConsumptionCells[idxObat] = createCellWithNumber(cunsumptionRow, consumptionColumn,
-								(double) productCount);
+						dailyUsageCell[cellIndex] = createCellWithNumber(dailyRow, dailyCol, (double) productCount);
 					}
-
 				}
 				number++;
 				row++;
-				setRegularStyle(customerConsumptionCells);
+				setRegularStyle(dailyUsageCell);
 			}
 
 			/**
@@ -142,25 +144,19 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 			 */
 			sheet.addMergedRegion(new CellRangeAddress(row, row, 2, 4));
 			XSSFRow summaryRow = sheet.createRow(row);
-			XSSFCell[] summaryCells = new XSSFCell[6 + productCount()];
-			summaryCells[0] = createCellWithString(summaryRow, 2, "Jumlah");
-			summaryCells[1] = summaryRow.createCell(3);
-			summaryCells[2] = summaryRow.createCell(4);
-			summaryCells[3] = summaryRow.createCell(5);
+			createCellWithStringRegularStyle(summaryRow, 2, "Jumlah");
+			createCellWithStringRegularStyle(summaryRow, 3, "");
+			createCellWithStringRegularStyle(summaryRow, 4, "");
+			createCellWithStringRegularStyle(summaryRow, 5, "");
 
-			int columnProductPerDay = 6;
-			int idxTotal = 5;
+			int totalDailyCol = 6;
 			for (Product o : productsPerDay) {
-				idxTotal++;
-
-				summaryCells[idxTotal] = summaryRow.createCell(columnProductPerDay);
-				summaryCells[idxTotal].setCellValue(o.getCount());
-				columnProductPerDay++;
+				totalDailyCol++;
+				createCellWithNumberRegularStyle(summaryRow, totalDailyCol, (double) o.getCount());
 			}
 
-			summaryCells[4] = createCellWithNumber(summaryRow, 5, (double) allProductCountDaily);
-
-			setRegularStyle(summaryCells);
+			createCellWithNumberRegularStyle(summaryRow, 5, (double) productKindCountSum);
+			createCellWithNumberRegularStyle(summaryRow, 6, (double) productQtySum);
 
 			notifyProgress(1, 31, 50);
 		}
@@ -205,8 +201,8 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		notifyProgress(10, 10, 10);
 
 		// ************************SHEET TERAKHIR***********************//
-		List<Product> productsTotal = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
-		productsTotal.forEach(p -> p.setCount(0));
+		Map<Long, Integer> productsTotal = new HashMap<>();
+		allProducts.forEach(p -> productsTotal.put(p.getId(), 0));
 		List<Transaction> toCustomers = transactionsOneMonth.stream()
 			.filter(t -> TransactionType.TRANS_OUT.equals(t.getType()))
 			.collect(Collectors.toList());
@@ -223,7 +219,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 			rowDataCells[0] = createCellWithString(locationRow, 2, String.valueOf(locationRowNum - 3));
 			rowDataCells[1] = createCellWithString(locationRow, 3, name);
 
-			List<Product> productsPerLocation = (List<Product>) SerializationUtils.clone((Serializable) allProducts);
+			List<Product> productsPerLocation = EntityUtil.cloneSerializable(allProducts);
 			List<Transaction> transactions;
 			if (isMaster) {
 				transactions = toCustomers;
@@ -239,17 +235,16 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 				int count = getCountProduct(product, transactions);
 				product.addCount(count);
 				if (product.getCount() > 0) {
-					rowDataCells[locationRowItem + 4] = createCellWithNumber(locationRow, column,
-							(double) product.getCount());
+					rowDataCells[locationRowItem + 4] = createCellWithNumber(locationRow, column, (double) product.getCount());
 				}
 				locationRowItem++;
 				column++;
 				totalProductsPerLocation += product.getCount();
 
 				// *********************KOLOM TOTAL OBAT*************************//
-				for (Product productTotal : productsTotal) {
-					if (productTotal.idEquals(product)) {
-						productTotal.addCount(product.getCount());
+				for (Long id : productsTotal.keySet()) {
+					if (id.equals(product.getId())) {
+            			productsTotal.put(id, productsTotal.get(id) + product.getCount());
 					}
 				}
 			}
@@ -271,18 +266,20 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 	private void writeAccumulationForSummarySheet(
 		XSSFSheet xsheetpkm,
 		int locationRowNum,
-		List<Product> productsTotal
+		Map<Long, Integer> productsTotal
 	) {
 		int column = 5;
 		int totalProductsAllLocation = 0;
 		XSSFRow summaryRow = xsheetpkm.createRow(locationRowNum);
 		XSSFCell[] summaryCells = new XSSFCell[3 + productCount()];
 		summaryCells[0] = createCellWithString(summaryRow, 3, "Total");
-
-		for (int i = 0; i < productsTotal.size(); i++) {
-			double value = (double) productsTotal.get(i).getCount();
+    
+    int i = 0;
+    for (Long key : productsTotal.keySet()) {
+			double value = (double) productsTotal.get(key);
 			summaryCells[i + 2] = createCellWithNumber(summaryRow, column, value);
 			column++;
+      		i++;
 			totalProductsAllLocation += value;
 		}
 
@@ -329,10 +326,22 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		cell.setCellValue(valueOf);
 		return cell;
 	}
+	private XSSFCell createCellWithStringRegularStyle(XSSFRow row, int column, String valueOf) {
+		XSSFCell cell = row.createCell(column);
+		cell.setCellValue(valueOf);
+		cell.setCellStyle(regularStyle);
+		return cell;
+	}
 
 	private XSSFCell createCellWithNumber(XSSFRow row, int column, Double valueOf) {
 		XSSFCell cell = row.createCell(column);
 		cell.setCellValue(valueOf);
+		return cell;
+	}
+	private XSSFCell createCellWithNumberRegularStyle(XSSFRow row, int column, Double valueOf) {
+		XSSFCell cell = row.createCell(column);
+		cell.setCellValue(valueOf);
+		cell.setCellStyle(regularStyle);
 		return cell;
 	}
 
@@ -361,7 +370,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 	private void createProductNameCells(XSSFRow titleRow, XSSFSheet sheet) {
 		// TODO Auto-generated method stub
 
-		XSSFCell[] cells = new XSSFCell[4];
+		XSSFCell[] cells = new XSSFCell[5];
 		cells[0] = titleRow.createCell(2);
 		cells[0].setCellValue("No");
 		cells[1] = titleRow.createCell(3);
@@ -369,14 +378,16 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		cells[2] = titleRow.createCell(4);
 		cells[2].setCellValue("Lokasi Transaksi");
 		cells[3] = titleRow.createCell(5);
-		cells[3].setCellValue("Jumlah Obat");
+		cells[3].setCellValue("Jumlah Obat (Jenis)");
+		cells[4] = titleRow.createCell(6);
+		cells[4].setCellValue("Jumlah Obat (Qty)");
 
 		for (int c = 0; c < cells.length; c++) {
 			cells[c].setCellStyle(regularStyle);
 			sheet.autoSizeColumn(c);
 		}
 
-		int column = 5;
+		int column = 6;
 		// Membuat daftar obat di atas tabel//
 		for (Product o : allProducts) {
 			column++;

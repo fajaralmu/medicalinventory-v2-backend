@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -328,12 +329,16 @@ public class EntityUtil {
 	 * Clone Serializable Object
 	 * 
 	 * @param <T>
-	 * @param serializable
+	 * @param val
 	 * @return
 	 */
-	public static <T extends Serializable> T cloneSerializable(T serializable) {
+	public static <T> T cloneSerializable(T val) {
 		try {
-			return SerializationUtils.clone(serializable);
+			if (val instanceof Serializable) {
+				T res = (T) SerializationUtils.clone((Serializable)val);
+				return res;
+			}
+			throw new InvalidTargetObjectTypeException("value is not instanceof serializable");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

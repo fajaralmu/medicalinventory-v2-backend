@@ -53,7 +53,7 @@ public class ReportService {
 	) throws Exception {
 
 		Filter filter = webRequest.getFilter();
-		String fileName = "Laporan-Bulan"+filter.getYear()+"-"+ filter.getMonth();
+		String fileName = "Laporan-Bulanan-" + filter.getYear() + "-" + filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
 
 		XSSFWorkbook wb = reportGenerator.getMonthyReport(filter, httpServletRequest);
