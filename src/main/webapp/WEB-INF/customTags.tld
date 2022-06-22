@@ -9,7 +9,7 @@
 
 	<tag>
 		<name>warning</name>
-		<tag-class>com.fajar.medicalinventory.tags.WarningTag</tag-class>
+		<tag-class>com.pkm.medicalinventory.tags.WarningTag</tag-class>
 		<body-content>empty</body-content>
 		<attribute>
 			<name>message</name>
