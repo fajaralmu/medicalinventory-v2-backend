@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -160,6 +161,13 @@ public class Transaction extends BaseEntity<TransactionModel> implements Seriali
 		}
 		return copy(model, "productFlows");
 	}
+
+    public int getProductKindCount() {
+		if (null == productFlows) {
+			return 0;
+		}
+        return productFlows.stream().map(p -> p.getProduct().getId()).collect(Collectors.toSet()).size();
+    }
 	 
 
 }

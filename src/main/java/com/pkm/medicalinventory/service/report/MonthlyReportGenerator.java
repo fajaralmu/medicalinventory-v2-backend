@@ -114,7 +114,7 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 				int totalProductPerCustomer = transaction.getTotalProductFlowCount();
 				
 				productQtySum += totalProductPerCustomer;
-				productKindCountSum += transaction.getProductFlows().size();
+				productKindCountSum += transaction.getProductKindCount();;
 
 				dailyUsageCell[3] = createCellWithNumber(dailyRow, 5, (double) transaction.getProductFlows().size());
 				dailyUsageCell[4] = createCellWithNumber(dailyRow, 6, (double) totalProductPerCustomer);
@@ -378,9 +378,9 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		cells[2] = titleRow.createCell(4);
 		cells[2].setCellValue("Lokasi Transaksi");
 		cells[3] = titleRow.createCell(5);
-		cells[3].setCellValue("Jumlah Obat (Jenis)");
+		cells[3].setCellValue("Jml Obat (Jenis)");
 		cells[4] = titleRow.createCell(6);
-		cells[4].setCellValue("Jumlah Obat (Qty)");
+		cells[4].setCellValue("Jml Obat (Qty)");
 
 		for (int c = 0; c < cells.length; c++) {
 			cells[c].setCellStyle(regularStyle);
