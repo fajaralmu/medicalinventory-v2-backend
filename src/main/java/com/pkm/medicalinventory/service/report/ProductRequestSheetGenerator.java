@@ -43,9 +43,12 @@ public class ProductRequestSheetGenerator extends BaseReportGenerator{
 	WritableCellFormat productNameCellFormat, regularStyle;
 	int month, year;
 
-	public ProductRequestSheetGenerator(WebRequest webRequest, List<Product> products, 
-			Map<Long, Integer> mappedProductIdAndStartingStock, List<Transaction> transactionOneMonth)
-			throws Exception {
+	public ProductRequestSheetGenerator(
+		WebRequest webRequest,
+		List<Product> products, 
+		Map<Long, Integer> mappedProductIdAndStartingStock,
+		List<Transaction> transactionOneMonth
+	) {
 
 		this.filter = webRequest.getFilter();
 		this.location = webRequest.getHealthcenter().toEntity();
@@ -56,6 +59,8 @@ public class ProductRequestSheetGenerator extends BaseReportGenerator{
 		this.year = filter.getYear();
 		this.productNameCellFormat = getProductNameFormat();
 		this.regularStyle = getRegularCellFormat();
+
+		this.products.sort((a, b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
 	}
 
 	public void generateReport(OutputStream os) throws Exception {

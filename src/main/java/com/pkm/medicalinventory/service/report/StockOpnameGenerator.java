@@ -34,6 +34,7 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		this.location = location;
 		this.date = date;
 		this.productStocks = productStocks;
+		this.productStocks.sort((a, b) -> a.getProduct().getName().toLowerCase().compareTo(b.getProduct().getName().toLowerCase()));
 	}
 	public void setMappedBeginningStockPrice(Map<Long, Double> mappedBeginningStockPrice) {
 		this.mappedBeginningStockPrice = mappedBeginningStockPrice;
@@ -114,7 +115,7 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 			totalPrice += stockPrice;
 			totalCount += stock.getTotalStock();
 
-			xssfRow.createCell(3).setCellValue(ob.getName()+"("+ob.getCode()+")");
+			xssfRow.createCell(3).setCellValue(ob.getName());
 			xssfRow.createCell(4).setCellValue(ob.getUnit().getName());
 
 			for (jxl.write.Number labelobat1 : labelobat) {
