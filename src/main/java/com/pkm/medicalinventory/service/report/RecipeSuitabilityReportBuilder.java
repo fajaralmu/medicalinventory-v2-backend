@@ -57,7 +57,7 @@ public class RecipeSuitabilityReportBuilder extends ReportBuilder<XSSFWorkbook> 
                 createCell(firstTrxPassed ? ++row : row, 3, ++number);
                 createCell(row, 4, transaction.getCustomer().getName());
                 createCell(row, 5, transaction.getCustomer().getCode());
-                if (firstTrxPassed) {
+                if (!firstTrxPassed) {
                     firstTrxPassed = true;
                 }
 
@@ -68,7 +68,7 @@ public class RecipeSuitabilityReportBuilder extends ReportBuilder<XSSFWorkbook> 
                     Optional<Product> product = products.stream().filter(p -> p.getId().equals(id)).findFirst();
                     createCell(firstProductPassed ? ++row : row, 6, product.isPresent() ? product.get().getName() : "N/A");
                     createCell(row, 7, mappedProduct.get(id));
-                    if (firstProductPassed) {
+                    if (!firstProductPassed) {
                         firstProductPassed = true;
                     }
                 }
