@@ -5,14 +5,17 @@ import java.util.Date;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class BaseReportGenerator {
+public abstract class ReportBuilder<WorkBook>{
 
-	protected XSSFWorkbook xwb;
+	protected WorkBook xwb;
 	protected ProgressNotifier progressNotifier;
 	protected SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-	public String dateToString(Date d) {
+	protected SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy");
+	protected String dateToTimeString(Date d) {
 		return sdfDateTime.format(d);
-
+	}
+	protected String dateToString(Date d) {
+		return sdfDate.format(d);
 	}
 	public void setProgressNotifier(ProgressNotifier progressNotifier) {
 		this.progressNotifier = progressNotifier;
@@ -26,4 +29,5 @@ public class BaseReportGenerator {
 	protected void notifyProgress(int progress, int maxProgress, double percent) {
 		getProgressNotifier().notify(progress, maxProgress, percent);
 	}
+	public abstract WorkBook build() throws Exception;
 }

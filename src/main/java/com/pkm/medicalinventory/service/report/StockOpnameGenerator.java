@@ -19,7 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import jxl.write.Label;
 
-public class StockOpnameGenerator extends BaseReportGenerator {
+public class StockOpnameGenerator extends ReportBuilder<XSSFWorkbook> {
 
 	private static final String DATE_PATTERN = "dd-MM-yyyy";
 	private final HealthCenter location;
@@ -29,14 +29,19 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 	private Integer year;
 	private Map<Long, Double> mappedBeginningStockPrice = new HashMap<>();
 
-	public StockOpnameGenerator(HealthCenter location, List<ProductStock> productStocks, Date date) {
-		xwb = new XSSFWorkbook();
+	public StockOpnameGenerator(
+		HealthCenter location,
+		List<ProductStock> productStocks,
+		Map<Long, Double> mappedBeginningStockPrice,
+		Date date,
+		int year
+	) {
+		this.xwb = new XSSFWorkbook();
 		this.location = location;
 		this.date = date;
+		this.year = year;
 		this.productStocks = productStocks;
 		this.productStocks.sort((a, b) -> a.getProduct().getName().toLowerCase().compareTo(b.getProduct().getName().toLowerCase()));
-	}
-	public void setMappedBeginningStockPrice(Map<Long, Double> mappedBeginningStockPrice) {
 		this.mappedBeginningStockPrice = mappedBeginningStockPrice;
 	}
 	private void validateRow(int row) {
@@ -50,7 +55,7 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		return sheet.getRow(row);
 	}
 
-	public XSSFWorkbook generateReport() throws Exception {
+	public XSSFWorkbook build() {
 		
 		String dateString = DateUtil.formatDate(date, DATE_PATTERN);
 		sheet = xwb.createSheet("Stock Opname " + dateString);
@@ -135,10 +140,4 @@ public class StockOpnameGenerator extends BaseReportGenerator {
 		return xwb;
 
 	}
-
-	public void setYear(Integer year) {
-		this.year = year;
-		
-	}
-
 }

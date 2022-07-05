@@ -8,20 +8,21 @@ import com.pkm.medicalinventory.entity.setting.EntityProperty;
 import com.pkm.medicalinventory.util.DateUtil;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Data
-public class EntityReportBuilder extends BaseReportGenerator {
+public class EntityReportBuilder extends ReportBuilder<XSSFWorkbook> {
 	protected XSSFSheet xsheet;
 	protected static final String BLANK = "";
 	protected static final String DATE_PATTERN = "ddMMyyyy'T'hhmmss-a";
 //	protected final ReportData reportData;
 	protected String reportName;
-	private List<? extends BaseModel> entities;
-	private EntityProperty entityProperty;
+	private final List<? extends BaseModel> entities;
+	private final EntityProperty entityProperty;
 	private final String requestId;
 
 	public EntityReportBuilder(EntityProperty entityProperty, List<? extends BaseModel> entities, String reqId) {
@@ -31,7 +32,7 @@ public class EntityReportBuilder extends BaseReportGenerator {
 		this.entities = entities;
 	}
 
-	public CustomWorkbook buildReport() {
+	public CustomWorkbook build() {
 
 		log.info("Writing entity report of: {}", entityProperty.getEntityName());
 
@@ -61,8 +62,8 @@ public class EntityReportBuilder extends BaseReportGenerator {
 					notifyProgress(1, totalRow, 60.d);
 				}
 			};
-			ExcelReportUtil.createTable(xsheet, entityProperty.getElements().size() + 1, 2, 2, rowCallback,
-					entityValues);
+			int col = entityProperty.getElements().size() + 1;
+			ExcelReportUtil.createTable(xsheet, col, 2, 2, rowCallback, entityValues);
 
 		} catch (Exception e) {
 			log.error("Error creating entity excel table");
@@ -73,7 +74,4 @@ public class EntityReportBuilder extends BaseReportGenerator {
 	protected String getDateTime() {
 		return DateUtil.formatDate(new Date(), DATE_PATTERN);
 	}
-
- 
-
 }

@@ -25,7 +25,7 @@ import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.entity.Supplier;
 import com.pkm.medicalinventory.entity.Transaction;
 
-public class TransactionReceiptGenerator extends BaseReportGenerator{
+public class TransactionReceiptGenerator extends ReportBuilder<Document>{
 	
 	private final Transaction transaction;
 	private final HealthCenter mainLocation;
@@ -33,17 +33,19 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 	static final DecimalFormat df 		= new DecimalFormat("#,###.##");
 	static final String DATE_PATTERN 	= "dd-MM-yyyy";
 	static final float FONT_MULTIPLIER 	= 1.2f;
+	private final OutputStream os;
 
-	public TransactionReceiptGenerator(Transaction transaction, HealthCenter mainLocation ) {
+	public TransactionReceiptGenerator(Transaction transaction, HealthCenter mainLocation, OutputStream os) {
 		this.transaction = transaction;
 		this.mainLocation = mainLocation;
+		this.os = os;
 	}
 	
 	private static String df(double value) {
 		return df.format(value);
 	}
 
-	public void generateReport(OutputStream os) throws  Exception {
+	public Document build() throws  Exception {
 		
 		HealthCenter location 	= this.mainLocation;
 		
@@ -100,7 +102,7 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		Double totalPrice = 0d;
 		Paragraph transInfo[] = new Paragraph[4];
 		transInfo[0] = labelValue("Kode transaksi", transaction. getCode(), fontTitle);
-		transInfo[1] = labelValue("Tanggal", dateToString(transaction.getTransactionDate()), fontTitle);
+		transInfo[1] = labelValue("Tanggal", dateToTimeString(transaction.getTransactionDate()), fontTitle);
 
 		Customer p = null;
 
@@ -241,6 +243,8 @@ public class TransactionReceiptGenerator extends BaseReportGenerator{
 		doc.add(Chunk.NEWLINE);
 		doc.add(pt);
 		doc.close();
+
+		return doc;
 	}
 
 	public String numbToCurrencyString(Object Int) {

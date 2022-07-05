@@ -68,6 +68,13 @@ public class ReportGenerator {
 	@Autowired
 	private ProductUsageService productUsageService;
 
+	public XSSFWorkbook getRecipeReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
+		List<Transaction> transactions = transactionRepository.findByMonthAndYearAndType(filter.getMonth(), filter.getYear(), TransactionType.TRANS_OUT);
+		log.info("Transaction count: {}", transactions.size());
+		ReportBuilder<XSSFWorkbook> builder = new RecipeSuitabilityReportBuilder(filter.getMonth(), filter.getYear(), fillProductFlows(transactions));
+		return builder.build();
+	}
+
 	public XSSFWorkbook getMonthyReport(Filter filter, HttpServletRequest httpServletRequest) throws Exception {
 
 		List<HealthCenter> locations = (List<HealthCenter>) healthCenterRepository.findAll();
@@ -88,7 +95,7 @@ public class ReportGenerator {
 																	  locations,
 																	  master,
 																	  notifier(httpServletRequest));
-		return generator.generateReport();
+		return generator.build();
 	}
 
 	private ProgressNotifier notifier(final HttpServletRequest httpServletRequest) {
@@ -140,9 +147,9 @@ public class ReportGenerator {
 
 		progressService.sendProgress(20, httpServletRequest);
 
-		TransactionReceiptGenerator generator = new TransactionReceiptGenerator(t, location);
+		ReportBuilder<?> generator = new TransactionReceiptGenerator(t, location, os);
 		generator.setProgressNotifier(notifier(httpServletRequest));
-		generator.generateReport(os);
+		generator.build();
 
 	}
 
@@ -208,9 +215,6 @@ public class ReportGenerator {
 		// doc.add(pt);
 
 		doc.close();
-
-		 
-
 		return doc;
 
 	}
@@ -253,12 +257,15 @@ public class ReportGenerator {
 			progressService.sendProgress(1, products.size(), 25, httpServletRequest);
 		}
 
-		ProductRequestSheetGenerator generator = new ProductRequestSheetGenerator(webRequest, products,
-				mappedProductIdAndStartingStock, transactionOneMonth);
-		generator.setMasterHealthCenter(isMasterHealthCenter);
+		ProductRequestSheetGenerator generator 
+			= new ProductRequestSheetGenerator(webRequest, 
+											   products, 
+											   mappedProductIdAndStartingStock,
+											   transactionOneMonth,
+											   os,
+											   isMasterHealthCenter);
 		generator.setProgressNotifier(notifier(httpServletRequest));
-		generator.generateReport(os);
-
+		generator.build();
 	}
 	
 	public XSSFWorkbook getStockOpnameReport(
@@ -327,10 +334,13 @@ public class ReportGenerator {
 		progressService.sendProgress(taskProp, httpServletRequest);
 		log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		try {
-			StockOpnameGenerator generator = new StockOpnameGenerator(location, stockModels, selectedDate);
-			generator.setMappedBeginningStockPrice(mappedPriceAtBeginningYear);
-			generator.setYear(webRequest.getFilter().getYear());
-			XSSFWorkbook wb = generator.generateReport();
+			ReportBuilder<XSSFWorkbook> generator
+				= new StockOpnameGenerator(location, 
+										   stockModels,
+										   mappedPriceAtBeginningYear,
+										   selectedDate,
+										   webRequest.getFilter().getYear());
+			XSSFWorkbook wb = generator.build();
 			progressService.sendProgress(10, httpServletRequest);
 
 			return wb;

@@ -37,44 +37,49 @@ public class RestReportController {
 
 	@PostMapping(value = "/stockopname", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
-	public void stockopname(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest,
-			HttpServletResponse httpServletResponse) throws Exception {
-		log.info("stockopname {} at {} ", webRequest.getHealthcenter().getName());
-		httpServletResponse.setContentType("text/xls");
-		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+	public void stockopname(@RequestBody WebRequest req, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
+		log.info("stockopname {} at {} ", req.getHealthcenter().getName());
+		httpRs.setContentType("text/xls");
+		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		
-		reportService.printStockOpname(webRequest, httpRequest, httpServletResponse);
+		reportService.printStockOpname(req, httpRq, httpRs);
 	}
 	@PostMapping(value = "/monthly", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
-	public void monthly(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest,
-			HttpServletResponse httpServletResponse) throws Exception {
+	public void monthly(@RequestBody WebRequest req, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
 		log.info("monthly report");
-		httpServletResponse.setContentType("text/xls");
-		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		httpRs.setContentType("text/xls");
+		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		
-		reportService.printMonthlyReport(webRequest, httpRequest, httpServletResponse);
+		reportService.printMonthlyReport(req, httpRq, httpRs);
+	}
+	@PostMapping(value = "/recipe", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@CustomRequestInfo(withRealtimeProgress = true)
+	public void recipe(@RequestBody WebRequest req, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
+		log.info("recipe report");
+		httpRs.setContentType("text/xls");
+		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		
+		reportService.printRecipeReport(req, httpRq, httpRs);
 	}
 	
 	@PostMapping(value = "/receiverequestsheet", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
-	public void receiveRequestSheet(@RequestBody WebRequest webRequest, HttpServletRequest httpRequest,
-			HttpServletResponse httpServletResponse) throws Exception {
+	public void receiveRequestSheet(@RequestBody WebRequest req, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
 		log.info("receiverequestsheet");
-		httpServletResponse.setContentType("text/xls");
-		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		httpRs.setContentType("text/xls");
+		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		
-		reportService.receiveRequestSheet(webRequest, httpRequest, httpServletResponse);
+		reportService.receiveRequestSheet(req, httpRq, httpRs);
 	}
 	@PostMapping(value = "/transactionreceipt/{code}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
-	public void transactionReceipt(@PathVariable(name="code") String code, HttpServletRequest httpRequest,
-			HttpServletResponse httpServletResponse) throws Exception {
+	public void transactionReceipt(@PathVariable(name="code") String code, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
 		log.info("transactionreceipt with code: {}", code);
-		httpServletResponse.setContentType("text/pdf");
-		httpServletResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
+		httpRs.setContentType("text/pdf");
+		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		
-		reportService.generateTransactionReceipt(code, httpRequest, httpServletResponse);
+		reportService.generateTransactionReceipt(code, httpRq, httpRs);
 	}
 	
 	@PostMapping(value = "/records", consumes = MediaType.APPLICATION_JSON_VALUE)

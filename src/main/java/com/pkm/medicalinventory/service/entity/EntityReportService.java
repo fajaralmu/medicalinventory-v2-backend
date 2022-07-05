@@ -15,6 +15,7 @@ import com.pkm.medicalinventory.service.report.EntityReportBuilder;
 import com.pkm.medicalinventory.service.report.ProgressNotifier;
 import com.pkm.medicalinventory.util.EntityPropertyBuilder;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +30,11 @@ public class EntityReportService {
 	@Autowired
 	private SessionValidationService sessionValidationService;
 
-	public CustomWorkbook getEntityReport(List<? extends BaseModel> entities, Class<? extends BaseEntity> entityClass,
-			HttpServletRequest httpRequest) throws Exception {
+	public CustomWorkbook getEntityReport(
+		List<? extends BaseModel> entities,
+		Class<? extends BaseEntity> entityClass,
+		HttpServletRequest httpRequest
+	) throws Exception {
 		log.info("Generate entity report: {}", entityClass); 
 		User currentUser = sessionValidationService.getLoggedUser(httpRequest);
 		String requestId = currentUser.getRequestId();
@@ -44,7 +48,7 @@ public class EntityReportService {
 		
 		progressService.sendProgress(1, 1, 10, false, httpRequest);
 
-		CustomWorkbook file = reportBuilder.buildReport(); 
+		CustomWorkbook file = reportBuilder.build(); 
 		
 		log.info("Entity Report generated");
 

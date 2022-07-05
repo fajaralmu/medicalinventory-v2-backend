@@ -1,13 +1,18 @@
 package com.pkm.medicalinventory.service.report;
 
-import static com.pkm.medicalinventory.constants.TransactionType.TRANS_OUT;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.apache.poi.hssf.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.pkm.medicalinventory.constants.TransactionType;
 import com.pkm.medicalinventory.dto.Filter;
@@ -18,19 +23,10 @@ import com.pkm.medicalinventory.entity.Transaction;
 import com.pkm.medicalinventory.util.DateUtil;
 import com.pkm.medicalinventory.util.EntityUtil;
 
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.poi.hssf.util.CellRangeAddress;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 /**
  * ONLY Reports consumptions from master to customer and master to branch
  */
-public class MonthlyReportGenerator extends BaseReportGenerator {
+public class MonthlyReportGenerator extends ReportBuilder<XSSFWorkbook> {
 
 	private final Map<Integer, List<Transaction>> transactionMapped;
 	private final List<Transaction> transactionsOneMonth;
@@ -42,13 +38,13 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 	private final HealthCenter masterLocation;
 
 	public MonthlyReportGenerator(
-    Filter filter, 
-    List<Transaction> transactionsOneMonth, 
-    List<Product> products,
-    List<HealthCenter> locations,
-    HealthCenter masterLocation,
-    ProgressNotifier progressNotifier
-  ) {
+		Filter filter, 
+		List<Transaction> transactionsOneMonth, 
+		List<Product> products,
+		List<HealthCenter> locations,
+		HealthCenter masterLocation,
+		ProgressNotifier progressNotifier
+	) {
 		this.transactionsOneMonth = transactionsOneMonth;
 		this.xwb = new XSSFWorkbook();
 		this.month = filter.getMonth();
@@ -79,10 +75,10 @@ public class MonthlyReportGenerator extends BaseReportGenerator {
 		return map;
 	}
 
-	public XSSFWorkbook generateReport() {
+	public XSSFWorkbook build() {
 
 		/**************** BEGIN DAILY CONSUMPTION ***********************/
-		mainLoop: for (Integer day = 1; day <= 31; day++) {
+		for (Integer day = 1; day <= 31; day++) {
 			List<Product> productsPerDay = EntityUtil.cloneSerializable(allProducts);
 			int productQtySum = 0, productKindCountSum = 0;
 			// JUDUL TABEL//

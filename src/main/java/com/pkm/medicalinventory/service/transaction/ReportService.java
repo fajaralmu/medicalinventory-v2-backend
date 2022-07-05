@@ -61,6 +61,21 @@ public class ReportService {
 		
 	}
 
+	public void printRecipeReport(
+		WebRequest webRequest, 
+		HttpServletRequest httpServletRequest,
+		HttpServletResponse httpServletResponse
+	) throws Exception {
+
+		Filter filter = webRequest.getFilter();
+		String fileName = "Kesesuaian-Resep-Bulan-" + filter.getYear() + "-" + filter.getMonth();
+		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xlsx");
+
+		XSSFWorkbook wb = reportGenerator.getRecipeReport(filter, httpServletRequest);
+		wb.write(httpServletResponse.getOutputStream());
+		
+	}
+
 	public void receiveRequestSheet(
 		WebRequest webRequest,
 		HttpServletRequest httpRequest,

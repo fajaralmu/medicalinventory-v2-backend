@@ -27,28 +27,26 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-public class ProductRequestSheetGenerator extends BaseReportGenerator{
-	private WritableWorkbook wb;
+public class ProductRequestSheetGenerator extends ReportBuilder<WritableWorkbook>{
 	private final HealthCenter location;
 	private final Filter filter;
 	private List<Product> products;
 	 
 	private boolean isMasterHealthCenter;
-	public void setMasterHealthCenter(boolean isMasterHealthCenter) {
-		this.isMasterHealthCenter = isMasterHealthCenter;
-	}
 
 	private Map<Long, Integer> mappedProductIdAndStartingStock;
 	private List<Transaction> transactionOneMonth;
-	WritableCellFormat productNameCellFormat, regularStyle;
-	int month, year;
+	private WritableCellFormat productNameCellFormat, regularStyle;
+	private int month, year;
 
 	public ProductRequestSheetGenerator(
 		WebRequest webRequest,
 		List<Product> products, 
 		Map<Long, Integer> mappedProductIdAndStartingStock,
-		List<Transaction> transactionOneMonth
-	) {
+		List<Transaction> transactionOneMonth,
+		OutputStream os,
+		boolean isMasterHealthCenter
+	) throws Exception {
 
 		this.filter = webRequest.getFilter();
 		this.location = webRequest.getHealthcenter().toEntity();
@@ -59,13 +57,14 @@ public class ProductRequestSheetGenerator extends BaseReportGenerator{
 		this.year = filter.getYear();
 		this.productNameCellFormat = getProductNameFormat();
 		this.regularStyle = getRegularCellFormat();
+		this.xwb = Workbook.createWorkbook(os);
+		this.isMasterHealthCenter = isMasterHealthCenter;
 
 		this.products.sort((a, b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
 	}
 
-	public void generateReport(OutputStream os) throws Exception {
-		this.wb = Workbook.createWorkbook(os);
-		WritableSheet sheet = wb.createSheet("LPLPO " + filter.getMonth() + "-" + filter.getYear(), 0);
+	public WritableWorkbook build() throws Exception {
+		WritableSheet sheet = xwb.createSheet("LPLPO " + filter.getMonth() + "-" + filter.getYear(), 0);
 
 		buildTitleCells(sheet);
 		int row = 8, no = 1;
@@ -121,8 +120,9 @@ public class ProductRequestSheetGenerator extends BaseReportGenerator{
 			}
 		}
 
-		wb.write();
-		wb.close();
+		xwb.write();
+		xwb.close();
+		return xwb;
 	}
 
 	private void buildTitleCells(WritableSheet sheet) throws Exception {
