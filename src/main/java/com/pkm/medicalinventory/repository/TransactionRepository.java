@@ -24,6 +24,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
 	@Query("select t from Transaction t where MONTH(t.transactionDate) = ?1 and YEAR(t.transactionDate) = ?2")
 	List<Transaction> findByMonthAndYear(int bulan, int tahun);
+	@Query("select t from Transaction t where MONTH(t.transactionDate) = ?1 and YEAR(t.transactionDate) = ?2 and t.healthCenterLocation = ?3")
+	List<Transaction> findByMonthAndYearAndHealthCenterLocation(int bulan, int tahun, HealthCenter healthCenterLocation);
 	@Query("select t from Transaction t where MONTH(t.transactionDate) = ?1 and YEAR(t.transactionDate) = ?2 and t.type = ?3")
 	List<Transaction> findByMonthAndYearAndType(int bulan, int tahun, TransactionType type);
 	@Query("select t from Transaction t where"

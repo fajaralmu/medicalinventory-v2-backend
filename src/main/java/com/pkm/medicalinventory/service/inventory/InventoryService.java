@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -224,21 +225,21 @@ public class InventoryService {
 		boolean isMasterLocation = healthCenterMasterService.isMasterHealthCenter(location);
 		Map<Long, Integer> result = ProductUsageService.getMapPopulatedWithKey(products);
 		
-		List<Object[]> tptalSupplied;
+		List<Object[]> totalSupplied;
 		List<Object[]> totalUsed;
 		if (isMasterLocation) {
-			tptalSupplied = productFlowRepository.getTotalIncomingProductsFromSupplier(products, date);
+			totalSupplied = productFlowRepository.getTotalIncomingProductsFromSupplier(products, date);
 			totalUsed = productFlowRepository.getTotalUsedProductsToCustomerOrBranchWarehouseAtDate(products, date, location.getId());
 		} else {
-			tptalSupplied = productFlowRepository.getTotalIncomingProductsAtBranchWarehouse(products, date,
+			totalSupplied = productFlowRepository.getTotalIncomingProductsAtBranchWarehouse(products, date,
 					location.getId());
 			totalUsed = productFlowRepository.getTotalUsedProductsToCustomerAtDate(products, date, location.getId());
 		}
-		if (null == tptalSupplied) {
+		if (null == totalSupplied) {
 			return result;
 		}
 		//populate supplied
-		for (Object[] objects : tptalSupplied) {
+		for (Object[] objects : totalSupplied) {
 			Long productId = Long.parseLong(objects[0].toString());
 			Integer suppliedCount = Integer.parseInt(objects[1].toString());
 			result.put(productId, suppliedCount);
@@ -254,6 +255,9 @@ public class InventoryService {
 		 
 //		int stock = (tptalSupplied == null ? 0 : tptalSupplied.intValue())
 //				- (totalUsed == null ? 0 : totalUsed.intValue());
+		Integer supplied = totalSupplied.stream().map(t -> Integer.parseInt(t[1].toString())).collect(Collectors.summingInt(i -> i));
+		Integer used = totalUsed == null ? 0 : totalUsed.stream().map(t -> Integer.parseInt(t[1].toString())).collect(Collectors.summingInt(i -> i));
+		log.info("Sum Stock: {} - {} = {}", supplied, used, supplied - used);;
 		return result;
 	}
 

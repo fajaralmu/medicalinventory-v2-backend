@@ -27,7 +27,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 
-public class ProductRequestSheetGenerator extends ReportBuilder<WritableWorkbook>{
+public class LPLPOGenerator extends ReportBuilder<WritableWorkbook>{
 	private final HealthCenter location;
 	private final Filter filter;
 	private List<Product> products;
@@ -39,7 +39,7 @@ public class ProductRequestSheetGenerator extends ReportBuilder<WritableWorkbook
 	private WritableCellFormat productNameCellFormat, regularStyle;
 	private int month, year;
 
-	public ProductRequestSheetGenerator(
+	public LPLPOGenerator(
 		WebRequest webRequest,
 		List<Product> products, 
 		Map<Long, Integer> mappedProductIdAndStartingStock,

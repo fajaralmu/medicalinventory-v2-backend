@@ -86,7 +86,7 @@ public class ReportService {
 		String fileName = "LPLPO_"+webRequest.getHealthcenter().getName()+"_"+filter.getYear()+"-"+ filter.getMonth();
 		httpServletResponse.setHeader("Content-disposition", "attachment;filename="+fileName+".xls");
 		
-		reportGenerator.generateProductRequestSheet(webRequest , httpServletResponse.getOutputStream(), httpRequest);
+		reportGenerator.generateLPLPO(webRequest , httpServletResponse.getOutputStream(), httpRequest);
 	}
 
 	public void generateTransactionReceipt(String code, HttpServletRequest httpRequest,

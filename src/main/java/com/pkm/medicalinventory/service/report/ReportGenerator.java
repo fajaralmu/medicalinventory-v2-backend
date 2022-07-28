@@ -222,13 +222,13 @@ public class ReportGenerator {
 	/**
 	 * generate LPLPO
 	 * @param webRequest
-	 * @param os
+	 * @param outputStream
 	 * @param httpServletRequest
 	 * @throws Exception
 	 */
-	public void generateProductRequestSheet(
+	public void generateLPLPO(
 		WebRequest webRequest,
-		OutputStream os,
+		OutputStream outputStream,
 		HttpServletRequest httpServletRequest
 	) throws Exception {
 		
@@ -242,8 +242,8 @@ public class ReportGenerator {
 
 		List<Product> products = productRepository.findByOrderByUtilityTool();
 
-		List<Transaction> transactionOneMonth = transactionRepository.findByMonthAndYear(filter.getMonth(),
-				filter.getYear());
+		List<Transaction> transactionOneMonth = transactionRepository
+			.findByMonthAndYearAndHealthCenterLocation(filter.getMonth(), filter.getYear(), location);
 
 		fillProductFlows(transactionOneMonth);
 		Map<Long, Integer> mappedProductIdAndStartingStock = new HashMap<>();
@@ -257,13 +257,13 @@ public class ReportGenerator {
 			progressService.sendProgress(1, products.size(), 25, httpServletRequest);
 		}
 
-		ProductRequestSheetGenerator generator 
-			= new ProductRequestSheetGenerator(webRequest, 
-											   products, 
-											   mappedProductIdAndStartingStock,
-											   transactionOneMonth,
-											   os,
-											   isMasterHealthCenter);
+		LPLPOGenerator generator 
+			= new LPLPOGenerator(webRequest, 
+								products, 
+								mappedProductIdAndStartingStock,
+								transactionOneMonth,
+								outputStream,
+								isMasterHealthCenter);
 		generator.setProgressNotifier(notifier(httpServletRequest));
 		generator.build();
 	}
@@ -327,6 +327,8 @@ public class ReportGenerator {
 					incomingCount, usedCount, productStockAtSelectedDate);
 			stockModel.setIncomingPrice(incomingPrice);
 			stockModel.setUsedPrice(usedPrice);
+
+			// log.info("")
 			
 			stockModels.add(stockModel);
 
