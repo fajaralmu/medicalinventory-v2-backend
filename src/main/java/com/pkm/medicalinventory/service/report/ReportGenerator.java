@@ -232,13 +232,13 @@ public class ReportGenerator {
 		HttpServletRequest httpServletRequest
 	) throws Exception {
 		
-		HealthCenter location = webRequest.getHealthcenter().toEntity();
+		HealthCenter location = defaultHealthCenterMasterService.getMasterHealthCenter();
 		Filter filter = webRequest.getFilter();
-		Boolean isMasterHealthCenter = defaultHealthCenterMasterService.isMasterHealthCenter(location);
 
 		int month = filter.getMonth(), year = filter.getYear();
 		Date date = DateUtil.getDate(year, month - 1, 1);
 		Date prevDate = DateUtil.getPrevDateLastDay(date);
+		prevDate = DateUtil.clock24Midnight(prevDate);
 
 		List<Product> products = productRepository.findByOrderByUtilityTool();
 
@@ -262,8 +262,7 @@ public class ReportGenerator {
 								products, 
 								mappedProductIdAndStartingStock,
 								transactionOneMonth,
-								outputStream,
-								isMasterHealthCenter);
+								outputStream);
 		generator.setProgressNotifier(notifier(httpServletRequest));
 		generator.build();
 	}
@@ -274,7 +273,7 @@ public class ReportGenerator {
 	) throws Exception {
 
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
-		Date selectedDate = DateUtil.getDate(webRequest.getFilter());
+		Date selectedDate = DateUtil.clock24Midnight(DateUtil.getDate(webRequest.getFilter()));
 		// prev year date
 		int prevYear = webRequest.getFilter().getYear() - 1;
 		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
@@ -295,15 +294,15 @@ public class ReportGenerator {
 		Map<Long, Integer> productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location,lastDayOfYear);
+		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location, lastDayOfYear);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
 		 
-		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products,location, lastDayOfYear, selectedDate);
+		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products, location, lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
 		 
-		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location,lastDayOfYear, selectedDate);
+		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location, lastDayOfYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 
 		for (Product product : products) {

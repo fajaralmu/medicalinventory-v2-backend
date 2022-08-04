@@ -31,8 +31,6 @@ public class LPLPOGenerator extends ReportBuilder<WritableWorkbook>{
 	private final HealthCenter location;
 	private final Filter filter;
 	private List<Product> products;
-	 
-	private boolean isMasterHealthCenter;
 
 	private Map<Long, Integer> mappedProductIdAndStartingStock;
 	private List<Transaction> transactionOneMonth;
@@ -44,8 +42,7 @@ public class LPLPOGenerator extends ReportBuilder<WritableWorkbook>{
 		List<Product> products, 
 		Map<Long, Integer> mappedProductIdAndStartingStock,
 		List<Transaction> transactionOneMonth,
-		OutputStream os,
-		boolean isMasterHealthCenter
+		OutputStream os
 	) throws Exception {
 
 		this.filter = webRequest.getFilter();
@@ -58,7 +55,6 @@ public class LPLPOGenerator extends ReportBuilder<WritableWorkbook>{
 		this.productNameCellFormat = getProductNameFormat();
 		this.regularStyle = getRegularCellFormat();
 		this.xwb = Workbook.createWorkbook(os);
-		this.isMasterHealthCenter = isMasterHealthCenter;
 
 		this.products.sort((a, b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
 	}
@@ -80,27 +76,11 @@ public class LPLPOGenerator extends ReportBuilder<WritableWorkbook>{
 			for (Transaction t : transactionOneMonth) {
 				List<ProductFlow> productFlows = t.getProductFlows();
 
-				if (isMasterHealthCenter) {
-					//supplied
-					if (t.getType().equals(TransactionType.TRANS_IN)) {
-						suppliedCount += sumCountProduct(productFlows, product);
-					}
-					//distributed
-					else if (t.getType().equals(TRANS_OUT) || t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
-//							&& t.getHealthCenterDestination() == null
-					) {
-						distributedCount += sumCountProduct(productFlows, product);
-					}
-				} else {
-					//supplied
-					if (t.getType().equals(TRANS_OUT_TO_WAREHOUSE)
-							&& t.getHealthCenterDestination().idEquals(location)) {
-						suppliedCount += sumCountProduct(productFlows, product);
-					}
-					//distributed
-					else if (t.getType().equals(TRANS_OUT) && t.getHealthCenterLocation().idEquals(location)) {
-						distributedCount += sumCountProduct(productFlows, product);
-					}
+				if (t.getType().equals(TransactionType.TRANS_IN)) {
+					suppliedCount += sumCountProduct(productFlows, product);
+				}
+				else if (t.getType().equals(TRANS_OUT) || t.getType().equals(TRANS_OUT_TO_WAREHOUSE)) {
+					distributedCount += sumCountProduct(productFlows, product);
 				}
 			}
 

@@ -64,7 +64,7 @@ public class ProductUsageService {
 		
 		final List<ProductFlow> quantities;
 		if (healthCenterMasterService.isMasterHealthCenter(location)) {
-			quantities= productFlowRepository.getUsedProductsToCustomerOrBranchWarehouseBetweenDate(products, date1, date2, location.getId());
+			quantities = productFlowRepository.getUsedProductsToCustomerOrBranchWarehouseBetweenDate(products, date1, date2, location.getId());
 		} else {
 			quantities = productFlowRepository.getUsedProductsToCustomerBetweenDate(products, date1, date2, location.getId()); 
 		}

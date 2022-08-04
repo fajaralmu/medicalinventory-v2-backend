@@ -257,7 +257,7 @@ public class InventoryService {
 //				- (totalUsed == null ? 0 : totalUsed.intValue());
 		Integer supplied = totalSupplied.stream().map(t -> Integer.parseInt(t[1].toString())).collect(Collectors.summingInt(i -> i));
 		Integer used = totalUsed == null ? 0 : totalUsed.stream().map(t -> Integer.parseInt(t[1].toString())).collect(Collectors.summingInt(i -> i));
-		log.info("Sum Stock: {} - {} = {}", supplied, used, supplied - used);;
+		log.info("Sum Stock at {}: {} - {} = {}", date, supplied, used, supplied - used);;
 		return result;
 	}
 
