@@ -41,7 +41,7 @@ public class InventoryConfigurationService {
 
 	private Configuration checkConfig() {
 		Configuration configuration = configurationRepository.findTop1ByCode(bindedValues.getConfigCode());
-		if (null ==configuration) {
+		if (null == configuration) {
 			return createConfig();
 		} 
 		return configuration;

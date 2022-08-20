@@ -12,38 +12,40 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.persistence.JoinColumn;
 
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Service;
+
 import com.pkm.medicalinventory.annotation.CustomEntity;
 import com.pkm.medicalinventory.annotation.Dto;
 import com.pkm.medicalinventory.dto.model.BaseModel;
 import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.entity.setting.EntityManagementConfig;
 import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor;
-import com.pkm.medicalinventory.service.config.WebConfigService;
+import com.pkm.medicalinventory.service.config.EntityRegistration;
 import com.pkm.medicalinventory.service.entity.BaseEntityUpdateService;
 import com.pkm.medicalinventory.util.CollectionUtil;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
 @Data
 public class EntityRepository {
-
 	@Autowired
-	private WebConfigService webConfigService;
+	private SessionFactory sessionFactory;
+	@Autowired
+	private EntityRegistration entityReg;
 	@Autowired
 	private CustomRepositoryImpl customRepository;
 	@Autowired
-	private ApplicationContext applicationContext; 
-	 
+	private ApplicationContext applicationContext;
 
 	@Setter(value = AccessLevel.NONE)
 	@Getter(value = AccessLevel.NONE)
@@ -56,7 +58,9 @@ public class EntityRepository {
 	 * @param updateService
 	 * @param updateInterceptor
 	 */
-	private void putConfig(Class<? extends BaseEntity> _class, BaseEntityUpdateService updateService,
+	private <T extends BaseEntity> void putConfig(
+			Class<T> _class,
+			BaseEntityUpdateService<T> updateService,
 			EntityUpdateInterceptor<?> updateInterceptor) {
 		String key = _class.getSimpleName().toLowerCase();
 		entityConfiguration.put(key, config(key, _class, updateService, updateInterceptor));
@@ -65,19 +69,19 @@ public class EntityRepository {
 
 	@PostConstruct
 	public void init() throws Exception {
-		putEntitiesConfig(); 
+		putEntitiesConfig();
 	}
 
 	private void putEntitiesConfig() throws Exception {
 		entityConfiguration.clear();
 
-		List<Type> persistenceClasses = webConfigService.getEntityClassess();
+		List<Type> persistenceClasses = entityReg.getEntityClassess();
 		log.info(">>>> persistenceClasses count: {}", persistenceClasses.size());
 		for (Type type : persistenceClasses) {
 			log.info("checking : {}", type);
 			try {
 				Class<? extends BaseEntity> entityClass = (Class<? extends BaseEntity>) type;
-				CustomEntity customEntity =  entityClass.getAnnotation(CustomEntity.class);
+				CustomEntity customEntity = entityClass.getAnnotation(CustomEntity.class);
 				if (null == customEntity) {
 					log.info(" SKIP {}, cause = customEntity is null", type);
 					continue;
@@ -88,7 +92,8 @@ public class EntityRepository {
 					continue;
 				}
 				String beanName = modelClass.getAnnotation(Dto.class).updateService();
-//				String beanName = StringUtil.lowerCaseFirstChar(updateServiceClass.getSimpleName());
+				// String beanName =
+				// StringUtil.lowerCaseFirstChar(updateServiceClass.getSimpleName());
 
 				BaseEntityUpdateService updateServiceBean = (BaseEntityUpdateService) applicationContext
 						.getBean(beanName);
@@ -155,14 +160,15 @@ public class EntityRepository {
 			ex.printStackTrace();
 			throw ex;
 		} finally {
-			//databaseProcessorNotifier.refresh();
+			// databaseProcessorNotifier.refresh();
 		}
 	}
 
 	public <T extends BaseEntity> T savev2(T entity) {
+		log.info("customRepository: {}", customRepository);
 		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
-		T result = databatseProcessor.saveObject(entity); 
-		 
+		T result = databatseProcessor.saveObject(entity);
+
 		return result;
 
 	}
@@ -184,7 +190,7 @@ public class EntityRepository {
 					continue;
 				}
 
-				BaseEntity entity = (BaseEntity) value; 
+				BaseEntity entity = (BaseEntity) value;
 				BaseEntity result = findById(entity.getClass(), entity.getId());
 
 				if (result == null) {
@@ -222,7 +228,7 @@ public class EntityRepository {
 	 * @return
 	 */
 	public <T extends BaseEntity> JpaRepository findRepo(Class<T> entityClass) {
-		JpaRepository repository = webConfigService.getJpaRepository(entityClass);
+		JpaRepository repository = entityReg.getJpaRepository(entityClass);
 		return repository;
 	}
 
@@ -246,12 +252,13 @@ public class EntityRepository {
 		log.debug("{} is NULL", clazz.getSimpleName());
 		return null;
 	}
-	
-//	public <ID extends Serializable, T extends BaseEntity> T findByIdv2(Class<T> _class, ID id) {
-//		T result = databaseReader.getById(_class, id);
-//		
-//		return result;
-//	}
+
+	// public <ID extends Serializable, T extends BaseEntity> T findByIdv2(Class<T>
+	// _class, ID id) {
+	// T result = databaseReader.getById(_class, id);
+	//
+	// return result;
+	// }
 
 	/**
 	 * find all entity
@@ -286,9 +293,9 @@ public class EntityRepository {
 	}
 
 	public List findByKey(Class entityClass, Field idField, Object... objectArray) {
-		 
+
 		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
-		return databatseProcessor.findByKeyAndValues(entityClass,idField.getName() , objectArray);
+		return databatseProcessor.findByKeyAndValues(entityClass, idField.getName(), objectArray);
 	}
 
 }

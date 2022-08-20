@@ -4,22 +4,20 @@ import java.lang.reflect.Type;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 
-import com.pkm.medicalinventory.service.config.WebConfigService;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import com.pkm.medicalinventory.service.config.EntityRegistration;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,14 +30,11 @@ public class HibernateSessionConfig {
 	private DriverManagerDataSource driverManagerDataSource;
 	@Autowired
 	private EntityManagerFactory entityManagerFactoryBean;
-//	@Autowired
-	private WebConfigService webConfigService;
 	@Autowired
-	private ApplicationContext applicationContext;
+	private EntityRegistration entityReg;
 
 	@Bean
 	public SessionFactory generateSession() {
-		webConfigService = (WebConfigService) applicationContext.getBean("webAppConfig");
 		try {
 			org.hibernate.cfg.Configuration configuration = new org.hibernate.cfg.Configuration();
 
@@ -60,7 +55,7 @@ public class HibernateSessionConfig {
 
 	private void addAnnotatedClass(org.hibernate.cfg.Configuration configuration) {
 
-		List<Type> entities = webConfigService.getEntityClassess();
+		List<Type> entities = entityReg.getEntityClassess();
 		for (Type type : entities) {
 			log.info("@@@@ addAnnotatedClass: {}", type);
 			configuration.addAnnotatedClass((Class) type);

@@ -43,9 +43,9 @@
 		<property name="driverClassName"
 			value="org.postgresql.Driver" />
 		<property name="url"
-			value="jdbc:postgresql://localhost:5432/medicalinventory" />
+			value="jdbc:postgresql://localhost:5432/medicalinventory_2" />
 		<property name="username" value="postgres" />
-		<property name="password" value="root" />
+		<property name="password" value="password09" />
 	</bean>
 <bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
