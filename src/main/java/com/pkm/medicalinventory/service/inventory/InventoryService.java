@@ -261,7 +261,7 @@ public class InventoryService {
 		return result;
 	}
 
-	public WebResponse adjustStock(HttpServletRequest httpServletRequest) {
+	public synchronized WebResponse adjustStock(HttpServletRequest httpServletRequest) {
 		 return stockAdjusterService.adjustStock(httpServletRequest);
 	}
 

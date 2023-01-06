@@ -12,13 +12,6 @@ import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
-import com.pkm.medicalinventory.dto.AttachmentInfo;
-import com.pkm.medicalinventory.service.ProgressService;
-import com.pkm.medicalinventory.service.config.WebConfigService;
-import com.pkm.medicalinventory.util.IconWriter;
-import com.pkm.medicalinventory.util.StringUtil;
-import com.pkm.medicalinventory.util.ThreadUtil;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -31,6 +24,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import com.pkm.medicalinventory.dto.AttachmentInfo;
+import com.pkm.medicalinventory.service.ProgressService;
+import com.pkm.medicalinventory.service.config.WebConfigService;
+import com.pkm.medicalinventory.util.IconWriter;
+import com.pkm.medicalinventory.util.StringUtil;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -40,8 +39,6 @@ public class FileService {
 	private static final String ICON_BASE64_PREFIX = "data:image/ico;base64,";
 	@Autowired
 	private WebConfigService webAppConfiguration;
-	@Autowired
-	private FtpResourceService ftpResourceService;
 	@Value("${app.resources.uploadType}")
 	private String uploadType;
 	@Value("${app.resources.apiUploadEndpoint}")
@@ -95,7 +92,8 @@ public class FileService {
 			throws IOException {
 		log.info("#uploadType: {}", uploadType);
 		if ("ftp".equals(uploadType)) {
-			return writeImageFtp(code, data);
+			return null;
+			// return writeImageFtp(code, data);
 		}
 		if ("api".equals(uploadType)) {
 			return writeImageApi(code, data, httpServletRequest);
@@ -170,30 +168,6 @@ public class FileService {
 		}
 		return response;
 	}
-
-	public synchronized String writeImageFtp(String code, String data) throws IOException {
-
-		String[] imageData = data.split(",");
-		if (imageData == null || imageData.length < 2) {
-			return null;
-		}
-
-		String imageString = imageData[1];
-
-		// extract image name
-		String imageIdentity = imageData[0];
-		String imageType = imageIdentity.replace("data:image/", "").replace(";base64", "");
-		String randomId = String.valueOf(new Date().getTime()) + StringUtil.generateRandomNumber(5) + "_"
-				+ getCounter();
-
-		String imageFileName = code + "_" + randomId + "." + imageType;
-		addCounter();
-		ThreadUtil.run(() -> {
-			ftpResourceService.storeFtp(imageString, imageFileName);
-		});
-		return imageFileName;
-	}
-
 	public synchronized String writeImageToDisk(String code, String data) throws IOException {
 
 		String[] imageDataSplitted = data.split(",");

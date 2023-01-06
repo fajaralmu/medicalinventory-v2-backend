@@ -22,6 +22,7 @@ import com.pkm.medicalinventory.repository.TransactionRepository;
 import com.pkm.medicalinventory.service.ProgressService;
 import com.pkm.medicalinventory.service.SessionValidationService;
 import com.pkm.medicalinventory.service.config.DefaultHealthCenterMasterService;
+import com.pkm.medicalinventory.service.inventory.InventoryService;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -48,6 +49,8 @@ public class TransactionService {
 	private ProductFlowRepository productFlowRepository;
 	@Autowired
 	private HealthCenterRepository healthCenterRepository;
+	@Autowired
+	private InventoryService inventoryService;
 	
 	public WebResponse getTransactionByCode(String code) {
 		Transaction transaction = transactionRepository.findByCode(code);
@@ -213,7 +216,7 @@ public class TransactionService {
 		return (ProductFlow) record;
 	}
 
-	public WebResponse deleteRecordByCode(String code) {
+	public synchronized WebResponse deleteRecordByCode(String code) {
 		Session session = sessionFactory.openSession();
 		org.hibernate.Transaction hibernateTransaction = session.beginTransaction();
 		try {
@@ -228,6 +231,8 @@ public class TransactionService {
 			}
 			session.delete(record);
 			hibernateTransaction.commit();
+
+			inventoryService.adjustStock(null);
 			return new WebResponse();
 		}catch (Exception e) {
 

@@ -54,72 +54,75 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	 */
 	private static final long serialVersionUID = 8839593046741372229L;
 
-//	@JsonIgnore
+	// @JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "transaction_id", nullable = false) 
+	@JoinColumn(name = "transaction_id", nullable = false)
 	private Transaction transaction;
 
 	@ManyToOne
-	@JoinColumn(name = "product_id", nullable = false) 
+	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
-	@Column(name="expired_date") 
+	@Column(name = "expired_date")
 	private Date expiredDate;
-	@Column(name="batch_num")
+	@Column(name = "batch_num")
 	private String batchNum;
-	@Column 
+	@Column
 	private int count;
-	@Column(name="used_count", nullable = false) 
+	@Column(name = "used_count", nullable = false)
 	private int usedCount;
-//	@Column(name="reference_flow_id", nullable = false) 
-//	private Long refStockId;
-	
+	// @Column(name="reference_flow_id", nullable = false)
+	// private Long refStockId;
+
 	@Nullable
 	@ManyToOne
 	@JoinColumn(name = "reference_flow_id")
-	@Setter(value = AccessLevel.NONE) 
+	@Setter(value = AccessLevel.NONE)
 	private ProductFlow referenceProductFlow;
 
 	@Column
-	@Default 
+	@Default
 	private boolean suitable = true;
-	@Column 
+	@Column
 	private double price;
-	@Column 
-	private boolean generic;  
-	
+	@Column
+	private boolean generic;
+
 	@Formula(value = "count - used_count")
 	private int stock;
-	 
+
 	@Transient
 	private List<ProductFlow> referencingItems;
-	
-	public void addUsedCount(int count) {
-		 
-		if (getStock() - count < 0) {
-			throw ApplicationException.fromMessage("Stock not enough: "+(getStock() - count));
+
+	public void addUsedCount(int newUsedCount) {
+
+		if (getStock() - newUsedCount < 0) {
+			throw ApplicationException
+					.fromMessage(
+						String.format("Stock for %s stockId (%d) INVALID! Incoming stock: %d, used: %d, newUsed: %d => %d",
+							product.getName(), getId(), count, usedCount, newUsedCount, (getStock() - newUsedCount)));
 		}
-		setUsedCount(getUsedCount()+count);
+		setUsedCount(getUsedCount() + newUsedCount);
 	}
-	
-	
-	public int getStock() { 
+
+	public int getStock() {
 		return count - usedCount;
 	}
-	
+
 	////////////
 
 	public static int sumStockCount(List<ProductFlow> productFlows) {
 		int sum = 0;
 		for (ProductFlow productFlow : productFlows) {
-			sum+=productFlow.getStock();
+			sum += productFlow.getStock();
 		}
 		return sum;
 	}
+
 	public static int sumQtyCount(List<ProductFlow> productFlows) {
 		int sum = 0;
 		for (ProductFlow productFlow : productFlows) {
-			sum+=productFlow.getCount();
+			sum += productFlow.getCount();
 		}
 		return sum;
 	}
@@ -127,12 +130,13 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 	public void resetUsedCount() {
 		setUsedCount(0);
 	}
+
 	public boolean productsEquals(Product p) {
-		if (product == null) return false;
+		if (product == null)
+			return false;
 		return product.idEquals(p);
-	} 
-	
-	
+	}
+
 	/**
 	 * make the expDate same as referenceProductFlow.expDate
 	 */
@@ -146,7 +150,6 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		setBatchNum(referenceProductFlow.getBatchNum());
 	}
 
-
 	public void setReferenceProductFlow(ProductFlow referenceFlow) {
 		if (null != referenceFlow && null != referenceFlow.getProduct()) {
 			setProduct(referenceFlow.getProduct());
@@ -154,35 +157,41 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		this.referenceProductFlow = referenceFlow;
 		this.copyFromReferenceFlow();
 	}
-	
+
 	@JsonIgnore
 	public Long getTransactionId() {
-		if (null == transaction) return null;
+		if (null == transaction)
+			return null;
 		return transaction.getId();
 	}
+
 	/**
 	 * distributed to customer/to branch warehouse
+	 * 
 	 * @return
 	 */
 	@JsonIgnore
-	public boolean isDistributed  () {
+	public boolean isDistributed() {
 		return null != referenceProductFlow;
 	}
-	
+
 	/**
-	 *  month starts at 1
+	 * month starts at 1
+	 * 
 	 * @return month starts at 1
 	 */
 	@JsonIgnore
-	public int getTransactionMonth () {
-		if (null == transaction) return 1;
+	public int getTransactionMonth() {
+		if (null == transaction)
+			return 1;
 		return DateUtil.getCalendarMonth(transaction.getTransactionDate()) + 1;
 	}
-	public int getTransactionYear () {
-		if (null == transaction) return 0;
+
+	public int getTransactionYear() {
+		if (null == transaction)
+			return 0;
 		return DateUtil.getCalendarYear(transaction.getTransactionDate());
 	}
-
 
 	public static double sumQtyAndPrice(List<ProductFlow> list) {
 		double result = 0;
@@ -192,22 +201,20 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		}
 		return result;
 	}
-	
-	
+
 	@Override
 	public ProductFlowModel toModel() {
 		ProductFlowModel model = super.toModel();
-		if (referencingItems!=null) {
+		if (referencingItems != null) {
 			List<ProductFlowModel> refItems = new ArrayList<>();
 			for (ProductFlow productFlow : referencingItems) {
-			refItems.add(productFlow.toModel());
+				refItems.add(productFlow.toModel());
 			}
 			model.setReferencingItems(refItems);
 		}
 		return copy(model, "referencingItems");
 	}
-	 
-	
+
 	public static void main(String[] args) {
 		List<ProductFlow> items = new ArrayList<>();
 		items.add(ProductFlow.builder().count(111).build());
@@ -215,14 +222,14 @@ public class ProductFlow extends BaseEntity<ProductFlowModel> {
 		items.add(ProductFlow.builder().count(101).build());
 		Transaction trx = Transaction.builder().code("123").build();
 		ProductFlow pf = ProductFlow.builder()
-				.referencingItems(items )
-//				transaction(trx )
+				.referencingItems(items)
+				// transaction(trx )
 				.build();
 		trx.addProductFlow(pf);
 		TransactionModel model = trx.toModel();
 		ProductFlowModel pfModel = model.getProductFlows().get(0);
 		System.out.println(pfModel.getReferencingItems());
-		
+
 	}
- 
+
 }

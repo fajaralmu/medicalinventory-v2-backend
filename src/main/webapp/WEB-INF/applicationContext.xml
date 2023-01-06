@@ -43,7 +43,7 @@
 		<property name="driverClassName"
 			value="org.postgresql.Driver" />
 		<property name="url"
-			value="jdbc:postgresql://localhost:5432/medicalinventory_2" />
+			value="jdbc:postgresql://localhost:5432/medicalinventory" />
 		<property name="username" value="postgres" />
 		<property name="password" value="password09" />
 	</bean>

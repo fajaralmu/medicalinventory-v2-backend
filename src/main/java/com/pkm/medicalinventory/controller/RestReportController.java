@@ -38,7 +38,7 @@ public class RestReportController {
 	@PostMapping(value = "/stockopname", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	@CustomRequestInfo(withRealtimeProgress = true)
 	public void stockopname(@RequestBody WebRequest req, HttpServletRequest httpRq, HttpServletResponse httpRs) throws Exception {
-		log.info("stockopname {} at {} ", req.getHealthcenter().getName());
+		log.info("stockopname {} at {}={} ", req.getHealthcenter().getName(), req.getFilter().getMonth(), req.getFilter().getYear());
 		httpRs.setContentType("text/xls");
 		httpRs.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
 		

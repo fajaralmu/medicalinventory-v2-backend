@@ -130,7 +130,6 @@ public class EntityUtil {
 				superClassField.setAccessible(true);
 				return superClassField;
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error("FAILED Getting FIELD: " + fieldName + ", error: " + e.getMessage());
 				 
 			}
@@ -243,8 +242,7 @@ public class EntityUtil {
 			targetObject = targetClass.newInstance();
 
 		} catch (Exception e) {
-			log.error("Error when create instance");
-			e.printStackTrace();
+			log.error("Error when create instance " + e.getMessage());
 		}
 		List<Field> fields = getDeclaredFields(source.getClass());
 
@@ -269,8 +267,7 @@ public class EntityUtil {
 				currentField.set(targetObject, field.get(source));
 
 			} catch (Exception e) {
-				log.error("Error set new value");
-				e.printStackTrace();
+				log.error("Error set new value: " + e.getMessage());
 			}
 
 		}

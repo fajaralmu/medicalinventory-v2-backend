@@ -276,37 +276,40 @@ public class ReportGenerator {
 		Date selectedDate = DateUtil.clock24Midnight(DateUtil.getDate(webRequest.getFilter()));
 		// prev year date
 		int prevYear = webRequest.getFilter().getYear() - 1;
-		Date lastDayOfYear = DateUtil.lastDayOfYear(prevYear);
-				
+		Date lastDayOfPrevYear = DateUtil.lastDayOfYear(prevYear);
+
+		log.info("Loading products");
 		List<Product> products = (List<Product>) productRepository.findAll();
 		List<ProductStock> stockModels = new LinkedList<>();
+		log.info("loading product prices at selected date");
 		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(selectedDate);
-		List<Object[]> mappedPricesAndIDsAtBeginningYear = productRepository.getMappedPriceAndProductIdsAt(lastDayOfYear);
+		log.info("loading product prices at lastDayOfYear={}", lastDayOfPrevYear);
+		List<Object[]> mappedPricesAndIDsAtBeginningYear = productRepository.getMappedPriceAndProductIdsAt(lastDayOfPrevYear);
 		Map<Long, Double> mappedPrice = parseProductPriceMap(mappedPricesAndIDs);
 		Map<Long, Double> mappedPriceAtBeginningYear = parseProductPriceMap(mappedPricesAndIDsAtBeginningYear);
 
 		log.info("products: {}", products.size());
-		log.info("mappedPricesAndIDs: {} ", mappedPrice);
+		//log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		progressService.sendProgress(10, httpServletRequest);
 
-		
+		log.info("loading product stock at selected date");
 		int taskProp = 16;
 		Map<Long, Integer> productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location, lastDayOfYear);
+		log.info("loading product stock at lastDayOfPrevYear={}", lastDayOfPrevYear);
+		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location, lastDayOfPrevYear);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		 
-		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products, location, lastDayOfYear, selectedDate);
+		log.info("loading incoming product from {} to {} ", lastDayOfPrevYear, selectedDate);
+		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 		
-		 
-		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location, lastDayOfYear, selectedDate);
+		log.info("loading used product from {} to {} ", lastDayOfPrevYear, selectedDate);
+		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
 		progressService.sendProgress(taskProp, httpServletRequest);
 
 		for (Product product : products) {
-			log.info("get stock info for: {}", product.getName());
 			Long productId = product.getId();
 			Double price = mappedPrice.get(productId);
 
@@ -319,11 +322,25 @@ public class ReportGenerator {
 			double usedPrice = ProductFlow.sumQtyAndPrice(usedCountBetweenDate.get(productId));
 			
 			int productStockAtSelectedDate = productStocks.get(productId);
+			
+			log.info("Stock info for: {}. early year stock: {}. incomingCount: {}. used stock: {}, remaining: {} | {}",
+				product.getName(),
+				productStockInTheBeginningOfYear,
+				incomingCount,
+				usedCount,
+				productStockInTheBeginningOfYear + incomingCount - usedCount,
+        productStockAtSelectedDate
+			);
 
 			product.setPrice(price);
 
-			ProductStock stockModel = new ProductStock(product.toModel(), productStockInTheBeginningOfYear,
-					incomingCount, usedCount, productStockAtSelectedDate);
+			ProductStock stockModel = new ProductStock(
+				product.toModel(),
+				productStockInTheBeginningOfYear,
+				incomingCount,
+				usedCount,
+				productStockAtSelectedDate
+			);
 			stockModel.setIncomingPrice(incomingPrice);
 			stockModel.setUsedPrice(usedPrice);
 
@@ -333,7 +350,7 @@ public class ReportGenerator {
 
 		}
 		progressService.sendProgress(taskProp, httpServletRequest);
-		log.info("mappedPricesAndIDs: {} ", mappedPrice);
+		// log.info("mappedPricesAndIDs: {} ", mappedPrice);
 		try {
 			ReportBuilder<XSSFWorkbook> generator
 				= new StockOpnameGenerator(location, 
