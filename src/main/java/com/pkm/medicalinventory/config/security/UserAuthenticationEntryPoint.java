@@ -35,7 +35,6 @@ public class UserAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoi
 	}
 
 	private void printApiResponse(HttpServletResponse response, AuthenticationException ex) throws IOException {
-		 
 		response.setContentType("application/json");
 		response.getOutputStream().print("{\"code\":\"-1\",\"message\":\""+ex.getMessage()+"\"}");
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

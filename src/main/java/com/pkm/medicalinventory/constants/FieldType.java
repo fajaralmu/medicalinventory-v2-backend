@@ -6,7 +6,7 @@ public enum FieldType {
 	 /**
 	  * leave this field as null will remove value, leave as old value wont update field
 	  */
-	 FIELD_TYPE_IMAGE ( "img"),
+//	 FIELD_TYPE_IMAGE ( "img"),
 	 FIELD_TYPE_CURRENCY ( "number"),
 	 FIELD_TYPE_NUMBER ( "number"),
 	 FIELD_TYPE_HIDDEN ( "hidden"),

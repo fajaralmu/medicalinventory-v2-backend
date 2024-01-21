@@ -25,9 +25,6 @@ public class MyHandlerInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-
-//		log.info("[preHandle][" + request + "]" + "[" + request.getMethod() + "]");
-
 		HandlerMethod handlerMethod = interceptorProcessor.getHandlerMethod(request);
 
 		if (handlerMethod != null && interceptorProcessor.isApi(handlerMethod)) {
@@ -40,9 +37,7 @@ public class MyHandlerInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
-
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 		if (handler instanceof HandlerMethod) {
 			interceptorProcessor.postHandle(request, response, (HandlerMethod) handler, modelAndView);
 
@@ -51,9 +46,7 @@ public class MyHandlerInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-			throws Exception {
-
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
 		super.afterCompletion(request, response, handler, ex);
 	}
 

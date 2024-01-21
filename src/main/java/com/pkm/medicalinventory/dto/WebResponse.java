@@ -26,9 +26,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonInclude(value = Include.NON_NULL)
 public class WebResponse implements Serializable {
 
@@ -36,14 +33,11 @@ public class WebResponse implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -8345271799535134609L;
-	@Builder.Default
 	private Date date = new Date();
+	@Setter(value = AccessLevel.NONE)
 	private UserModel user; 
-	@Builder.Default
 	private String code = "00";
-	@Builder.Default
 	private String message = "success";
-	@Builder.Default
 	@Setter(value = AccessLevel.NONE)
 	private List<BaseModel> entities = new ArrayList<>();
 	
@@ -77,10 +71,19 @@ public class WebResponse implements Serializable {
 	@JsonIgnore
 	private Class<? extends BaseEntity> entityClass; 
 	
+	public WebResponse() {
+		//
+	}
+	
 	public WebResponse(String code, String message) {
 		this.code = code;
 		this.message = message;
 		this.date = new Date();
+	}
+	
+	public void setUser(UserModel user) {
+		user.setPassword(null);
+		this.user = user;
 	}
 
 	public <T extends BaseModel> void setEntities(List<T > entities) {
@@ -119,7 +122,70 @@ public class WebResponse implements Serializable {
 		return new WebResponse("02", "Invalid Session");
 	}
 
-	
+	public WebResponse withUser(UserModel m) {
+		setUser(m);
+		return this;
+	}
+
+	public WebResponse withEntityProperty(EntityProperty config) {
+		setEntityProperty(config);
+		return this;
+	}
+
+	public WebResponse withGeneralList(List<Object> result) {
+		setGeneralList(result);
+		return this;
+	}
+
+	public WebResponse withEntity(BaseModel resp) {
+		setEntity(resp);
+		return this;
+	}
+
+	public WebResponse withEntityClass(Class<? extends BaseEntity> entityClass2) {
+		setEntityClass(entityClass2);
+		return this;
+	}
+
+	public WebResponse withEntities(List<BaseModel> models) {
+		setEntities(models);
+		return this;
+	}
+
+	public WebResponse withTotalData(int count) {
+		setTotalData(count);
+		return this;
+	}
+
+	public WebResponse withFilter(Filter filter2) {
+		setFilter(filter2);
+		return this;
+	}
+
+	public WebResponse withConfiguration(ConfigurationModel config) {
+		setConfiguration(config);
+		return this;
+	}
+
+	public WebResponse withAppProfile(ApplicationProfileModel profile) {
+		setApplicationProfile(profile);
+		return this;
+	}
+
+	public WebResponse withRequestId(String requestId2) {
+		setRequestId(requestId2);
+		return this;
+	}
+
+	public WebResponse withPercentage(double progress) {
+		setPercentage(progress);
+		return this;
+	}
+
+	public WebResponse withTransaction(TransactionModel rec) {
+		setTransaction(rec);
+		return this;
+	}
 	
 	
 }

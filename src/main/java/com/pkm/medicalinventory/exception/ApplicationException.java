@@ -12,9 +12,12 @@ public class ApplicationException extends RuntimeException{
 	public ApplicationException(Exception ex) {
 		super(ErrorUtil.getRootCaouseMessage(ex));
 	}
+	public ApplicationException(String msg) {
+		super(msg);
+	}
 
-	public static ApplicationException fromMessage(String string) {
-		return new ApplicationException(new Exception(string));
+	public static ApplicationException fromMessage(String msg) {
+		return new ApplicationException(msg);
 	}
   
 }

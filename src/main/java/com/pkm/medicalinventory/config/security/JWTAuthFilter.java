@@ -1,7 +1,6 @@
 package com.pkm.medicalinventory.config.security;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -28,7 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 public class JWTAuthFilter extends OncePerRequestFilter {
 
 	private static final String PREFIX = "Bearer ";
+	private static final String ALLOW_HEADER_VAL = "Content-Type, Accept, X-Requested-With, Authorization, requestid, access-token";
+	
 	private UserDetailsService userDetailsService;
+	
 	@Autowired
 	private JWTUtils jwtUtils;
 	@Autowired
@@ -39,15 +41,19 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	protected void doFilterInternal(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		FilterChain filterChain
+	) throws ServletException, IOException {
+		
 		log.debug("___________JWTAuthFilter____________{}", request.getRequestURI());
+		
 		if (request.getMethod().toLowerCase().equals("options")) {
 			setCorsHeaders(response);
 			return;
 		}
 		try {
-			
 			String jwt = parseJwt(request);
 			Object userPrincipal = null;
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -64,12 +70,18 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 					String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
 					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							userDetails, null, userDetails.getAuthorities());
-					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					UsernamePasswordAuthenticationToken userAuth = new UsernamePasswordAuthenticationToken(
+						userDetails,
+						null,
+						userDetails.getAuthorities()
+					);
+					userAuth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+					
 					log.info("JWT Authenticated..");
-					SecurityContextHolder.getContext().setAuthentication(authentication);
-					String refreshToken = jwtUtils.generateJwtToken(authentication);
+					
+					SecurityContextHolder.getContext().setAuthentication(userAuth);
+					String refreshToken = jwtUtils.generateJwtToken(userAuth);
+					
 					response.setHeader("access-token", refreshToken);
 					response.setHeader("Access-Control-Expose-Headers", "access-token");
 				} else {
@@ -93,8 +105,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 		response.setHeader("Access-Control-Allow-Credentials", "true");
 		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 		response.setHeader("Access-Control-Max-Age", "3600");
-		response.setHeader("Access-Control-Allow-Headers",
-				"Content-Type, Accept, X-Requested-With, Authorization, requestid, access-token");
+		response.setHeader("Access-Control-Allow-Headers", ALLOW_HEADER_VAL );
 		response.setStatus(HttpStatus.OK.value());
 
 	}
@@ -102,10 +113,14 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 	private String parseJwt(HttpServletRequest request) {
 		String headerAuth = request.getHeader("Authorization");
 		log.debug("headerAuth: {}", headerAuth);
-		if (headerAuth!=null && (headerAuth.replaceAll("[ ]", "").toLowerCase().equals("bearernull")
-				|| headerAuth.trim().toLowerCase().equals("bearer")
-				|| headerAuth.isEmpty())
-				)  {
+		if (
+			headerAuth!=null && 
+			(
+				headerAuth.replaceAll("[ ]", "").toLowerCase().equals("bearernull") ||
+				headerAuth.trim().toLowerCase().equals("bearer") ||
+				headerAuth.isEmpty()
+			)
+		)  {
 			return null;
 		}
 		if (StringUtils.hasText(headerAuth) && headerAuth.startsWith(PREFIX)) {
@@ -121,12 +136,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
 	private void sendJsonResponseUnAuthenticated(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-
 		log.info("JWT Authentication Failed");
 		
 		setCorsHeaders(response);
 		
-		WebResponse data = WebResponse.builder().date(new Date()).message("Unauthenticated").build();
+		WebResponse data = new WebResponse("401", "Unauthenticated");
 		response.getOutputStream().println(objectMapper.writeValueAsString(data));
 		response.setStatus(HttpStatus.UNAUTHORIZED.value()); 
 

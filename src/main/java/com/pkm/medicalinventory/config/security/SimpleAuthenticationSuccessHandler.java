@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pkm.medicalinventory.controller.AuthController;
 import com.pkm.medicalinventory.dto.WebResponse;
+import com.pkm.medicalinventory.dto.model.UserModel;
 import com.pkm.medicalinventory.entity.User;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +52,7 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	@Override
 	protected void handle(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
 			throws IOException {
-
 		AuthController.extractRequestHeader(request);
-		
 		
 		if (isJsonResponse(request)) {
 			sendJsonResponse(response, authentication);
@@ -65,8 +64,7 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 			return;
 		}
 		log.info("Redirect to {}", targetUrl);
-		redirectStrategy.sendRedirect(request, response, targetUrl);
-		 
+		redirectStrategy.sendRedirect(request, response, targetUrl); 
 	}
 	
 	@Override
@@ -96,19 +94,18 @@ public class SimpleAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			UserDetailDomain principal = (UserDetailDomain) authentication.getPrincipal();
 			User user = principal.getUserDetails();
-			response.getWriter().write(objectMapper.writeValueAsString(WebResponse.builder()
-//					.token(jwt)
-					.user(user.toModel() ).build()));
+			UserModel userModel = user.toModel();
+			userModel.setPassword(null);
+			WebResponse resp = new WebResponse().withUser(userModel );
+			response.getWriter().write(objectMapper.writeValueAsString(resp));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static boolean isJsonResponse(HttpServletRequest httpServletRequest) {
-		boolean isJsonResponse = httpServletRequest.getParameter("transport_type")!=null
-				&&
-				httpServletRequest.getParameter("transport_type").equals("rest");
-//		log.info("isJsonResponse: {}", isJsonResponse);
+		String transportType = httpServletRequest.getParameter("transport_type"); 
+		boolean isJsonResponse = transportType!=null && transportType.equals("rest");
 		
 		return isJsonResponse;
 	}

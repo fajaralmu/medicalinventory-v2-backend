@@ -19,7 +19,6 @@
  	</beans:bean>
  	<beans:bean id="loginFailureHandler" class="com.pkm.medicalinventory.config.security.SimpleAuthenticationFailureHandler">
  		<beans:property name="objectMapper" ref="objectMapper"></beans:property>
- 		<beans:property name="jwtUtils" ref="jwtUtils"></beans:property>
  	</beans:bean>
  	<beans:bean id="loginSuccessHandler" class="com.pkm.medicalinventory.config.security.SimpleAuthenticationSuccessHandler">
  		<beans:constructor-arg value="/loginsuccess" index="0"  />

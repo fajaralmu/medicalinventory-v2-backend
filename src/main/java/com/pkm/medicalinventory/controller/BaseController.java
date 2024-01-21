@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.pkm.medicalinventory.auth.SessionValidationService;
+import com.pkm.medicalinventory.auth.UserSessionService;
+import com.pkm.medicalinventory.component.BindedValues;
+import com.pkm.medicalinventory.config.ApplicationProfileService;
 import com.pkm.medicalinventory.dto.KeyValue;
 import com.pkm.medicalinventory.dto.NavigationMenu;
 import com.pkm.medicalinventory.entity.User;
-import com.pkm.medicalinventory.service.SessionValidationService;
-import com.pkm.medicalinventory.service.UserSessionService;
-import com.pkm.medicalinventory.service.config.BindedValues;
-import com.pkm.medicalinventory.service.config.DefaultApplicationProfileService;
 import com.pkm.medicalinventory.util.DateUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,23 +46,20 @@ public class BaseController {
 	@Autowired
 	protected BindedValues bindedValues;
 	@Autowired
-	protected DefaultApplicationProfileService defaultApplicationProfileService;
+	protected ApplicationProfileService appProfileService;
 
 	@ModelAttribute("applicationHeaderLabel")
 	public String applicationHeaderLabel(HttpServletRequest request) {
-
-		return defaultApplicationProfileService.getApplicationProfile().getName();
+		return appProfileService.getApplicationProfile().getName();
 	}
 
 	@ModelAttribute("applicationDescription")
 	public String applicationDescription(HttpServletRequest request) {
-
-		return defaultApplicationProfileService.getApplicationProfile().getShortDescription();
+		return appProfileService.getApplicationProfile().getShortDescription();
 	}
 
 	@ModelAttribute("applicationFooterLabel")
 	public String applicationFooterLabel(HttpServletRequest request) {
-
 		return applicationHeaderLabel(request);
 	}
 
@@ -91,18 +88,18 @@ public class BaseController {
 	}
 
 	@ModelAttribute("loggedUser")
-	public User loggedUser(HttpServletRequest request) {
-		return sessionValidationService.getLoggedUser(request);
+	public User loggedUser() {
+		return sessionValidationService.getLoggedUser();
 	}
 
 	@ModelAttribute("userPrincipal")
-	public Object getUserPrincipal(HttpServletRequest request) {
-		return sessionValidationService.getUserPrincipal(request);
+	public Object getUserPrincipal() {
+		return sessionValidationService.getUserPrincipal();
 	}
 
 	@ModelAttribute("greeting")
-	public String greeting(HttpServletRequest request) {
-		User user = loggedUser(request);
+	public String greeting() {
+		User user = loggedUser();
 		String name = user == null ? "" : user.getDisplayName();
 		return "Good " + DateUtil.getTimeGreeting() + ", " + name;
 

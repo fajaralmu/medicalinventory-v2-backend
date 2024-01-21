@@ -12,7 +12,6 @@ import java.util.List;
 import com.pkm.medicalinventory.constants.TransactionType;
 import com.pkm.medicalinventory.entity.Product;
 import com.pkm.medicalinventory.entity.ProductFlow;
-import com.pkm.medicalinventory.service.inventory.CriteriaWrapper;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;

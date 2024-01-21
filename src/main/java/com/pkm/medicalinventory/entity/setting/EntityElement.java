@@ -233,7 +233,7 @@ public class EntityElement implements Serializable {
 			setType(determinedFieldType.value);
 
 			setId(field.getName());
-			setMultiple(formField.multipleImage());
+//			setMultiple(formField.multipleImage());
 			setClassName(field.getType().getCanonicalName());
 
 			setHasPreview(formField.hasPreview());
@@ -262,9 +262,6 @@ public class EntityElement implements Serializable {
 	private void checkFieldType(FieldType fieldType) throws Exception {
 
 		switch (fieldType) {
-		case FIELD_TYPE_IMAGE:
-			processImageType();
-			break;
 		case FIELD_TYPE_CURRENCY:
 			processCurrencyType();
 			break;
@@ -275,9 +272,9 @@ public class EntityElement implements Serializable {
 			processPlainListType();
 			break;
 		case FIELD_TYPE_FIXED_LIST:
-			if (formField.multipleSelect()) {
-				processMultipleSelectElements();
-			}
+//			if (formField.multipleSelect()) {
+//				processMultipleSelectElements();
+//			}
 			break;
 		default:
 			break;
@@ -292,11 +289,7 @@ public class EntityElement implements Serializable {
 
 	private void processCurrencyType() {
 //		entityProperty.getCurrencyElements().add(field.getName());
-	}
-
-	private void processImageType() {
-//		entityProperty.getImageElements().add(field.getName());
-	}
+	} 
 
 	private void processDateType() {
 //		entityProperty.getDateElements().add(field.getName());

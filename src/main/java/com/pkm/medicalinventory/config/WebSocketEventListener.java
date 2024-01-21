@@ -8,32 +8,14 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 
 @Component
 public class WebSocketEventListener {
+	
+	Logger log = LoggerFactory.getLogger(WebSocketEventListener.class);
 
-//    @Autowired
-//    private SimpMessageSendingOperations messagingTemplate;
+	@EventListener
+	public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+		log.info("Received a new web socket connection");
+		log.info("message: {}", event.getMessage());
+		log.info("source : {}", event.getSource());
+	}
 
-    Logger log = LoggerFactory.getLogger(WebSocketEventListener.class);
-    @EventListener
-    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-//    	 com.fasterxml.jackson.dataformat.xml.XmlMapper;
-    	log.info("Received a new web socket connection");
-    	log.info("message: {}",event.getMessage());
-    	log.info("source : {}",event.getSource());
-    	}
-
-//    @EventListener
-//    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-//        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-//
-//        String username = (String) headerAccessor.getSessionAttributes().get("username");
-//        if(username != null) {
-//        	log.info("User Disconnected : " + username);
-//
-//            ChatMessage chatMessage = new ChatMessage();
-//            chatMessage.setType(ChatMessage.MessageType.LEAVE);
-//            chatMessage.setSender(username);
-//
-//            messagingTemplate.convertAndSend("/topic/public", chatMessage);
-//        }
-//    }
 }

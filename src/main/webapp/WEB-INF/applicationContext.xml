@@ -85,7 +85,7 @@
 	<bean id="jwtUtils" class="com.pkm.medicalinventory.config.security.JWTUtils" />
 	
 	<bean id="webAppConfig"
-		class="com.pkm.medicalinventory.service.config.WebConfigService">
+		class="com.pkm.medicalinventory.config.WebConfigService">
 		<!-- <property name="uploadedImageRealPath"
 			value="D:/Development/Files/Web/Shop1/Images"></property>
 		<property name="uploadedImagePath"
@@ -95,7 +95,7 @@
 		 
 	</bean>
 	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
-	<bean id="defaultUserService" class="com.pkm.medicalinventory.service.config.DefaultUserService" >
+	<bean id="userService" class="com.pkm.medicalinventory.auth.impl.UserServiceImpl" >
 		<property name="passwordEncoder" ref="passwordEncoder"></property>
 	</bean>
 	

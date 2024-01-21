@@ -8,16 +8,13 @@ import com.pkm.medicalinventory.annotation.Dto;
 import com.pkm.medicalinventory.dto.model.BaseModel;
 import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.exception.ApplicationException;
-import com.pkm.medicalinventory.service.entity.BaseEntityUpdateService;
-import com.pkm.medicalinventory.util.EntityUtil;
+import com.pkm.medicalinventory.management.EntityUpdateService;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.Builder.Default;
 
 @Data
 @Builder
@@ -29,19 +26,20 @@ public class EntityManagementConfig implements Serializable {
 	@JsonIgnore
 	private Class<? extends BaseEntity> entityClass;
 	@JsonIgnore
-	private BaseEntityUpdateService entityUpdateService;
+	private EntityUpdateService entityUpdateService;
 	@JsonIgnore
 	private String fieldName;
 	private boolean disabled;
 	private String iconClassName;
 	@JsonIgnore
 	@Default
-	private Class<? extends BaseModel> modelClass = BaseModel.class;
-	
-	
+	private Class<? extends BaseModel> modelClass = BaseModel.class;	
 
-	public EntityManagementConfig(String fieldName, Class<? extends BaseEntity> entityClass,
-			BaseEntityUpdateService service, EntityUpdateInterceptor updateInterceptor) {
+	public EntityManagementConfig(
+		String fieldName, Class<? extends BaseEntity> entityClass,
+		EntityUpdateService service,
+		EntityUpdateInterceptor updateInterceptor
+	) {
 		this.entityClass = entityClass;
 		this.entityUpdateService = service;
 		if (null == fieldName) {
@@ -52,7 +50,7 @@ public class EntityManagementConfig implements Serializable {
 		init();
 	}
 	
-	public EntityManagementConfig setIconClassName(String iconClassName) {
+	public EntityManagementConfig withIconClassName(String iconClassName) {
 		this.iconClassName = iconClassName;
 		return this;
 	}

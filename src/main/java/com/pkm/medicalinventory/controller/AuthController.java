@@ -41,9 +41,13 @@ public class AuthController extends BaseController {
 
 	@RequestMapping(value = { "/login" }, method = RequestMethod.GET)
 	@CustomRequestInfo(pageUrl = "pages/login", title = "Login", stylePaths = "login")
-	public String loginPage(@RequestParam(value = "error", required = false) String error,
-			@RequestParam(value = "logout", required = false) String logout, Model model, 
-			HttpServletRequest httpServletRequest, HttpServletResponse response) {
+	public String loginPage(
+		@RequestParam( value = "error", required = false) String error,
+		@RequestParam(value = "logout", required = false) String logout,
+		Model model, 
+		HttpServletRequest httpServletRequest,
+		HttpServletResponse response
+	) {
 		String errorMessge = null;
 		if (error != null) {
 			errorMessge = "Username or Password is incorrect !!";

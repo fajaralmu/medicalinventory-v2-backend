@@ -17,8 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import com.pkm.medicalinventory.service.config.EntityRegistration;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -54,7 +52,6 @@ public class HibernateSessionConfig {
 	}
 
 	private void addAnnotatedClass(org.hibernate.cfg.Configuration configuration) {
-
 		List<Type> entities = entityReg.getEntityClassess();
 		for (Type type : entities) {
 			log.info("@@@@ addAnnotatedClass: {}", type);

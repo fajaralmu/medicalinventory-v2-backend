@@ -58,10 +58,6 @@ public class User extends BaseEntity<UserModel> implements SingleImageModel {
 	public void addAuthority(Authority authority) {
 		authorities.add(authority);
 	}
-	 
-	@Transient
-	@JsonIgnore
-	private String requestId;
 
 	@Transient
 	@JsonIgnore

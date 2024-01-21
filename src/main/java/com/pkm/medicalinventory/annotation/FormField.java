@@ -22,11 +22,9 @@ public @interface FormField {
 	public String[] detailFields() default {}; 
 	public String[] multiply() default {};
 	
-	public boolean showDetail() default false;  
-	public boolean multipleImage() default false; 
+	public boolean showDetail() default false;   
 	public boolean required() default true;  
 	public boolean emptyAble() default true;
-	public boolean multipleSelect() default false;
 	public boolean iconImage() default false;
 	
 	public boolean hasPreview() default false;

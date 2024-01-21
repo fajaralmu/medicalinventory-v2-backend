@@ -5,7 +5,7 @@
 	<groupId>com.pkm</groupId>
 	<artifactId>medicalinventory</artifactId>
 	<packaging>war</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>medicalinventory Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -302,6 +302,7 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					
 				</configuration>
 			</plugin>
@@ -317,9 +318,9 @@
 					<target>${java.version}</target>
 					<scanIntervalSeconds>5</scanIntervalSeconds>
 					
-					<warSourceExcludes>**/fajar/medicalinventory/externalapp/**</warSourceExcludes>
-					
+					<warSourceExcludes>**/pkm/medicalinventory/externalapp/**</warSourceExcludes>
 					<packagingExcludes>**/medicalinventory/externalapp/**</packagingExcludes>
+					
 				</configuration>
 			</plugin>
 			<plugin>
@@ -359,7 +360,7 @@
 							<!-- command to build: mvn clean install -P dto -->
 							<!-- <packaging>war</packaging> -->
 							<includes>
-								<include>**/fajar/medicalinventory/dto/*</include>
+								<include>**/pkm/medicalinventory/dto/*</include>
 							</includes>
 						</configuration>
 					</plugin>

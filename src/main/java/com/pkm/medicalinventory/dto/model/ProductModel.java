@@ -48,8 +48,8 @@ public class ProductModel extends BaseModel<Product>{
 
 	// web stuff
 
-	@FormField(multipleImage = true, type = FieldType.FIELD_TYPE_IMAGE)
-	private String imageNames;
+//	@FormField(multipleImage = true, type = FieldType.FIELD_TYPE_IMAGE)
+//	private String imageNames;
 
 //	@JsonIgnore
 	private Integer count;

@@ -28,7 +28,9 @@ public class UserDetailDomain implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		 
-		return user.getAuthorities().stream().map(auth -> new SimpleGrantedAuthority(auth.getName().toString()))
+		return user.getAuthorities()
+				.stream()
+				.map(auth -> new SimpleGrantedAuthority(auth.getName().toString()))
 				.collect(Collectors.toList());
 	}
 

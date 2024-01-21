@@ -392,7 +392,7 @@ public class EntityUtil {
 		return false;
 	}
 	
-	public static <T> void copyProperties(T source, T target, boolean ignoreNull, String ...propertiesToCopy) throws  Exception {
+	public static <T> void copyProperties(T source, T target, boolean ignoreNull, String ...propertiesToCopy) {
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
 		System.out.println("propertiesToCopy: "+ String.join(",", propertiesToCopy));
@@ -400,10 +400,14 @@ public class EntityUtil {
 		for (String name : propertiesToCopy) {
 			
 			Field field = EntityUtil.getDeclaredField(_class, name);
-			Object sourceValue = field.get(source);
-			field.setAccessible(true);
-			if (ignoreNull && sourceValue != null) {
-				field.set(target, sourceValue);
+			try {
+				Object sourceValue = field.get(source);
+				field.setAccessible(true);
+				if (ignoreNull && sourceValue != null) {
+					field.set(target, sourceValue);
+				}
+			} catch (Exception e) {
+				log.error("Failed to set field", e);
 			}
 					
 		}

@@ -45,12 +45,12 @@ public class ApplicationProfileModel extends BaseModel<ApplicationProfile>  {
 	
 	@FormField
 	private String website;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultIcon.BMP")
-	private String iconUrl;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, iconImage = true, required = false, defaultValue = "DefaultIcon.BMP")
-	private String pageIcon;
-	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultBackground.BMP")
-	private String backgroundUrl;
+//	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultIcon.BMP")
+//	private String iconUrl;
+//	@FormField(type = FieldType.FIELD_TYPE_IMAGE, iconImage = true, required = false, defaultValue = "DefaultIcon.BMP")
+//	private String pageIcon;
+//	@FormField(type = FieldType.FIELD_TYPE_IMAGE, required = false, defaultValue = "DefaultBackground.BMP")
+//	private String backgroundUrl;
 	@FormField(type = FieldType.FIELD_TYPE_PLAIN_LIST, hasPreview = true, 
 //			previewLink = "fa-preview" , 
 			required = false, defaultValue = "home")

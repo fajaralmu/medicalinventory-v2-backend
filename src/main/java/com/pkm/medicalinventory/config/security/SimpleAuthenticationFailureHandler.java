@@ -1,7 +1,6 @@
 package com.pkm.medicalinventory.config.security;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,20 +20,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SimpleAuthenticationFailureHandler implements AuthenticationFailureHandler {
 	private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-	private JWTUtils jwtUtils;
 	private ObjectMapper objectMapper;
 	
-	public void setJwtUtils(JWTUtils jwtUtils) {
-		this.jwtUtils = jwtUtils;
-	}
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
 	@Override
-	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException exception) throws IOException, ServletException {
-
+	public void onAuthenticationFailure(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		AuthenticationException exception
+	) throws IOException, ServletException {
 		if (SimpleAuthenticationSuccessHandler.isJsonResponse(request)) {
 			try {
 				sendJsonResponse(request, response, exception);
@@ -55,19 +52,16 @@ public class SimpleAuthenticationFailureHandler implements AuthenticationFailure
 		
 	}
 	
-	private class SS {
-		
-	}
-	private void sendJsonResponse(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException exception) throws  Exception {
-		
+	private void sendJsonResponse(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		AuthenticationException exception
+	) throws Exception {
 		JWTAuthFilter.setCorsHeaders(response);
 		
 		log.info("Authentication Failed");
+		WebResponse data = new WebResponse("401", exception.getMessage());
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());
-		WebResponse data = WebResponse.builder().date(new Date())
-				.message(exception.getMessage()).build();
-
 		response.getOutputStream().println(objectMapper.writeValueAsString(data));
 		
 	}

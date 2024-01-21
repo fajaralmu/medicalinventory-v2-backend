@@ -28,14 +28,21 @@ public class MvcUtil {
 		return host;
 	}
 
-	public static Model constructCommonModel(HttpServletRequest request, EntityProperty entityProperty, Model model,
-			String title, String page) {
-		return constructCommonModel(request, entityProperty, model, title, page, null);
+	public static Model constructCommonModel(
+		EntityProperty entityProperty,
+		Model model,
+		String title,String page
+	) {
+		return constructCommonModel(entityProperty, model, title, page, null);
 	}
 
-	public static Model constructCommonModel(HttpServletRequest request, EntityProperty entityProperty, Model model,
-			String title, String page, String option) {
-
+	public static Model constructCommonModel(
+		EntityProperty entityProperty,
+		Model model,
+		String title,
+		String page,
+		String option
+	) {
 		boolean withOption = false;
 		String optionJson = "null";
 
