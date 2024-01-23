@@ -16,9 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pkm.medicalinventory.annotation.CustomRequestInfo;
 import com.pkm.medicalinventory.dto.WebRequest;
-import com.pkm.medicalinventory.exception.ApplicationException;
-import com.pkm.medicalinventory.report.WritableReport;
 import com.pkm.medicalinventory.report.ReportService;
+import com.pkm.medicalinventory.report.WritableReport;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,10 +29,6 @@ public class ReportController {
 
 	@Autowired
 	private ReportService reportService;
-
-	public ReportController() {
-		log.info("------------------RestReportController-----------------");
-	}
 
 	@PostMapping(
 		value = "/stockopname",
@@ -48,7 +43,7 @@ public class ReportController {
 	) throws Exception {
 		log.info("stockopname {} at {}={} ", req.getHealthcenter().getName(), req.getFilter().getMonth(), req.getFilter().getYear());
 		WritableReport report = reportService.printStockOpname(req);
-		writeReportFile(httpRs, report, "tex/xls");
+		writeReportFile(httpRs, report, "text/xls", "xlsx");
 	}
 	@PostMapping(
 		value = "/monthly",
@@ -62,7 +57,7 @@ public class ReportController {
 	) throws Exception {
 		log.info("monthly report");
 		WritableReport report = reportService.printMonthlyReport(req);
-		writeReportFile(httpRs, report, "tex/xls");
+		writeReportFile(httpRs, report, "text/xls", "xlsx");
 	}
 	@PostMapping(
 		value = "/recipe",
@@ -76,7 +71,7 @@ public class ReportController {
 	) throws Exception {
 		log.info("recipe report");
 		WritableReport report = reportService.printRecipeReport(req);
-		writeReportFile(httpRs, report, "text/xls");
+		writeReportFile(httpRs, report, "text/xls", "xlsx");
 	}
 	
 	@PostMapping(
@@ -89,9 +84,9 @@ public class ReportController {
 		@RequestBody WebRequest req,
 		HttpServletResponse httpRs
 	) throws Exception {
-		log.info("receiverequestsheet");
+		log.info("LPLPO");
 		WritableReport report = reportService.receiveRequestSheet(req);
-		writeReportFile(httpRs, report, "text/xls");
+		writeReportFile(httpRs, report, "text/xls", "xls");
 	}
 	@PostMapping(
 		value = "/transactionreceipt/{code}",
@@ -107,7 +102,7 @@ public class ReportController {
 		log.info("transactionreceipt with code: {}", code);
 		
 		WritableReport report = reportService.generateTransactionReceipt(code);
-		writeReportFile(httpRs, report, "text/pdf");
+		writeReportFile(httpRs, report, "text/pdf", "pdf");
 	}
 	
 	@PostMapping(
@@ -122,13 +117,13 @@ public class ReportController {
 		log.info("entityreport {}", request);
 		WritableReport result = reportService.generateEntityReport(request);
 
-		writeReportFile(httpResponse, result, "text/xls");
+		writeReportFile(httpResponse, result, "text/xls", "xlsx");
 	}
 	
-	private static void writeReportFile(HttpServletResponse httpResponse, WritableReport report, String conenType) throws Exception {
-//		httpResponse.setContentType("text/xls");
+	private static void writeReportFile(HttpServletResponse httpResponse, WritableReport report, String contentType, String ext) throws Exception {
+		httpResponse.setContentType(contentType);
 		httpResponse.setHeader("Access-Control-Expose-Headers", "Content-disposition,access-token");
-		httpResponse.setHeader("Content-disposition", "attachment;filename=" + report.getFileName());
+		httpResponse.setHeader("Content-disposition", "attachment;filename=" + report.getFileName()+"."+ext);
 
 		try (OutputStream outputStream = httpResponse.getOutputStream()) {
 			report.write(outputStream);
