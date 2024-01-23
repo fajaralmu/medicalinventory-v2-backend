@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,14 +37,13 @@ public class InventoryController {
  
  
 	@PostMapping(
-		value = "/availableproducts/{code}",
+		value = "/availableproducts",
 		consumes = MediaType.APPLICATION_JSON_VALUE,
 		produces = MediaType.APPLICATION_JSON_VALUE
 	) 
 	public WebResponse gettransactionbycode(
-		@PathVariable String code, @RequestBody
-		WebRequest webRequest,
-		HttpServletRequest httpRequest
+		@RequestParam("code") String code, @RequestBody
+		WebRequest webRequest
 	) {
 		log.info("availableproducts {} at {} ", code, webRequest.getHealthcenter().getName());
 		return inventoryService.getAvailableProductStocks(code, webRequest);
