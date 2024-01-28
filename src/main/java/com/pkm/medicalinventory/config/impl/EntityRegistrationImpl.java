@@ -29,9 +29,7 @@ public class EntityRegistrationImpl implements EntityRegistration {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	private List<JpaRepository<?, ?>> jpaRepositories = new ArrayList<>();
 	private List<Type> entityClassess = new ArrayList<>();
-	private Map<Class<? extends BaseEntity>, JpaRepository> repositoryMap = new HashMap<>();
 
 	public List<Type> getEntityClassess() {
 		return entityClassess;
@@ -45,7 +43,7 @@ public class EntityRegistrationImpl implements EntityRegistration {
 
 	private void getJpaReporitoriesBean() {
 		log.info("//////////////GET JPA REPOSITORIES BEANS///////////////");
-		jpaRepositories.clear();
+	 
 		entityClassess.clear();
 		String[] beanNames = applicationContext.getBeanNamesForType(JpaRepository.class);
 		if (null == beanNames)
@@ -67,9 +65,6 @@ public class EntityRegistrationImpl implements EntityRegistration {
 			Type type = getTypeArgument(interfaces[0], 0);
 
 			entityClassess.add(type);
-			jpaRepositories.add(beanObject);
-
-			repositoryMap.put((Class) type, beanObject);
 
 			log.info(i + "." + beanName + ". entity type: " + type);
 		}
@@ -132,15 +127,5 @@ public class EntityRegistrationImpl implements EntityRegistration {
 		} finally {
 			br.close();
 		}
-	}
-
-	public <T extends BaseEntity> JpaRepository getJpaRepository(Class<T> _entityClass) {
-		log.info("get JPA Repository for: {}", _entityClass);
-
-		JpaRepository result = this.repositoryMap.get(_entityClass);
-
-		log.info("found repo object: {}", result);
-
-		return result;
 	}
 }

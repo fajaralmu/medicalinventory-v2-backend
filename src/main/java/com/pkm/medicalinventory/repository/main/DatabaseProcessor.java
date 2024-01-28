@@ -1,4 +1,4 @@
-package com.pkm.medicalinventory.repository;
+package com.pkm.medicalinventory.repository.main;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -62,7 +62,7 @@ public class DatabaseProcessor {
 		return new CriteriaBuilder(hibernateSession, _class, filter);
 	}
 
-	public <T extends BaseEntity> List<T> filterAndSortv2(Class<T> _class, Filter filter) {
+	public <T extends BaseEntity> List<T> filter(Class<T> _class, Filter filter) {
 		log.info("filterAndSortv2 : {}", _class);
 		checkSession();
 		Transaction tx = hibernateSession.beginTransaction();
@@ -91,7 +91,7 @@ public class DatabaseProcessor {
 		return CollectionUtil.emptyList();
 	}
 
-	public <T extends BaseEntity> T validateJoinColumns(T rawEntity) throws Exception {
+	public <T extends BaseEntity> T mapRelation(T rawEntity) throws Exception {
 		List<Field> joinColumnFields = QueryUtil.getJoinColumnFields(rawEntity.getClass());
 
 		T entity = EntityUtil.cloneSerializable(rawEntity);
@@ -111,9 +111,7 @@ public class DatabaseProcessor {
 
 			field.set(entity, dbValue);
 		}
-
 		return entity;
-
 	}
 
 	private void refresh() {
@@ -130,7 +128,6 @@ public class DatabaseProcessor {
 		} catch (Exception e) {
 			log.error("ERROR refresh session: {}", e.getMessage());
 		}
-
 	}
 
 	/**
@@ -150,7 +147,7 @@ public class DatabaseProcessor {
 		return object;
 	}
 
-	public boolean deleteObjectById(Class<? extends BaseEntity> entityClass, Long id2) {
+	public boolean delete(Class<? extends BaseEntity> entityClass, Long id2) {
 		checkSession();
 		Transaction transaction = hibernateSession.beginTransaction();
 		try {
@@ -167,7 +164,6 @@ public class DatabaseProcessor {
 			}
 			throw e;
 		} finally {
-
 			refresh();
 		} 
 	}
@@ -186,17 +182,18 @@ public class DatabaseProcessor {
 		for (int i = 0; i < values.length; i++) {
 			predictates[i] = (Restrictions.naturalId().set(key, values[i]));
 		}
-
 		criteria.add(Restrictions.or(predictates));
+		
 		List list = criteria.list();
 
 		refresh();
+		
 		log.info("RESULT findByKeyAndValues:{}", list == null ? "NULL" : list.size());
+		
 		return list;
 	}
 
-	public <T extends BaseEntity> T saveObject(final T rawEntity) {
-
+	public <T extends BaseEntity> T save(final T rawEntity) {
 		if (null == rawEntity) {
 			log.error("rawEntity IS NULL");
 			return null;
@@ -205,7 +202,7 @@ public class DatabaseProcessor {
 		T result, entity;
 
 		try {
-			entity = validateJoinColumns(rawEntity);
+			entity = mapRelation(rawEntity);
 		} catch (Exception e) {
 			entity = rawEntity;
 			e.printStackTrace();
@@ -223,8 +220,10 @@ public class DatabaseProcessor {
 				log.debug("success add new record of {} with new ID: {}", entity.getClass(), newId);
 			} else {
 				log.debug("Will update entity :{}", entity.getId());
+				
 				entity.setModifiedDate(new Date()); 
-				result = (T) hibernateSession.merge(entity); 
+				result = (T) hibernateSession.merge(entity);
+				
 				log.debug("success update record of {}  ", entity.getClass());
 			}
 

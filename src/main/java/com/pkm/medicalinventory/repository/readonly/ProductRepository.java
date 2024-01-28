@@ -1,17 +1,16 @@
-package com.pkm.medicalinventory.repository;
+package com.pkm.medicalinventory.repository.readonly;
 
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-import com.pkm.medicalinventory.entity.Product;
-import com.pkm.medicalinventory.entity.Unit;
-
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import com.pkm.medicalinventory.entity.Product;
+import com.pkm.medicalinventory.entity.Unit;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -23,7 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	List<Product> findByUtilityTool(boolean isUtility);
 
 	List<Product> findByOrderByName(Pageable of);
-	 
+
 	@Query("select p from Product p order by p.utilityTool, p.name")
 	List<Product> findByOrderByUtilityTool();
 
@@ -41,13 +40,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	Product findTop1ByCode(String code);
 
-	
 	@Query("select count(p) from Product p")
 	BigInteger countAll();
+
 	@Query("select count(p) from Product p where lower(p.name) like %?1%")
 	BigInteger countWhereNameLowerCaseLike(String nameLowerCased);
 
 	@Query("select (p) from Product p where lower(p.name) like %?1% order by p.name")
-	List<Product> findByNameLowerCaseLikeOrderByName(String nameLowerCased, Pageable pageable); 
+	List<Product> findByNameLowerCaseLikeOrderByName(String nameLowerCased, Pageable pageable);
 
 }

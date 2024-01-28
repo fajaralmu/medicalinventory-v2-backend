@@ -11,8 +11,8 @@ import com.pkm.medicalinventory.constants.FontAwesomeIcon;
 import com.pkm.medicalinventory.dto.WebRequest;
 import com.pkm.medicalinventory.dto.model.ApplicationProfileModel;
 import com.pkm.medicalinventory.entity.ApplicationProfile;
-import com.pkm.medicalinventory.repository.AppProfileRepository;
-import com.pkm.medicalinventory.repository.EntityRepository;
+import com.pkm.medicalinventory.repository.main.AppProfileRepository;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

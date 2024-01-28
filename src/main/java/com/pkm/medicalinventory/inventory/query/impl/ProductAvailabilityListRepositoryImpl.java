@@ -22,7 +22,7 @@ import com.pkm.medicalinventory.entity.Product;
 import com.pkm.medicalinventory.inventory.query.CriteriaWrapper;
 import com.pkm.medicalinventory.inventory.query.InventoryRepository;
 import com.pkm.medicalinventory.inventory.query.ProductAvailabilityListRepository;
-import com.pkm.medicalinventory.repository.ProductRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductRepository;
 import com.pkm.medicalinventory.util.DateUtil;
 
 @Service

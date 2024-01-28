@@ -22,9 +22,9 @@ import com.pkm.medicalinventory.exception.ApplicationException;
 import com.pkm.medicalinventory.management.EntityUpdateService;
 import com.pkm.medicalinventory.management.MasterDataManagementPageService;
 import com.pkm.medicalinventory.management.MasterDataService;
-import com.pkm.medicalinventory.repository.CustomRepositoryImpl;
-import com.pkm.medicalinventory.repository.DatabaseProcessor;
-import com.pkm.medicalinventory.repository.EntityRepository;
+import com.pkm.medicalinventory.repository.main.CustomRepositoryImpl;
+import com.pkm.medicalinventory.repository.main.DatabaseProcessor;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
 import com.pkm.medicalinventory.util.EntityUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 	private MasterDataManagementPageService entityManagementPageService;
 
 	private EntityManagementConfig getEntityManagementConfig(String key) {
-		return entityRepository.getConfiguration(key);
+		return entityRepository.getConfig(key);
 	}
 
 	
@@ -121,7 +121,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 		DatabaseProcessor filterDatabaseProcessor = customRepository.createDatabaseProcessor();
 		try {
 
-			List<T> resultList = filterDatabaseProcessor.filterAndSortv2(entityClass, filter);
+			List<T> resultList = filterDatabaseProcessor.filter(entityClass, filter);
 			entities.addAll(resultList);
 			long resultCount = filterDatabaseProcessor.getRowCount(entityClass, filter);
 			count.put("value", resultCount);

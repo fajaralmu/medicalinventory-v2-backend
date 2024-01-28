@@ -17,10 +17,15 @@
 	<mvc:resources location="/resources/" mapping="/res/**"></mvc:resources>
 	<mvc:resources location="file:/D:/Development/Files/Web/"
 		mapping="/WebAsset/**"></mvc:resources>
-	  <jpa:repositories base-package="com.pkm.medicalinventory.repository" 
-		/>  
+	<jpa:repositories
+		entity-manager-factory-ref="entityManagerFactory_main"
+		base-package="com.pkm.medicalinventory.repository.main" />
+	<jpa:repositories
+		entity-manager-factory-ref="entityManagerFactory_replica"
+		base-package="com.pkm.medicalinventory.repository.readonly" />
 	<mvc:interceptors>
-		<bean id="handlerInterceptor" class="com.pkm.medicalinventory.config.requestfilter.MyHandlerInterceptor" />
+		<bean id="handlerInterceptor"
+			class="com.pkm.medicalinventory.config.requestfilter.MyHandlerInterceptor" />
 	</mvc:interceptors>
 	<context:component-scan
 		base-package="com.pkm.medicalinventory" />
@@ -31,50 +36,71 @@
 		<property name="suffix" value=".jsp" />
 	</bean>
 
-	 <bean id="transactionManager"
-		class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory"
-			ref="entityManagerFactory"></property>
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory_main"></property>
 	</bean>
 
-	<!-- if you use postgres, change all "Like" query statement with "ILIKE" for not activating math case  -->
-	  <bean id="dataSource_postgres"
+	<!-- if you use postgres, change all "Like" query statement with "ILIKE" 
+		for not activating math case -->
+	<bean id="dataSource_main"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName"
-			value="org.postgresql.Driver" />
-		<property name="url"
-			value="jdbc:postgresql://localhost:5432/medicalinventory" />
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="jdbc:postgresql://localhost:5432/medicalinventory" />
 		<property name="username" value="postgres" />
 		<property name="password" value="password09" />
 	</bean>
-<bean id="entityManagerFactory"
+	<bean id="dataSource_replica"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="jdbc:postgresql://localhost:5431/medicalinventory" />
+		<property name="username" value="postgres" />
+		<property name="password" value="password09" />
+	</bean>
+	<bean id="entityManagerFactory_main"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-		<property name="packagesToScan"
-			value="com.pkm.medicalinventory*" />
-		<property name="dataSource" ref="dataSource_postgres" /><!-- <property 
-			name="sessionFactory" ref="sessionFactory"></property> -->
+		<property name="packagesToScan" value="com.pkm.medicalinventory.entity*" />
+		<property name="dataSource" ref="dataSource_main" />
 		<property name="jpaProperties">
 			<props>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
-				 <prop key="hibernate.hbm2ddl.auto">update</prop>  
-<!-- 				 <prop key="hibernate.hbm2ddl.auto">update</prop>   -->
-				<!--  <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
-				 <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop> 
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+				<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
 				<prop key="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
 				</prop>
 			</props>
 		</property>
-		<property name="persistenceProvider"
-			ref="persistenceProvider">
+		<property name="persistenceProvider" ref="persistenceProvider">
+			<!-- <bean class="org.hibernate.jpa.HibernatePersistenceProvider"></bean> -->
+		</property>
+	</bean>
+	<bean id="entityManagerFactory_replica"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="packagesToScan"
+			value="com.pkm.medicalinventory.entity*" />
+		<property name="dataSource" ref="dataSource_replica" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+				<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
+				</prop>
+			</props>
+		</property>
+		<property name="persistenceProvider" ref="persistenceProvider">
 			<!-- <bean class="org.hibernate.jpa.HibernatePersistenceProvider"></bean> -->
 		</property>
 	</bean>
 
-	<bean id="persistenceProvider" 	class="org.hibernate.jpa.HibernatePersistenceProvider" />
-	<bean id="objectMapper" 		class="com.fasterxml.jackson.databind.ObjectMapper" />
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean id="persistenceProvider" class="org.hibernate.jpa.HibernatePersistenceProvider" />
+	<bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper" />
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
 				<value>classpath:config.properties</value>
@@ -82,23 +108,23 @@
 		</property>
 
 	</bean>
-	<bean id="jwtUtils" class="com.pkm.medicalinventory.config.security.JWTUtils" />
-	
+	<bean id="jwtUtils"
+		class="com.pkm.medicalinventory.config.security.JWTUtils" />
+
 	<bean id="webAppConfig"
 		class="com.pkm.medicalinventory.config.WebConfigService">
-		<!-- <property name="uploadedImageRealPath"
-			value="D:/Development/Files/Web/Shop1/Images"></property>
-		<property name="uploadedImagePath"
-			value="WebAsset/Shop1/Images"></property>
-		<property name="reportPath"
-			value="D:/Development/Files/Web/Shop1/Reports"></property> -->
-		 
+		<!-- <property name="uploadedImageRealPath" value="D:/Development/Files/Web/Shop1/Images"></property> 
+			<property name="uploadedImagePath" value="WebAsset/Shop1/Images"></property> 
+			<property name="reportPath" value="D:/Development/Files/Web/Shop1/Reports"></property> -->
+
 	</bean>
-	<bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
-	<bean id="userService" class="com.pkm.medicalinventory.auth.impl.UserServiceImpl" >
+	<bean id="passwordEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	<bean id="userService"
+		class="com.pkm.medicalinventory.auth.impl.UserServiceImpl">
 		<property name="passwordEncoder" ref="passwordEncoder"></property>
 	</bean>
-	
-	<import resource="security.xml"/>
- 
+
+	<import resource="security.xml" />
+
 </beans>

@@ -1,7 +1,7 @@
 package com.pkm.medicalinventory.config.security;
 
 import com.pkm.medicalinventory.entity.User;
-import com.pkm.medicalinventory.repository.UserRepository;
+import com.pkm.medicalinventory.repository.main.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

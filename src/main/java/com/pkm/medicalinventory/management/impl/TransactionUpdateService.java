@@ -5,19 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.pkm.medicalinventory.constants.TransactionType;
-import com.pkm.medicalinventory.dto.WebResponse;
 import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.entity.Transaction;
 import com.pkm.medicalinventory.entity.User;
-import com.pkm.medicalinventory.repository.ProductFlowRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
 import com.pkm.medicalinventory.util.EntityUtil;
 
 @Service

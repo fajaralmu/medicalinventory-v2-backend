@@ -15,7 +15,7 @@ import com.pkm.medicalinventory.entity.Product;
 import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.inventory.ProductUsageService;
 import com.pkm.medicalinventory.inventory.WarehouseService;
-import com.pkm.medicalinventory.repository.ProductFlowRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
 
 @Service
 public class ProductUsageServiceImpl implements ProductUsageService  {

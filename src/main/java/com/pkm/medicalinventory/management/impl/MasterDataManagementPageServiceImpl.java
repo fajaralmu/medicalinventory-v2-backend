@@ -23,7 +23,7 @@ import com.pkm.medicalinventory.entity.Unit;
 import com.pkm.medicalinventory.entity.setting.EntityManagementConfig;
 import com.pkm.medicalinventory.entity.setting.EntityProperty;
 import com.pkm.medicalinventory.management.MasterDataManagementPageService;
-import com.pkm.medicalinventory.repository.EntityRepository;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
 import com.pkm.medicalinventory.util.CollectionUtil;
 import com.pkm.medicalinventory.util.EntityPropertyBuilder;
 import com.pkm.medicalinventory.util.EntityUtil;

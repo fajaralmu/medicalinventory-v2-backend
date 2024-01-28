@@ -10,8 +10,8 @@ import com.pkm.medicalinventory.dto.WebRequest;
 import com.pkm.medicalinventory.dto.model.ConfigurationModel;
 import com.pkm.medicalinventory.entity.Configuration;
 import com.pkm.medicalinventory.inventory.InventoryConfigurationService;
-import com.pkm.medicalinventory.repository.ConfigurationRepository;
-import com.pkm.medicalinventory.repository.EntityRepository;
+import com.pkm.medicalinventory.repository.main.ConfigurationRepository;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
 
 @Service
 public class InventoryConfigServiceImpl implements InventoryConfigurationService {

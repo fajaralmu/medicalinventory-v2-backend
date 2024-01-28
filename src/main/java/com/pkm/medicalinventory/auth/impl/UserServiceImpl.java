@@ -15,9 +15,9 @@ import com.pkm.medicalinventory.dto.WebRequest;
 import com.pkm.medicalinventory.dto.model.UserModel;
 import com.pkm.medicalinventory.entity.Authority;
 import com.pkm.medicalinventory.entity.User;
-import com.pkm.medicalinventory.repository.AuthorityRepository;
-import com.pkm.medicalinventory.repository.EntityRepository;
-import com.pkm.medicalinventory.repository.UserRepository;
+import com.pkm.medicalinventory.repository.main.AuthorityRepository;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
+import com.pkm.medicalinventory.repository.main.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

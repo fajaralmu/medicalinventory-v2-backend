@@ -21,8 +21,8 @@ import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.exception.ApplicationException;
 import com.pkm.medicalinventory.exception.DataNotFoundException;
 import com.pkm.medicalinventory.inventory.StockControlService;
-import com.pkm.medicalinventory.repository.ProductFlowRepository;
-import com.pkm.medicalinventory.repository.TransactionRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
+import com.pkm.medicalinventory.repository.readonly.TransactionRepository;
 import com.pkm.medicalinventory.service.ProgressService;
 import com.pkm.medicalinventory.util.CollectionUtil;
 

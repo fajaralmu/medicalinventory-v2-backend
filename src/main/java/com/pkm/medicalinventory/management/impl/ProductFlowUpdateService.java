@@ -15,7 +15,7 @@ import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.exception.ApplicationException;
 import com.pkm.medicalinventory.exception.DataNotFoundException;
 import com.pkm.medicalinventory.inventory.InventoryService;
-import com.pkm.medicalinventory.repository.ProductFlowRepository; 
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

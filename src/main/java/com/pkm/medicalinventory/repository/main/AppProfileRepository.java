@@ -1,4 +1,4 @@
-package com.pkm.medicalinventory.repository;
+package com.pkm.medicalinventory.repository.main;
 
 import com.pkm.medicalinventory.entity.ApplicationProfile;
 

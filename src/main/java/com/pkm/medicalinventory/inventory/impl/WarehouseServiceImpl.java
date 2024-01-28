@@ -11,8 +11,8 @@ import com.pkm.medicalinventory.component.BindedValues;
 import com.pkm.medicalinventory.entity.HealthCenter;
 import com.pkm.medicalinventory.exception.DataNotFoundException;
 import com.pkm.medicalinventory.inventory.WarehouseService;
-import com.pkm.medicalinventory.repository.EntityRepository;
-import com.pkm.medicalinventory.repository.HealthCenterRepository;
+import com.pkm.medicalinventory.repository.main.EntityRepository;
+import com.pkm.medicalinventory.repository.main.HealthCenterRepository;
 
 @Service
 public class WarehouseServiceImpl implements WarehouseService {

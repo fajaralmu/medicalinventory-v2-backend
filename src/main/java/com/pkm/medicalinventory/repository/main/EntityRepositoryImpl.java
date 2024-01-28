@@ -1,5 +1,6 @@
-package com.pkm.medicalinventory.repository;
+package com.pkm.medicalinventory.repository.main;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.security.InvalidParameterException;
@@ -7,15 +8,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.JoinColumn;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.pkm.medicalinventory.annotation.CustomEntity;
@@ -26,16 +26,11 @@ import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.entity.setting.EntityManagementConfig;
 import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor;
 import com.pkm.medicalinventory.management.EntityUpdateService;
-import com.pkm.medicalinventory.util.CollectionUtil;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Slf4j 
+@Slf4j
 public class EntityRepositoryImpl implements EntityRepository {
 	@Autowired
 	private SessionFactory sessionFactory;
@@ -45,7 +40,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 	private CustomRepository customRepository;
 	@Autowired
 	private ApplicationContext applicationContext;
-	
+
 	private final Map<String, EntityManagementConfig> entityConfiguration = new HashMap<String, EntityManagementConfig>();
 
 	/**
@@ -55,9 +50,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 	 * @param updateService
 	 * @param updateInterceptor
 	 */
-	private <T extends BaseEntity> void putConfig(
-			Class<T> _class,
-			EntityUpdateService<T> updateService,
+	private <T extends BaseEntity> void putConfig(Class<T> _class, EntityUpdateService<T> updateService,
 			EntityUpdateInterceptor<?> updateInterceptor) {
 		String key = _class.getSimpleName().toLowerCase();
 		entityConfiguration.put(key, config(key, _class, updateService, updateInterceptor));
@@ -92,8 +85,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 				// String beanName =
 				// StringUtil.lowerCaseFirstChar(updateServiceClass.getSimpleName());
 
-				EntityUpdateService updateServiceBean = (EntityUpdateService) applicationContext
-						.getBean(beanName);
+				EntityUpdateService updateServiceBean = (EntityUpdateService) applicationContext.getBean(beanName);
 				EntityUpdateInterceptor updateInterceptor = ((BaseEntity) entityClass.newInstance())
 						.modelUpdateInterceptor();
 
@@ -120,64 +112,31 @@ public class EntityRepositoryImpl implements EntityRepository {
 		return entityConfiguration.get(entityCode);
 	}
 
-	/**
-	 * construct EntityManagementConfig object
-	 * 
-	 * @param object
-	 * @param class1
-	 * @param commonUpdateService2
-	 * @param updateInterceptor
-	 * @return
-	 */
-	private EntityManagementConfig config(String object, Class<? extends BaseEntity> class1, EntityUpdateService commonUpdateService2, EntityUpdateInterceptor updateInterceptor) {
-		return new EntityManagementConfig(object, class1, commonUpdateService2, updateInterceptor);
+	private EntityManagementConfig config(
+		String object, Class<? extends BaseEntity> class1,
+		EntityUpdateService service,
+		EntityUpdateInterceptor interceptor
+	) {
+		return new EntityManagementConfig(object, class1, service, interceptor);
 	}
 
-	/**
-	 * save entity
-	 * 
-	 * @param <T>
-	 * @param baseEntity
-	 * @return
-	 */
-	public <T extends BaseEntity, ID> T save(T baseEntity) {
-		log.info("execute method save");
-
-		boolean joinEntityExist = validateJoinColumn(baseEntity);
-
-		if (!joinEntityExist) {
-
-			throw new InvalidParameterException("JOIN COLUMN INVALID");
+	public <T extends BaseEntity> T save(T entity) {
+		boolean relationValid = validateRelation(entity);
+		if (!relationValid) {
+			throw new InvalidParameterException("Entity Relation INVALID");
 		}
 
-		try {
-			return savev2(baseEntity);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw ex;
-		} finally {
-			// databaseProcessorNotifier.refresh();
-		}
-	}
-
-	public <T extends BaseEntity> T savev2(T entity) {
 		log.info("customRepository: {}", customRepository);
 		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
-		T result = databatseProcessor.saveObject(entity);
-
-		return result;
-
+		return databatseProcessor.save(entity);
 	}
 
-	public <T extends BaseEntity> boolean validateJoinColumn(T baseEntity) {
+	private <T extends BaseEntity> boolean validateRelation(T baseEntity) {
 		List<Field> joinColumns = getJoinColumn(baseEntity.getClass());
-
-		if (joinColumns.size() == 0) {
+		if (joinColumns.size() == 0)
 			return true;
-		}
 
 		for (Field field : joinColumns) {
-
 			try {
 				field.setAccessible(true);
 				Object value = field.get(baseEntity);
@@ -188,10 +147,9 @@ public class EntityRepositoryImpl implements EntityRepository {
 				BaseEntity entity = (BaseEntity) value;
 				BaseEntity result = findById(entity.getClass(), entity.getId());
 
-				if (result == null) {
+				if (result == null)
 					return false;
-				}
-
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				return false;
@@ -202,7 +160,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 		return true;
 	}
 
-	public List<Field> getJoinColumn(Class<? extends BaseEntity> clazz) {
+	private List<Field> getJoinColumn(Class<? extends BaseEntity> clazz) {
 		List<Field> joinColumns = new ArrayList<>();
 		Field[] fields = clazz.getFields();
 
@@ -214,51 +172,39 @@ public class EntityRepositoryImpl implements EntityRepository {
 
 		return joinColumns;
 	}
-
-	/**
-	 * find suitable repository (declared in this class) for given entity object
-	 * 
-	 * @param entityClass
-	 * @return
-	 */
-	public <T extends BaseEntity> JpaRepository findRepo(Class<T> entityClass) {
-		JpaRepository repository = entityReg.getJpaRepository(entityClass);
-		return repository;
-	}
-
-	/**
-	 * find by id
-	 * 
-	 * @param clazz
-	 * @param ID
-	 * @return
-	 */
-	public <ID, T extends BaseEntity> T findById(Class<T> clazz, ID ID) {
-		log.info("find {} By Id: {}", clazz.getSimpleName(), ID);
-		JpaRepository<T, ID> repository = findRepo(clazz);
-
-		log.info("found repo : {} for {}", repository.getClass(), clazz);
-
-		Optional<T> result = repository.findById(ID);
-		if (result.isPresent()) {
-			return result.get();
-		}
-		log.debug("{} is NULL", clazz.getSimpleName());
-		return null;
-	}
 	
-	/**
-	 * find all entity
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public <T extends BaseEntity> List<T> findAll(Class<T> clazz) {
-		JpaRepository repository = findRepo(clazz);
-		if (repository == null) {
-			return CollectionUtil.emptyList();
+	public <ID extends Serializable, T extends BaseEntity> T findById(Class<T> clazz, ID id) {
+		log.info("find {} By Id: {}", clazz.getSimpleName(), id);
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			Object record = session.get(clazz, id);
+			if (record != null && record.getClass().isInstance(clazz)) {
+				return (T) record;
+			}
+			log.debug("{} is NULL", clazz.getSimpleName());
+			return null;
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (session != null)
+				session.close();
 		}
-		return repository.findAll();
+
+	}
+	public <T extends BaseEntity> List<T> findAll(Class<T> clazz) {
+		log.info("find all {}", clazz.getSimpleName());
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			return session.createCriteria(clazz).list();
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			if (session != null)
+				session.close();
+		}
+		
 	}
 
 	/**
@@ -271,17 +217,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 	public <T extends BaseEntity> boolean deleteById(Long id, Class<T> class1) {
 		log.info("Will delete entity: {}, id: {}", class1.getClass(), id);
 		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
-		return databatseProcessor.deleteObjectById(class1, id);
+		return databatseProcessor.delete(class1, id);
 
 	}
-
-	public EntityManagementConfig getConfiguration(String key) {
-		return this.entityConfiguration.get(key);
-	}
-
-	public List findByKey(Class entityClass, Field idField, Object... objectArray) {
-		DatabaseProcessor databatseProcessor = customRepository.createDatabaseProcessor();
-		return databatseProcessor.findByKeyAndValues(entityClass, idField.getName(), objectArray);
-	}
-
+//	private <T extends BaseEntity> JpaRepository findRepo(Class<T> entityClass) {
+//		JpaRepository repository = entityReg.getJpaRepository(entityClass);
+//		return repository;
+//	}
 }

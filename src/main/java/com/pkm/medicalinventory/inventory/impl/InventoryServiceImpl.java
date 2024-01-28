@@ -32,9 +32,9 @@ import com.pkm.medicalinventory.inventory.WarehouseService;
 import com.pkm.medicalinventory.inventory.query.ProductAvailabilityRepository;
 import com.pkm.medicalinventory.inventory.query.ProductStockRepository;
 import com.pkm.medicalinventory.management.impl.CommonFilterResult;
-import com.pkm.medicalinventory.repository.HealthCenterRepository;
-import com.pkm.medicalinventory.repository.ProductFlowRepository;
-import com.pkm.medicalinventory.repository.ProductRepository;
+import com.pkm.medicalinventory.repository.main.HealthCenterRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductRepository;
 import com.pkm.medicalinventory.service.ProgressService;
 
 import lombok.extern.slf4j.Slf4j;

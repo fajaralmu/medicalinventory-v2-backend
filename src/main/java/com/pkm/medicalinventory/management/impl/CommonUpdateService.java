@@ -1,11 +1,9 @@
 package com.pkm.medicalinventory.management.impl;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.stereotype.Service;
 
 import com.pkm.medicalinventory.entity.BaseEntity;
-import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor; 
+import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
 

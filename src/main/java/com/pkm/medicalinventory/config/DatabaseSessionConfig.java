@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -21,26 +23,38 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j
-public class HibernateSessionConfig {
-	private static SessionFactory factory;
+public class DatabaseSessionConfig { 
 
 	@Autowired
-	private DriverManagerDataSource driverManagerDataSource;
+	@Qualifier("dataSource_main")
+	private DriverManagerDataSource dataSource;
 	@Autowired
-	private EntityManagerFactory entityManagerFactoryBean;
+	@Qualifier("entityManagerFactory_main")
+	private EntityManagerFactory factory;
+	
+	@Autowired
+	@Qualifier("dataSource_replica")
+	private DriverManagerDataSource dataSource_replica;
+	@Autowired
+	@Qualifier("entityManagerFactory_replica")
+	private EntityManagerFactory factory_replica;
+	
 	@Autowired
 	private EntityRegistration entityReg;
 
-	@Bean
-	public SessionFactory generateSession() {
+	@Bean(name = "sessionFactory_main")
+	public SessionFactory getSessionFactory() {
 		try {
 			org.hibernate.cfg.Configuration configuration = new org.hibernate.cfg.Configuration();
 
-			configuration.setProperties(additionalProperties());
+			configuration.setProperties(additionalProperties(factory, dataSource));
 
 			addAnnotatedClass(configuration);
 
-			factory = configuration./* setInterceptor(new HibernateInterceptor()). */buildSessionFactory();
+			SessionFactory factory = configuration.
+					/* setInterceptor(new HibernateInterceptor()). */
+					buildSessionFactory();
+			
 			log.info("Session Factory has been initialized");
 			return factory;
 		} catch (Exception ex) {
@@ -50,6 +64,28 @@ public class HibernateSessionConfig {
 		}
 
 	}
+//	@Bean(name = "sessionFactory_replica")
+//	public SessionFactory getSessionFactory_replica() {
+//		try {
+//			org.hibernate.cfg.Configuration configuration = new org.hibernate.cfg.Configuration();
+//			
+//			configuration.setProperties(additionalProperties(entityManagerFactoryBean_replica, driverManagerDataSource_replica));
+//			
+//			addAnnotatedClass(configuration);
+//			
+//			SessionFactory factory = configuration.
+//					/* setInterceptor(new HibernateInterceptor()). */
+//					buildSessionFactory();
+//			
+//			log.info("Session Factory has been initialized");
+//			return factory;
+//		} catch (Exception ex) {
+//			
+//			System.err.println("Failed to create sessionFactory object." + ex);
+//			throw new ExceptionInInitializerError(ex);
+//		}
+//		
+//	}
 
 	private void addAnnotatedClass(org.hibernate.cfg.Configuration configuration) {
 		List<Type> entities = entityReg.getEntityClassess();
@@ -60,15 +96,15 @@ public class HibernateSessionConfig {
 
 	}
 
-	private Properties additionalProperties() {
+	private static Properties additionalProperties(EntityManagerFactory fac, DriverManagerDataSource source) {
 
-		String dialect = entityManagerFactoryBean.getProperties().get("hibernate.dialect").toString();
-		String showSql = entityManagerFactoryBean.getProperties().get("hibernate.show_sql").toString();
-		String ddlAuto = entityManagerFactoryBean.getProperties().get("hibernate.hbm2ddl.auto").toString();
-		String use_jdbc_metadata_defaults = entityManagerFactoryBean.getProperties().get("hibernate.temp.use_jdbc_metadata_defaults").toString();
+		String dialect = fac.getProperties().get("hibernate.dialect").toString();
+		String showSql = fac.getProperties().get("hibernate.show_sql").toString();
+		String ddlAuto = fac.getProperties().get("hibernate.hbm2ddl.auto").toString();
+		String use_jdbc_metadata_defaults = fac.getProperties().get("hibernate.temp.use_jdbc_metadata_defaults").toString();
 		Class<? extends Driver> driverClass = org.postgresql.Driver.class;// com.mysql.jdbc.Driver.class;
 		try {
-			String connectionUrl =(driverManagerDataSource.getConnection().getMetaData().getURL());
+			String connectionUrl =(source.getConnection().getMetaData().getURL());
 			log.info("CONNECTION URL: {}", connectionUrl);
 			driverClass = DriverManager.getDriver(connectionUrl).getClass();
 			log.info("DRIVER CLASSNAME: {}", driverClass);
@@ -82,9 +118,9 @@ public class HibernateSessionConfig {
 		
 		Properties properties = new Properties();
 		properties.setProperty("hibernate.dialect", dialect);
-		properties.setProperty("hibernate.connection.url", driverManagerDataSource.getUrl());
-		properties.setProperty("hibernate.connection.username", driverManagerDataSource.getUsername());
-		properties.setProperty("hibernate.connection.password", driverManagerDataSource.getPassword());
+		properties.setProperty("hibernate.connection.url", source.getUrl());
+		properties.setProperty("hibernate.connection.username", source.getUsername());
+		properties.setProperty("hibernate.connection.password", source.getPassword());
 
 		properties.setProperty("hibernate.connection.driver_class", driverClass.getCanonicalName());
 		properties.setProperty("hibernate.current_session_context_class", "thread");

@@ -23,10 +23,10 @@ import com.pkm.medicalinventory.exception.DataNotFoundException;
 import com.pkm.medicalinventory.inventory.InventoryService;
 import com.pkm.medicalinventory.inventory.TransactionService;
 import com.pkm.medicalinventory.inventory.WarehouseService;
-import com.pkm.medicalinventory.repository.DatabaseProcessor;
-import com.pkm.medicalinventory.repository.HealthCenterRepository;
-import com.pkm.medicalinventory.repository.ProductFlowRepository;
-import com.pkm.medicalinventory.repository.TransactionRepository;
+import com.pkm.medicalinventory.repository.main.DatabaseProcessor;
+import com.pkm.medicalinventory.repository.main.HealthCenterRepository;
+import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
+import com.pkm.medicalinventory.repository.readonly.TransactionRepository;
 import com.pkm.medicalinventory.service.ProgressService;
 
 import lombok.extern.slf4j.Slf4j; 
