@@ -1,12 +1,15 @@
 package com.pkm.medicalinventory.report.impl;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ThreadUtils;
+import org.hibernate.internal.util.ValueHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,7 @@ import com.pkm.medicalinventory.entity.HealthCenter;
 import com.pkm.medicalinventory.entity.Product;
 import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.entity.Transaction;
+import com.pkm.medicalinventory.exception.ApplicationException;
 import com.pkm.medicalinventory.exception.DataNotFoundException;
 import com.pkm.medicalinventory.inventory.InventoryService;
 import com.pkm.medicalinventory.inventory.ProductUsageService;
@@ -49,6 +53,7 @@ import com.pkm.medicalinventory.repository.readonly.TransactionRepository;
 import com.pkm.medicalinventory.service.ProgressNotifier;
 import com.pkm.medicalinventory.service.ProgressService;
 import com.pkm.medicalinventory.util.DateUtil;
+import com.pkm.medicalinventory.util.HttpRequestUtil;
 import com.pkm.medicalinventory.util.MapUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -253,6 +258,7 @@ public class ReportGeneratorImpl implements ReportGenerator{
 	}
 	
 	public WritableReport getStockOpnameReport(String fileName,WebRequest webRequest) {
+		List<ProductStock> stockModels = new LinkedList<>();
 
 		HealthCenter location = webRequest.getHealthcenter().toEntity();
 		Date selectedDate = DateUtil.clock24Midnight(DateUtil.getDate(webRequest.getFilter()));
@@ -262,50 +268,84 @@ public class ReportGeneratorImpl implements ReportGenerator{
 
 		log.info("Loading products");
 		List<Product> products = (List<Product>) productRepository.findAll();
-		List<ProductStock> stockModels = new LinkedList<>();
-		
-		log.info("loading product prices at selected date");
-		List<Object[]> mappedPricesAndIDs = productRepository.getMappedPriceAndProductIdsAt(selectedDate);
-		
-		log.info("loading product prices at lastDayOfYear={}", lastDayOfPrevYear);
-		List<Object[]> mappedPricesAndIDsAtBeginningYear = productRepository.getMappedPriceAndProductIdsAt(lastDayOfPrevYear);
-		Map<Long, Double> mappedPrice = parseProductPriceMap(mappedPricesAndIDs);
-		Map<Long, Double> mappedPriceAtBeginningYear = parseProductPriceMap(mappedPricesAndIDsAtBeginningYear);
-
 		log.info("products: {}", products.size());
-		//log.info("mappedPricesAndIDs: {} ", mappedPrice);
-		progressService.sendProgress(10);
 
-		log.info("loading product stock at selected date");
-		int taskProp = 16;
-		Map<Long, Integer> productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
-		progressService.sendProgress(taskProp);
+		final Map<Long, Double> mappedPrice = new HashMap<>();
+		final Map<Long, Double> mappedPriceAtBeginningYear = new HashMap<>();
+		final StockOpnameInternal model = new StockOpnameInternal();
+		final String reqId = HttpRequestUtil.getPageRequestId();
 		
-		log.info("loading product stock at lastDayOfPrevYear={}", lastDayOfPrevYear);
-		Map<Long, Integer> remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location, lastDayOfPrevYear);
-		progressService.sendProgress(taskProp);
+		Thread mappedPriceTask = new Thread(() -> {
+			Date begin = new Date();
+			log.info("loading product prices at selected date");
+
+			List<Object[]> mapPriceAndId = productRepository.getMappedPriceAndProductIdsAt(selectedDate);
+			parseProductPriceMap(mappedPrice, mapPriceAndId);
+
+			long dur = new Date().getTime() - begin.getTime();
+			log.info("loading product prices finished. Duration: {} ms", dur);
+			
+			progressService.sendProgress(5d, reqId);
+		});
+		mappedPriceTask.start();
 		
-		log.info("loading incoming product from {} to {} ", lastDayOfPrevYear, selectedDate);
-		Map<Long, List<ProductFlow>> incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
-		progressService.sendProgress(taskProp);
+		Thread mappedPriceEarlyYearTask = new Thread(() -> {
+			Date begin = new Date();
+			log.info("loading product prices at lastDayOfYear={}", lastDayOfPrevYear);
+
+			List<Object[]> mappedPricesAndIDsAtBeginningYear = productRepository.getMappedPriceAndProductIdsAt(lastDayOfPrevYear);
+			parseProductPriceMap(mappedPriceAtBeginningYear, mappedPricesAndIDsAtBeginningYear);
+
+			long dur = new Date().getTime() - begin.getTime();
+			log.info("loading product prices at lastDayOfYear finished. Duration: {} ms", dur);
+
+			progressService.sendProgress(5d, reqId);
+		});
+		mappedPriceEarlyYearTask.start();
 		
-		log.info("loading used product from {} to {} ", lastDayOfPrevYear, selectedDate);
-		Map<Long, List<ProductFlow>> usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
-		progressService.sendProgress(taskProp);
+		final double taskProp = 16;
+
+		//log.info("mappedPricesAndIDs: {} ", mappedPrice);
+		Thread stockTask = new Thread(() -> {
+			log.info("loading product stock at selected date");
+			model.productStocks = inventoryService.getProductsStockAtDate(products, location, selectedDate);
+			progressService.sendProgress(taskProp, reqId);
+			
+			log.info("loading product stock at lastDayOfPrevYear={}", lastDayOfPrevYear);
+			model.remainingStocksAtYear = inventoryService.getProductsStockAtDate(products, location, lastDayOfPrevYear);
+			progressService.sendProgress(taskProp, reqId);
+			
+			log.info("loading incoming product from {} to {} ", lastDayOfPrevYear, selectedDate);
+			model.incomingStocksBetweenDate = productUsageService.getIncomingProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
+			progressService.sendProgress(taskProp, reqId);
+			
+			log.info("loading used product from {} to {} ", lastDayOfPrevYear, selectedDate);
+			model.usedCountBetweenDate = productUsageService.getUsedProductsBetweenDatev2(products, location, lastDayOfPrevYear, selectedDate);
+			progressService.sendProgress(taskProp, reqId);
+		});
+		stockTask.start();
+
+		try {
+			mappedPriceTask.join();
+			mappedPriceEarlyYearTask.join();
+			stockTask.join();
+		} catch (Exception ex) {
+			throw new ApplicationException(ex);
+		}
 
 		for (Product product : products) {
 			Long productId = product.getId();
 			Double price = mappedPrice.get(productId);
 
-			int productStockInTheBeginningOfYear = remainingStocksAtYear.get(productId);
+			int productStockInTheBeginningOfYear = model.remainingStocksAtYear.get(productId);
 			
-			int incomingCount = ProductFlow.sumQtyCount(incomingStocksBetweenDate.get(productId));
-			double incomingPrice = ProductFlow.sumQtyAndPrice(incomingStocksBetweenDate.get(productId));
+			int incomingCount = ProductFlow.sumQtyCount( model.incomingStocksBetweenDate.get(productId));
+			double incomingPrice = ProductFlow.sumQtyAndPrice( model.incomingStocksBetweenDate.get(productId));
 			
-			int usedCount = ProductFlow.sumQtyCount(usedCountBetweenDate.get(productId));
-			double usedPrice = ProductFlow.sumQtyAndPrice(usedCountBetweenDate.get(productId));
+			int usedCount = ProductFlow.sumQtyCount( model.usedCountBetweenDate.get(productId));
+			double usedPrice = ProductFlow.sumQtyAndPrice( model.usedCountBetweenDate.get(productId));
 			
-			int productStockAtSelectedDate = productStocks.get(productId);
+			int productStockAtSelectedDate =  model.productStocks.get(productId);
 			
 			log.info("Stock info for: {}. early year stock: {}. incomingCount: {}. used stock: {}, remaining: {} | {}",
 				product.getName(),
@@ -354,9 +394,7 @@ public class ReportGeneratorImpl implements ReportGenerator{
 		}
 	}
 
-	private Map<Long, Double> parseProductPriceMap(List<Object[]> list) {
-
-		Map<Long, Double> map = new HashMap<>();
+	private Map<Long, Double> parseProductPriceMap(final Map<Long, Double> map, List<Object[]> list) {
 		for (Object[] object : list) {
 			if (object[0] == null)
 				continue;
@@ -367,4 +405,10 @@ public class ReportGeneratorImpl implements ReportGenerator{
 		return map;
 	}
 
+	static class StockOpnameInternal {
+		public Map<Long, Integer> productStocks = new HashMap<>();
+		public Map<Long, Integer> remainingStocksAtYear = new HashMap<>();
+		public Map<Long, List<ProductFlow>> incomingStocksBetweenDate = new HashMap<>();
+		public Map<Long, List<ProductFlow>> usedCountBetweenDate = new HashMap<>();
+	}
 }

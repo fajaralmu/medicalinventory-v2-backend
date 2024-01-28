@@ -23,7 +23,7 @@ public class ProgressServiceImpl implements ProgressService {
 		
 		log.info(">>>>>>>>Init Progress: {}", requestId);
 		progressData.put(requestId, 0d);
-		sendProgress(0, requestId);
+		sendProgressInternal(0, requestId);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public class ProgressServiceImpl implements ProgressService {
 			updateProgress(requestId, 0, newRequest);
 		} else {
 			progressData.put(requestId, overallProgress);
-			sendProgress(overallProgress, requestId);
+			sendProgressInternal(overallProgress, requestId);
 
 		}
 	}
@@ -102,14 +102,14 @@ public class ProgressServiceImpl implements ProgressService {
 
 	public void sendComplete(String requestId) {
 		log.info("________COMPLETE PROGRESS FOR {}________", requestId);
-		sendProgress(98, requestId);
-		sendProgress(99, requestId);
-		sendProgress(100, requestId);
+		sendProgressInternal(98, requestId);
+		sendProgressInternal(99, requestId);
+		sendProgressInternal(100, requestId);
 		progressData.remove(requestId);
 
 	}
 
-	private void sendProgress(double progress, String requestId) {
+	private void sendProgressInternal(double progress, String requestId) {
 //		log.info("Send Progress: {} to {}", progress, requestId);
 //		ThreadUtil.run(() -> {
 		serverEvtService.sendProgress(progress, requestId);
@@ -137,9 +137,18 @@ public class ProgressServiceImpl implements ProgressService {
 	public void sendProgress(double percent) {
 		sendProgress(1, 1, percent);
 	}
+	
+	public void sendProgress(double percent, String reqId) {
+		sendProgress(1, 1, percent, false, reqId);
+	}
 
 	static String getRequestId() {
-		return HttpRequestUtil.getPageRequestId();
+		try {
+			return HttpRequestUtil.getPageRequestId();
+		} catch (Exception ex){
+			log.info("failed to get req id: {}", ex.getMessage());
+			return "";
+		}
 	}
 
 	public static void main(String[] ccc) {
