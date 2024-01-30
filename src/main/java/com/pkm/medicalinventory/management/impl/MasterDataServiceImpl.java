@@ -19,7 +19,7 @@ import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.entity.setting.EntityManagementConfig;
 import com.pkm.medicalinventory.entity.setting.EntityProperty;
 import com.pkm.medicalinventory.exception.ApplicationException;
-import com.pkm.medicalinventory.management.EntityUpdateService;
+import com.pkm.medicalinventory.management.IManagementService;
 import com.pkm.medicalinventory.management.MasterDataManagementPageService;
 import com.pkm.medicalinventory.management.MasterDataService;
 import com.pkm.medicalinventory.repository.main.CustomRepositoryImpl;
@@ -42,12 +42,11 @@ public class MasterDataServiceImpl implements MasterDataService {
 	private EntityManagementConfig getEntityManagementConfig(String key) {
 		return entityRepository.getConfig(key);
 	}
-
 	
 	public BaseModel saveEntity(WebRequest request, boolean newRecord) {
 		final String key = request.getEntity().toLowerCase();
 		EntityManagementConfig entityConfig = getEntityManagementConfig(key);
-		EntityUpdateService updateService = entityConfig.getEntityUpdateService();
+		IManagementService updateService = entityConfig.getEntityUpdateService();
 		String fieldName = entityConfig.getFieldName();
 		BaseModel entityValue = null;
 
@@ -99,10 +98,12 @@ public class MasterDataServiceImpl implements MasterDataService {
 			if (null == entityConfig) {
 				throw new Exception("Invalid entity:" + entityName);
 			}
-			EntityUpdateService updateService = entityConfig.getEntityUpdateService();
+			IManagementService updateService = entityConfig.getEntityUpdateService();
 			entityClass = entityConfig.getEntityClass();
 			CommonFilterResult entityResult = filterEntities(filter, entityClass);
+			log.info("Sart post filter: {}", entityName);
 			updateService.postFilter(entityResult.getEntities());
+			log.info("Post filter finished: {}", entityName);
 			return new WebResponse()
 					.withEntityClass(entityClass)
 					.withEntities(BaseModel.toModels(entityResult.getEntities()))
@@ -120,7 +121,6 @@ public class MasterDataServiceImpl implements MasterDataService {
 		final Map<String, Long> count = new HashMap<>();
 		DatabaseProcessor filterDatabaseProcessor = customRepository.createDatabaseProcessor();
 		try {
-
 			List<T> resultList = filterDatabaseProcessor.filter(entityClass, filter);
 			entities.addAll(resultList);
 			long resultCount = filterDatabaseProcessor.getRowCount(entityClass, filter);
@@ -152,7 +152,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 			Long id = Long.parseLong(filter.get("id").toString());
 			String entityName = request.getEntity().toLowerCase();
 			EntityManagementConfig entityConfig = getEntityManagementConfig(entityName);
-			EntityUpdateService updateService = entityConfig.getEntityUpdateService();
+			IManagementService updateService = entityConfig.getEntityUpdateService();
 			return updateService.deleteEntity(id, entityConfig.getEntityClass()).toModel();
 		} catch (Exception e) {
 			throw new ApplicationException(e);

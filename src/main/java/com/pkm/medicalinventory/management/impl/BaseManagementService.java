@@ -9,9 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class CommonUpdateService extends BaseEntityUpdateService<BaseEntity> {
+public class BaseManagementService extends ManagementService<BaseEntity> {
 
-	
 	@Override
 	public BaseEntity saveEntity(BaseEntity entity, boolean newRecord) {
 		log.info("saving entity: {}", entity.getClass());

@@ -13,7 +13,7 @@ public @interface Dto {
 
 	FormInputColumn formInputColumn() default FormInputColumn.TWO_COLUMN;
 	
-	String updateService() default "commonUpdateService";
+	String managementService() default "baseManagementService";
 	String value() default "";
 	
 	boolean ignoreBaseField() default true;

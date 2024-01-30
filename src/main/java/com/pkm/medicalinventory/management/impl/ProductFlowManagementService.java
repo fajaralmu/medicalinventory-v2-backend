@@ -2,15 +2,12 @@ package com.pkm.medicalinventory.management.impl;
 
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.pkm.medicalinventory.dto.WebResponse;
 import com.pkm.medicalinventory.entity.ProductFlow;
 import com.pkm.medicalinventory.exception.ApplicationException;
 import com.pkm.medicalinventory.exception.DataNotFoundException;
@@ -21,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class ProductFlowUpdateService extends BaseEntityUpdateService<ProductFlow> {
+public class ProductFlowManagementService extends ManagementService<ProductFlow> {
 
 	@Autowired
 	private ProductFlowRepository productFlowRepository;

@@ -29,7 +29,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author fajar
  */
 @JsonInclude(value = Include.NON_NULL)
-@Dto(deletable = false, editable = true, creatable = false, updateService = "transactionUpdateService", value = "Transaksi")
+@Dto(
+	deletable = false,
+	editable = true,
+	creatable = false,
+	managementService = "transactionManagementService",
+	value = "Transaksi"
+)
 @Data
 @Slf4j
 public class TransactionModel extends BaseModel<Transaction> {

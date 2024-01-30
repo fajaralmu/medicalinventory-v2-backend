@@ -8,7 +8,7 @@ import com.pkm.medicalinventory.annotation.Dto;
 import com.pkm.medicalinventory.dto.model.BaseModel;
 import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.exception.ApplicationException;
-import com.pkm.medicalinventory.management.EntityUpdateService;
+import com.pkm.medicalinventory.management.IManagementService;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ public class EntityManagementConfig implements Serializable {
 	@JsonIgnore
 	private Class<? extends BaseEntity> entityClass;
 	@JsonIgnore
-	private EntityUpdateService entityUpdateService;
+	private IManagementService entityUpdateService;
 	@JsonIgnore
 	private String fieldName;
 	private boolean disabled;
@@ -37,7 +37,7 @@ public class EntityManagementConfig implements Serializable {
 
 	public EntityManagementConfig(
 		String fieldName, Class<? extends BaseEntity> entityClass,
-		EntityUpdateService service,
+		IManagementService service,
 		EntityUpdateInterceptor updateInterceptor
 	) {
 		this.entityClass = entityClass;

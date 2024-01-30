@@ -1,7 +1,5 @@
 package com.pkm.medicalinventory.entity;
 
-import static com.pkm.medicalinventory.constants.FieldType.FIELD_TYPE_TEXTAREA;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,8 +10,6 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pkm.medicalinventory.annotation.CustomEntity;
 import com.pkm.medicalinventory.annotation.Dto;
-import com.pkm.medicalinventory.annotation.FormField;
-import com.pkm.medicalinventory.constants.FieldType;
 import com.pkm.medicalinventory.constants.FontAwesomeIcon;
 import com.pkm.medicalinventory.dto.model.ApplicationProfileModel;
 import com.pkm.medicalinventory.entity.setting.SingleImageModel;
@@ -23,7 +19,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Dto(ignoreBaseField = false, updateService = "shopProfileUpdateService")
+@Dto(ignoreBaseField = false, managementService = "appProfileManagementService")
 @CustomEntity
 @Entity
 @Table(name = "shop_profile")

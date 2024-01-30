@@ -25,7 +25,7 @@ import com.pkm.medicalinventory.dto.model.BaseModel;
 import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.entity.setting.EntityManagementConfig;
 import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor;
-import com.pkm.medicalinventory.management.EntityUpdateService;
+import com.pkm.medicalinventory.management.IManagementService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +50,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 	 * @param updateService
 	 * @param updateInterceptor
 	 */
-	private <T extends BaseEntity> void putConfig(Class<T> _class, EntityUpdateService<T> updateService,
+	private <T extends BaseEntity> void putConfig(Class<T> _class, IManagementService<T> updateService,
 			EntityUpdateInterceptor<?> updateInterceptor) {
 		String key = _class.getSimpleName().toLowerCase();
 		entityConfiguration.put(key, config(key, _class, updateService, updateInterceptor));
@@ -81,11 +81,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 					log.info(" SKIP {}, cause = {}'s Dto is null", type, modelClass);
 					continue;
 				}
-				String beanName = modelClass.getAnnotation(Dto.class).updateService();
+				String beanName = modelClass.getAnnotation(Dto.class).managementService();
 				// String beanName =
 				// StringUtil.lowerCaseFirstChar(updateServiceClass.getSimpleName());
 
-				EntityUpdateService updateServiceBean = (EntityUpdateService) applicationContext.getBean(beanName);
+				IManagementService updateServiceBean = (IManagementService) applicationContext.getBean(beanName);
 				EntityUpdateInterceptor updateInterceptor = ((BaseEntity) entityClass.newInstance())
 						.modelUpdateInterceptor();
 
@@ -114,7 +114,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 
 	private EntityManagementConfig config(
 		String object, Class<? extends BaseEntity> class1,
-		EntityUpdateService service,
+		IManagementService service,
 		EntityUpdateInterceptor interceptor
 	) {
 		return new EntityManagementConfig(object, class1, service, interceptor);

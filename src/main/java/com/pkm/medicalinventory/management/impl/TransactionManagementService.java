@@ -18,7 +18,7 @@ import com.pkm.medicalinventory.repository.readonly.ProductFlowRepository;
 import com.pkm.medicalinventory.util.EntityUtil;
 
 @Service
-public class TransactionUpdateService extends BaseEntityUpdateService<Transaction> {
+public class TransactionManagementService extends ManagementService<Transaction> {
 
 	@Autowired
 	private ProductFlowRepository productFlowRepository;

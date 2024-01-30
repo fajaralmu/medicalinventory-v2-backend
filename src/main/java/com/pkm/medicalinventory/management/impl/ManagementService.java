@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service;
 import com.pkm.medicalinventory.annotation.FormField;
 import com.pkm.medicalinventory.entity.BaseEntity;
 import com.pkm.medicalinventory.entity.setting.EntityUpdateInterceptor;
-import com.pkm.medicalinventory.management.EntityUpdateService;
+import com.pkm.medicalinventory.management.IManagementService;
 import com.pkm.medicalinventory.repository.main.EntityRepository;
 import com.pkm.medicalinventory.util.EntityUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Service
+// @Service
 @Slf4j
-public class BaseEntityUpdateService<T extends BaseEntity> implements EntityUpdateService<T> {
+public abstract class ManagementService<T extends BaseEntity> implements IManagementService<T> {
  
 	@Autowired
 	protected EntityRepository entityRepository;

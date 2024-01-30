@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.pkm.medicalinventory.entity.BaseEntity;
 
-public interface EntityUpdateService<T extends BaseEntity> {
+public interface IManagementService<T extends BaseEntity> {
 
 	public T saveEntity(T object, boolean newRecord);
 
