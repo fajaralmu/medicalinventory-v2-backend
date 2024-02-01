@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -107,11 +108,12 @@ public class BaseController {
 
 	@ModelAttribute("navigationMenus")
 	public List<NavigationMenu> navigationMenus(HttpServletRequest request) {
-		boolean authenticated = validatePrinciple(request.getUserPrincipal());
-		List<NavigationMenu> displayedMenus = NavigationMenu.defaultMenus().stream()
-				.filter(predicateNavigationMenu(authenticated))
-				.collect(Collectors.toList());
-		return displayedMenus;
+		// boolean authenticated = validatePrinciple(request.getUserPrincipal());
+		// List<NavigationMenu> displayedMenus = NavigationMenu.defaultMenus().stream()
+		// 		.filter(predicateNavigationMenu(authenticated))
+		// 		.collect(Collectors.toList());
+		// return displayedMenus;
+		return new ArrayList<>();
 	}
 
 	private Predicate<? super NavigationMenu> predicateNavigationMenu(boolean authenticated) {
